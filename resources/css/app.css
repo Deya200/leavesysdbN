@@ -1,0 +1,225 @@
+@import 'tailwindcss';
+
+:root {
+    /* Define a consistent color palette */
+    --primary-color: #007bff; /* Blue */
+    --secondary-color: #28a745; /* Green */
+    --accent-color: #ffc107; /* Yellow */
+    --dark-color: #343a40; /* Dark Gray */
+    --light-color: #ffffff; /* White */
+    --hover-bg: #495057; /* Hover background for sidebar links */
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Global Styling */
+body {
+    font-family: var(--font-sans);
+    background-color: #f8f9fa;
+    color: var(--dark-color);
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none; /* Remove underlines */
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-color); /* Add hover color */
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--dark-color);
+    color: var(--light-color);
+    height: 100vh;
+    overflow-y: auto;
+    transition: width 0.3s ease;
+}
+
+.sidebar:hover {
+    width: 270px; /* Expand slightly on hover for better visibility */
+}
+
+.sidebar h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 20px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--hover-bg);
+    background-color: #212529;
+}
+
+.sidebar .nav-link {
+    font-size: 1rem;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin: 5px 10px;
+}
+
+.sidebar .nav-link i {
+    margin-right: 10px; /* Add spacing for icons */
+    font-size: 1.2rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: var(--hover-bg);
+    transform: translateX(10px);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    font-weight: bold;
+}
+
+/* Dashboard Boxes */
+.card {
+    height: 200px; /* Ensures all cards have the same height */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a soft shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Elevate on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+.card .card-body i {
+    margin-bottom: 10px; /* Spacing between icon and text */
+    font-size: 2.5rem; /* Bigger icons */
+}
+
+.card-primary {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+}
+
+.card-secondary {
+    background-color: var(--secondary-color);
+    color: var(--light-color);
+}
+
+.card-accent {
+    background-color: var(--accent-color);
+    color: var(--dark-color);
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+
+/* Forms Styling */
+.form-control, .form-select {
+    border-radius: 5px;
+    border: 1px solid var(--primary-color);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    padding: 10px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Buttons */
+.button, .btn {
+    display: inline-block;
+    font-weight: bold;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn:hover, .button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn-light {
+    background-color: #ffffff;
+    color: var(--dark-color);
+    border: 1px solid #ddd;
+}
+
+.btn-light:hover {
+    background-color: #f1f1f1;
+    color: var(--primary-color);
+}
+
+/* Tables */
+.table-container {
+    overflow-x: auto;
+    border-radius: 5px;
+    background-color: var(--light-color);
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+thead {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+th {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+td {
+    font-size: 0.95rem;
+}
+
+/* Footer */
+footer {
+    background-color: #212529;
+    padding: 20px;
+    text-align: center;
+    color: var(--light-color);
+    border-top: 2px solid #d9f3ff;
+}
+
+footer a {
+    color: #d9f3ff;
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 8px;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    text-decoration: underline;
+    color: #ffffff;
+}

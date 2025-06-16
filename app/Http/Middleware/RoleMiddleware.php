@@ -17,26 +17,26 @@ class RoleMiddleware
      * @param  string  $role
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $role)
-    {
-        // Check if user is authenticated
-        if (!Auth::check()) {
-            return redirect()->route('login'); // or abort(403, 'Unauthorized.');
-        }
+    // public function handle(Request $request, Closure $next, $role)
+    // {
+    //     // Check if user is authenticated
+    //     if (!Auth::check()) {
+    //         return redirect()->route('login'); // or abort(403, 'Unauthorized.');
+    //     }
 
-        $user = $request->user();
+    //     $user = $request->user();
 
-        // Check if the given role exists in the roles table
-        if (!Role::where('name', $role)->exists()) {
-            abort(403, "Role '{$role}' does not exist.");
-        }
+    //     // Check if the given role exists in the roles table
+    //     if (!Role::where('name', $role)->exists()) {
+    //         abort(403, "Role '{$role}' does not exist.");
+    //     }
 
-        // Check if authenticated user has the given role
-        if (!$user->role || $user->role->name !== $role) {
-            abort(403, 'Access denied: insufficient role.');
-        }
+    //     // Check if authenticated user has the given role
+    //     if (!$user->role || $user->role->name !== $role) {
+    //         abort(403, 'Access denied: insufficient role.');
+    //     }
 
 
-        return $next($request);
-    }
+    //     return $next($request);
+    // }
 }

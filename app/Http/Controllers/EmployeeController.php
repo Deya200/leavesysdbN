@@ -90,16 +90,13 @@ class EmployeeController extends Controller
      * @param string $EmployeeNumber
      * @return \Illuminate\View\View
      */
-    public function edit($EmployeeNumber)
+    public function edit(Employee $employee)
     {
-        $employee = Employee::with(['department', 'grade', 'position'])
-            ->where('EmployeeNumber', $EmployeeNumber)
-            ->firstOrFail();
-
+        $employee->load(['department', 'grade', 'position']);
         $departments = Department::all();
         $grades = Grade::all();
         $positions = Position::all();
-        $roles = Role::all(); // Fetch available roles
+        $roles = Role::all();
 
         return view('employees.edit', compact('employee', 'departments', 'grades', 'positions', 'roles'));
     }
@@ -202,16 +199,24 @@ class EmployeeController extends Controller
     }
 
     public function getGenderByEmployeeNumber($employeeNumber)
-{
-    // Adjust the column name if needed (here we assume your table column is "Gender")
-    $employee = Employee::where('EmployeeNumber', $employeeNumber)->first();
+    {
+        // Adjust the column name if needed (here we assume your table column is "Gender")
+        $employee = Employee::where('EmployeeNumber', $employeeNumber)->first();
 
-    if ($employee) {
-        return response()->json(['gender' => $employee->Gender]);
-    }
+        if ($employee) {
+            return response()->json(['gender' => $employee->Gender]);
+        }
     
-    return response()->json(['error' => 'Employee record not found.'], 404);
-}
+        return response()->json(['error' => 'Employee record not found.'], 404);
+    }
+
+    public function show(Employee $employee)
+    {
+        // Optionally eager load relationships
+        $employee->load(['department', 'grade', 'position', 'subordinates']); // etc.
+
+        return view('employees.show', compact('employee'));
+    }
 
 
 }

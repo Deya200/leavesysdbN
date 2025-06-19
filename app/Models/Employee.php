@@ -18,6 +18,11 @@ class Employee extends Authenticatable
     protected $keyType = 'string';
     public $timestamps = true;
 
+    public function getRouteKeyName()
+    {
+        return 'EmployeeNumber';
+    }
+
     protected $fillable = [
         'EmployeeNumber',
         'FirstName',
@@ -44,6 +49,8 @@ class Employee extends Authenticatable
         'SupervisorID' => 'string',
         'RemainingAnnualLeaveDays' => 'integer', // Cast to integer
     ];
+
+
 
     /**
      * Relationship: Employee's Department

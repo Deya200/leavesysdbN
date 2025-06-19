@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
             
         });
         Route::resource('employees', EmployeeController::class);
+        //Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
 
         // Department Management
         Route::resource('departments', DepartmentController::class);
@@ -231,3 +232,7 @@ Route::get('/employee-gender/{employeeNumber}', [EmployeeController::class, 'get
 
 Route::get('/employee-gender/{employeeNumber}', [EmployeeController::class, 'getGenderByEmployeeNumber'])
     ->name('employee.gender');
+
+
+    //Modifications
+Route::get('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestController::class, 'showAdminRejectForm'])->name('leave_requests.admin.reject.form');

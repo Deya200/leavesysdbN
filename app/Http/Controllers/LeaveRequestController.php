@@ -272,6 +272,21 @@ class LeaveRequestController extends Controller
         });
     }
 
+    public function adminReject(LeaveRequest $leaveRequest)
+{
+    // Find the leave request (if not route-model bound)
+    $leaveRequest = LeaveRequest::findOrFail($leaveRequest);
+
+    // Save the rejection reason
+    $leaveRequest->RejectionReason = $request->input('RejectionReason');
+    $leaveRequest->RequestStatus = 'Rejected by Admin';
+    $leaveRequest->AdminVerified = 0; // or whatever logic you use
+    $leaveRequest->save();
+
+    // Optionally, redirect or return a response
+    return redirect()->back()->with('status', 'Leave request rejected successfully.');
+}
+
     // Employee dashboard
     public function employeeDashboard()
     {

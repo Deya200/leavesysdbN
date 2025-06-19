@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Http\Models\User
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,14 +16,14 @@ class AdminMiddleware
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response)  $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+     public function handle($request, Closure $next)
     {
-        // Adjust the condition as needed
-        if (Auth::check() && Auth::user()->role_id === 1) {
-            return $next($request);
+        // Check if the user is authenticated and has the 'employee' role
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return $next($request); // Allow the request to proceed
         }
 
-        // You can customize the error message or redirect as needed
-        abort(403, 'Unauthorized.');
+        // Redirect unauthorized users to login with an error message
+        return redirect()->route('login')->withErrors(['error' => 'Unauthorized access!']);
     }
 }

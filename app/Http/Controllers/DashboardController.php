@@ -39,7 +39,7 @@ class DashboardController extends Controller
         ->get();
 
     return view('dashboards.index', [
-        'totalEmployees' => $totalEmployees,
+        'totalEmployees' => $totalEmployees, 
         'maleEmployees' => $maleEmployees,
         'femaleEmployees' => $femaleEmployees,
         'totalPositions' => $totalPositions,
@@ -48,9 +48,11 @@ class DashboardController extends Controller
         'recentLeaveRequests' => $recentLeaveRequests,
     ]);
 }
+
 public function admin()
 {
-    return view('dashboards.admin'); // or whatever view you want
+    $leaveRequests = \App\Models\LeaveRequest::latest()->get();
+    return view('dashboards.admin', compact('leaveRequests')); // or whatever view you want
 }
 
 

@@ -76,7 +76,9 @@ class User extends Authenticatable
      */
     public function isAdmin()
     {
-        return $this->role && strtolower($this->role->name) === 'admin'; // ✅ Fix role detection
+        // Check if the user has role_id == 1 OR the role name is 'admin'
+        return ($this->role_id === 1)
+            || ($this->role && strtolower($this->role->name) === 'admin');
     }
     public function isSupervisor()
 {
@@ -110,5 +112,6 @@ class User extends Authenticatable
         return asset('images/default-avatar.png'); // ✅ Default image fallback
     }
 
+    
 
 }

@@ -313,11 +313,12 @@
                   <span class="menu-text">Dashboard</span>
                 </a>
               </li>
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a href="{{ route('admin.leave_requests') }}" class="nav-link">
                   <span class="menu-text">Admin Verification</span>
                 </a>
-              </li>
+              </li> -->
+
               <!-- Employees Dropdown -->
               <li class="nav-item">
                 <a class="nav-link parent-toggle" data-bs-toggle="collapse" data-bs-target="#collapseEmployees" aria-expanded="false" aria-controls="collapseEmployees">

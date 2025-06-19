@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Employee;
+
 class LeaveType extends Model
 {
     use HasFactory;
@@ -20,4 +21,20 @@ class LeaveType extends Model
         'MaxLeaveDays',
         'MinServiceYears',
     ];
+
+    //Leave checks
+    public function isAnnualLeave()
+    {
+        return $this->LeaveTypeName === 'Annual Leave';
+    }
+
+    public function isPartenityLeave()
+    {
+        return $this->LeaveTypeName === 'Partenity Leave';
+    }
+
+    public function isSickLeave()
+    {
+        return $this->LeaveTypeName === 'Sick Leave';
+    }
 }

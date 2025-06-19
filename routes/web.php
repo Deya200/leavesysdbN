@@ -16,19 +16,17 @@ use App\Http\Controllers\{
     SupervisorController,
     AdminController
 };
+
 Route::fallback(function () {
     return redirect()->route('dashboard')->with('error', 'Page not found.');
 });
 
-Route::group(['middleware' => ['admin']], function () {
-    // Define the Admin Dashboard Route with the name "dashboards.admin"
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('dashboards.admin');
     
     // You can define other admin routes here as needed:
-    Route::get('/admin/leave-requests', [AdminController::class, 'leaveRequests'])->name('admin.leave_requests');
+    Route::get('/admin/leave-requests', [AdminController::class, 'leaveRequests'])->name('leave_verification');
     Route::post('/admin/leave-requests/{id}/approve', [AdminController::class, 'approveLeave'])->name('leave_requests.admin.approve');
     Route::post('/admin/leave-requests/{id}/reject', [AdminController::class, 'rejectLeave'])->name('leave_requests.admin.reject');
-});
+
 
 // Public Routes
 Auth::routes();
@@ -171,15 +169,16 @@ Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 
 Route::get('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave_requests.approve');
 Route::get('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave_requests.reject');
 Route::get('/leave-requests/{leaveRequest}/show', [LeaveRequestController::class, 'show'])->name('leave_requests.show');
-Route::get('/leave-requests/{leaveRequest}/supervisor-approve', [LeaveRequestController::class, 'supervisorApprove'])->name('leave_requests.supervisor.approve');
-Route::get('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestController::class, 'supervisorReject'])->name('leave_requests.supervisor.reject');
+Route::post('/leave-requests/{leaveRequest}/supervisor-approve', [LeaveRequestController::class, 'supervisorApprove'])->name('leave_requests.supervisor.approve');
+Route::post('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestController::class, 'supervisorReject'])->name('leave_requests.supervisor.reject');
 
 
 Route::post('/leave_requests/supervisor/reject/{id}', [SupervisorController::class, 'reject'])
     ->name('leave_requests.supervisor.reject');
 
-Route::get('/leave-requests/{leaveRequest}/admin-approve', [LeaveRequestController::class, 'adminApprove'])->name('leave_requests.admin.approve');
-Route::get('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestController::class, 'adminReject'])->name('leave_requests.admin.reject');
+//Route::get('/leave-requests/{leaveRequest}/admin-approve', [LeaveRequestController::class, 'adminApprove'])->name('leave_requests.admin.approve');
+//Route::get('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestController::class, 'adminReject'])->name('leave_requests.admin.reject');
+
 Route::get('/leave-requests/my-requests', [LeaveRequestController::class, 'myLeaveRequests'])->name('leave_requests.my_requests');
 Route::get('/leave-requests/calculate-leave-days', [LeaveRequestController::class, 'calculateRemainingLeaveDays'])->name('leave_requests.calculate_days');
 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -222,19 +221,13 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function() {
-    Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboards.admin');
-    // You can add more admin routes here
-});
 Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
     ->name('dashboards.admin')
-    ->middleware(['auth', 'admin']);
-
+    ->middleware(['auth']);
     
 
-Route::group(['middleware' => 'admin'], function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('dashboards.admin');
-    // Your other routes...
-});
+    
+Route::get('/employee-gender/{employeeNumber}', [EmployeeController::class, 'getGenderByEmployeeNumber']);
+
 Route::get('/employee-gender/{employeeNumber}', [EmployeeController::class, 'getGenderByEmployeeNumber'])
     ->name('employee.gender');

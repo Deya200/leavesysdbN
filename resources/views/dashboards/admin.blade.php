@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mt-3">
-    <h2 class="mb-4">Admin Leave Verification</h2>
+    <h2 class="mb-4">Administrator Leave Verification</h2>
 
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

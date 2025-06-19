@@ -11,22 +11,29 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
-    public function __construct()
-{
-    $this->middleware('admin');
-}
 
-    public function index()
+// public function __construct()
+//{
+//    $this->middleware('admin');
+//}
+
+public function index()
 {
     $user = auth()->user();
     $employee = Employee::where('EmployeeNumber', $user->EmployeeNumber)->first();
     $totalEmployees = Employee::count();
     $totalLeaveRequests = LeaveRequest::count();
     $pendingLeaves = LeaveRequest::where('RequestStatus', 'Pending Admin Verification')->count();
+    $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->latest()->get();
 
-    return view('dashboards.admin', compact('employee', 'totalEmployees', 'totalLeaveRequests', 'pendingLeaves'));
+    return view('dashboards.admin', compact(
+        'employee', 
+        'totalEmployees', 
+        'totalLeaveRequests', 
+        'pendingLeaves', 
+        'leaveRequests'
+    ));
 }
-
 
     /**
      * View all employees.

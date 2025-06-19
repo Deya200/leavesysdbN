@@ -38,7 +38,7 @@ class DashboardController extends Controller
         ->take(5)
         ->get();
 
-    return view('dashboards.index', [
+    return view('dashboards.index', [ // dashboard.index is the main dashboard in the admin function
         'totalEmployees' => $totalEmployees, 
         'maleEmployees' => $maleEmployees,
         'femaleEmployees' => $femaleEmployees,
@@ -51,6 +51,7 @@ class DashboardController extends Controller
 
 public function admin()
 {
+    //dashboard.admin is the verification page in the admin function
     $leaveRequests = \App\Models\LeaveRequest::latest()->get();
     return view('dashboards.admin', compact('leaveRequests')); // or whatever view you want
 }

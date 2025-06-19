@@ -47,7 +47,8 @@ Route::get('/register/thankyou', function () {
 Route::middleware(['auth'])->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    //Note this is the main admin or HR  dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard'); 
 
     // Profile Management
   
@@ -221,9 +222,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-
-Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
-    ->name('dashboards.admin')
+//admin verification page 
+Route::get('/admin/verification', [DashboardController::class, 'admin'])
+    ->name('admin.verification')
     ->middleware(['auth']);
     
 

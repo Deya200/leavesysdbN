@@ -308,16 +308,16 @@
             @if(auth()->user()->role_id === 1)
               <!-- Admin Dashboard -->
               <li class="nav-item">
-                <a class="nav-link" href="{{ route('dashboards.admin') }}">
+                <a class="nav-link" href="{{ route('dashboard') }}">
                   <i class="fas fa-home"></i>
                   <span class="menu-text">Dashboard</span>
                 </a>
               </li>
-              <!-- <li class="nav-item">
-                <a href="{{ route('admin.leave_requests') }}" class="nav-link">
+              <li class="nav-item">
+                <a href="{{ route('admin.verification') }}" class="nav-link">
                   <span class="menu-text">Admin Verification</span>
                 </a>
-              </li> -->
+              </li> 
 
               <!-- Employees Dropdown -->
               <li class="nav-item">

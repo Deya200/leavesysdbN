@@ -14,7 +14,7 @@
                     <i class="fas fa-calendar-alt fa-2x mb-3"></i>
                     <h5 class="card-title">Leave Requests</h5>
                     <p class="card-text">Manage your leave requests here.</p>
-                    <a href="{{ route('leave.requests.index') }}" class="btn btn-light">View</a> <!-- Corrected route -->
+                    <a href="{{ route('leave_requests.index') }}" class="btn btn-light">View</a> <!-- Corrected route -->
                 </div>
             </div>
         </div>

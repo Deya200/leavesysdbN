@@ -12,6 +12,8 @@ class LeaveType extends Model
 
     // Specify the primary key if it's not "id"
     protected $primaryKey = 'LeaveTypeID';
+    public $incrementing = true; // or false if not auto-increment
+    protected $keyType = 'int'; // or 'string' if it's not int
 
     // Fillable fields for mass assignment
     protected $fillable = [

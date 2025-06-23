@@ -29,10 +29,9 @@ class NotificationController extends Controller
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function markAsRead($id)
+    public function markAsRead(Notification $notification)
     {
         // Find the notification by ID and update its status
-        $notification = Notification::findOrFail($id);
         $notification->update(['Status' => 'Read']);
 
         return redirect()->back()->with('success', 'Notification marked as read.');
@@ -59,10 +58,9 @@ class NotificationController extends Controller
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($id)
+    public function destroy(Notification $notification)
     {
         // Find the notification by ID and delete it
-        $notification = Notification::findOrFail($id);
         $notification->delete();
 
         return redirect()->back()->with('success', 'Notification deleted successfully.');

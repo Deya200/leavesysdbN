@@ -108,7 +108,7 @@ class EmployeeController extends Controller
      * @param string $EmployeeNumber
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $EmployeeNumber)
+    public function update(Request $request, Employee $employee)
     {
         $validatedData = $request->validate([
             'FirstName'      => 'required|string|max:255',
@@ -121,8 +121,7 @@ class EmployeeController extends Controller
             'role_id'        => 'required|integer',
         ]);
 
-        $employee = Employee::where('EmployeeNumber', $EmployeeNumber)->firstOrFail();
-        $employee->update($validatedData);
+         $employee->update($validatedData);
         // Since role_id is updated in the employee record, no further role syncing is required.
         // Optionally, you can verify the role exists:
         Role::findOrFail($validatedData['role_id']);
@@ -137,9 +136,8 @@ class EmployeeController extends Controller
      * @param string $EmployeeNumber
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($EmployeeNumber)
+    public function destroy(Employee $employee)
     {
-        $employee = Employee::where('EmployeeNumber', $EmployeeNumber)->firstOrFail();
         // Simply delete the employee record; no detaching of roles/permissions is needed.
         $employee->delete();
 

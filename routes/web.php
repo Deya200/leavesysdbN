@@ -21,6 +21,9 @@ Route::fallback(function () {
     return redirect()->route('dashboard')->with('error', 'Page not found.');
 });
 
+//Resources
+Route::resource('employees', EmployeeController::class);
+
     
     // You can define other admin routes here as needed:
     Route::get('/admin/leave-requests', [AdminController::class, 'leaveRequests'])->name('leave_verification');
@@ -82,7 +85,8 @@ Route::middleware(['auth'])->group(function () {
     // Admin Routes
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-        Route::get('/leave-requests', [LeaveRequestController::class, 'index'])->name('leave_requests');
+        Route::get('/
+s', [LeaveRequestController::class, 'index'])->name('leave_requests');
         
         // User Management
         Route::resource('users', UserController::class)->except(['show']);
@@ -111,7 +115,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Notifications
     Route::prefix('notifications')->group(function () {
-        Route::get('/', [NotificationController::class, 'index'])->name('notifications');
+        Route::get('/notification', [NotificationController::class, 'index'])->name('notifications');
         Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
         Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');

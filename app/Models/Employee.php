@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Permission\Traits\HasRoles;
+
 
 class Employee extends Authenticatable
 {
-    use HasFactory, HasRoles; // Added HasRoles for role-based access
+    use HasFactory; // Added HasRoles for role-based access
 
     protected $table = 'employees';
     protected $primaryKey = 'EmployeeNumber';

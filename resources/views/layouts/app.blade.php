@@ -418,6 +418,14 @@
                   <span class="menu-text">Apply for New Leave</span>
                 </a>
               </li>
+              <li>
+                <a href="{{ route('notifications') }}" class="nav-link">
+                  <i class="fas fa-bell me-2"></i>
+                  <span class="menu-text"> Notifications </span>
+                </a>
+              </li>
+
+  
             @endif
           </ul>
         </div>

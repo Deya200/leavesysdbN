@@ -28,18 +28,6 @@
     <!-- Summary Cards for Admin -->
     <div class="row mb-4" style="padding-top: 10px;">
 
-    @can('update', $leaveRequest)
-    <a href="{{ route('leave_requests.edit', $leaveRequest) }}" class="btn btn-primary">Edit</a>
-@endcan
-
-@can('supervisorApprove', $leaveRequest)
-    <form action="{{ route('leave_requests.supervisor.approve', $leaveRequest) }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-success">Approve</button>
-    </form>
-@endcan
-
-
         <div class="col-md-3">
             <div class="card shadow ">
                 <div class="card-body text-center" style="background-color: #5169C4; color: white;">

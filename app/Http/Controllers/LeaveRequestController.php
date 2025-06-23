@@ -39,9 +39,9 @@ class LeaveRequestController extends Controller
     public function index(Request $request)
     {
         $leaveRequests = LeaveRequest::with([
-            'employee:id,FirstName,LastName',
-            'leaveType:id,TypeName',
-            'supervisor:id,FirstName,LastName'
+            'employee:EmployeeNumber,FirstName,LastName',
+            'leaveType:LeaveTypeID,LeaveTypeName',
+            'supervisor:EmployeeNumber,FirstName,LastName'
         ])
         ->when($request->search, function ($query, $search) {
             $query->where(function ($q) use ($search) {

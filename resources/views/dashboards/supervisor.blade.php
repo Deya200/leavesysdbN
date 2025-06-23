@@ -87,12 +87,24 @@
                             </td>
                             <td class="text-center">
                                 @if ($request->RequestStatus === 'Pending Supervisor Approval')
-                                    <div class="d-flex gap-2">
+                                    <!-- Buttons Row: Approve and Reject side by side -->
+                                    <div class="d-flex flex-row align-items-center gap-2">
+                                        <!-- Approve Button -->
                                         <form action="{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn btn-success btn-sm shadow-sm">Approve</button>
                                         </form>
-                                        <button type="button" class="btn btn-danger btn-sm shadow-sm" onclick="showRejectionModal('{{ $request->LeaveRequestID }}')">Reject</button>
+
+                                        <!-- Reject Button (toggles the form) -->
+                                        <button type="button" class="btn btn-danger btn-sm shadow-sm" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
+                                    </div>
+                                    <!-- Hidden Rejection Form (appears below the buttons when toggled) -->
+                                    <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none; margin-top:5px; width:100%;">
+                                        <form action="{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}" method="POST">
+                                            @csrf
+                                            <textarea name="RejectionReason" class="form-control form-control-sm mt-1" placeholder="Enter reason" required></textarea>
+                                            <button type="submit" class="btn btn-sm btn-danger mt-1 w-100">Confirm Rejection</button>
+                                        </form>
                                     </div>
                                 @endif
                             </td>
@@ -149,53 +161,54 @@
     </div>
 
     <script>
-    function toggleLeaveTable() {
-        let hiddenRows = document.querySelectorAll('#leaveRequestsTable .hidden-row');
-        let moreButton = document.getElementById('leaveToggleButton');
-        let lessButton = document.getElementById('leaveLessButton');
-
-        hiddenRows.forEach(row => {
-            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-        });
-
-        // Toggle button visibility
-        if (moreButton.style.display !== 'none') {
-            moreButton.style.display = 'none';
-            lessButton.style.display = 'inline-block';
-        } else {
-            moreButton.style.display = 'inline-block';
-            lessButton.style.display = 'none';
+        function toggleRejectForm(id) {
+            const form = document.getElementById('rejectForm-' + id);
+            if (form) {
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            }
         }
-    }
 
-    function toggleEmployeeTable() {
-        let hiddenRows = document.querySelectorAll('#employeeTable .hidden-row');
-        let moreButton = document.getElementById('toggleButton');
-        let lessButton = document.getElementById('toggleLessButton');
+        function toggleLeaveTable() {
+            let hiddenRows = document.querySelectorAll('#leaveRequestsTable .hidden-row');
+            let moreButton = document.getElementById('leaveToggleButton');
+            let lessButton = document.getElementById('leaveLessButton');
 
-        hiddenRows.forEach(row => {
-            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-        });
+            hiddenRows.forEach(row => {
+                row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+            });
 
-        // Toggle button visibility
-        if (moreButton.style.display !== 'none') {
-            moreButton.style.display = 'none';
-            lessButton.style.display = 'inline-block';
-        } else {
-            moreButton.style.display = 'inline-block';
-            lessButton.style.display = 'none';
+            if (moreButton.style.display !== 'none') {
+                moreButton.style.display = 'none';
+                lessButton.style.display = 'inline-block';
+            } else {
+                moreButton.style.display = 'inline-block';
+                lessButton.style.display = 'none';
+            }
         }
-    }
 
-    // Hide extra rows initially
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll('.hidden-row').forEach(row => {
-            row.style.display = 'none';
+        function toggleEmployeeTable() {
+            let hiddenRows = document.querySelectorAll('#employeeTable .hidden-row');
+            let moreButton = document.getElementById('toggleButton');
+            let lessButton = document.getElementById('toggleLessButton');
+
+            hiddenRows.forEach(row => {
+                row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+            });
+
+            if (moreButton.style.display !== 'none') {
+                moreButton.style.display = 'none';
+                lessButton.style.display = 'inline-block';
+            } else {
+                moreButton.style.display = 'inline-block';
+                lessButton.style.display = 'none';
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.hidden-row').forEach(row => {
+                row.style.display = 'none';
+            });
         });
-    });
-</script>
-</body>
-
+    </script>
 </div>
-
 @endsection

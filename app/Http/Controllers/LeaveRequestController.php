@@ -22,16 +22,10 @@ class LeaveRequestController extends Controller
     public function calculateRemainingLeaveDays()
     {
         $employee = Employee::where('EmployeeNumber', auth()->id())->firstOrFail();
-
-        if ($employee->RemainingAnnualLeaveDays !== null) {
-            return $employee->RemainingAnnualLeaveDays;
-        }
-
         $totalLeaveDays = optional($employee->grade)->AnnualLeaveDays ?? 0;
         $usedLeaveDays = LeaveRequest::where('EmployeeNumber', $employee->EmployeeNumber)
             ->where('RequestStatus', 'Approved')
             ->sum('TotalDays');
-
         return max(0, $totalLeaveDays - $usedLeaveDays);
     }
 
@@ -106,9 +100,18 @@ class LeaveRequestController extends Controller
             ]);
 
             Log::info("Leave request created: {$leaveRequest->id}");
-            return redirect()->route('dashboards.employee')->with('success', 'Request submitted!');
+            
+           return redirect()->route('leave_requests.create')->with('success', 'Your leave application was submitted successfully!');
         });
     }
+
+    //Submitted request
+    public function submitted(LeaveRequest $leaveRequest)
+        {
+            // Optionally, authorize user view here
+            return view('leave_requests.submitted', compact('leaveRequest'));
+        }
+
 
     // Edit request
     public function edit(LeaveRequest $leaveRequest)
@@ -116,7 +119,7 @@ class LeaveRequestController extends Controller
         $this->authorize('update', $leaveRequest);
 
         $leaveTypes = LeaveType::all();
-        return view('leave_requests.edit', compact('leaveRequest', 'leaveTypes'));
+        return view('leave_requests.edit', compact('leaveRequest'));
     }
 
     // Update request
@@ -159,6 +162,32 @@ class LeaveRequestController extends Controller
             return redirect()->route('dashboards.employee')
                 ->with('success', 'Request updated successfully');
         });
+    }
+
+    public function review(Request $request)
+{
+    $validated = $request->validate([
+        'LeaveTypeID' => 'required|exists:leave_types,LeaveTypeID',
+        'StartDate' => ['required', 'date', 'after_or_equal:today', 'before_or_equal:EndDate'],
+        'EndDate' => 'required|date|after_or_equal:StartDate',
+        'Reason' => 'required|string|max:1000',
+    ]);
+
+    $leaveType = LeaveType::find($validated['LeaveTypeID']);
+    $totalDays = \Carbon\Carbon::parse($validated['StartDate'])
+        ->diffInDays(\Carbon\Carbon::parse($validated['EndDate'])) + 1;
+
+    return view('leave_requests.review', [
+        'data' => $validated,
+        'leaveType' => $leaveType,
+        'totalDays' => $totalDays
+    ]);
+}
+
+    public function showReview(Request $request)
+    {
+        // You can pass any data needed for the review form, or just return the view
+        return view('leave_requests.review');
     }
 
     public function destroy(LeaveRequest $leaveRequest)

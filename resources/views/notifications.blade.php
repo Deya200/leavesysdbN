@@ -1,40 +1,61 @@
 @extends('layouts.app')
 
-@section('content')
-<div class="container mt-5">
-    <h1 class="mb-4">Notifications</h1>
+@section('title', 'Notifications')
 
+@section('content')
+<!--
+<div class="container">
+    <h1>Notifications</h1>
+    
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
     @if($notifications->count())
-        <form method="POST" action="{{ route('notifications.readAll') }}" class="mb-3">
+        <form action="{{ route('notifications.markAllAsRead') }}" method="POST" style="display:inline;">
             @csrf
-            <button class="btn btn-primary" type="submit">Mark All as Read</button>
+            <button type="submit" class="btn btn-secondary mb-3">Mark All as Read</button>
         </form>
-        <ul class="list-group">
-            @foreach($notifications as $notification)
-                <li class="list-group-item d-flex justify-content-between align-items-center {{ $notification->Status == 'Unread' ? 'fw-bold' : '' }}">
-                    {{ $notification->message ?? 'No message' }}
-                    <span>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Message</th>
+                    <th>Status</th>
+                    <th>Received At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach ($notifications as $notification)
+                <tr @if($notification->Status == 'Unread') style="font-weight:bold;" @endif>
+                    <td>{{ $notification->Message }}</td>
+                    <td>
                         @if($notification->Status == 'Unread')
-                            <form style="display:inline" method="POST" action="{{ route('notifications.read', $notification->id) }}">
-                                @csrf
-                                <button class="btn btn-sm btn-success">Mark as Read</button>
-                            </form>
+                            <span class="badge bg-warning">Unread</span>
+                        @else
+                            <span class="badge bg-success">Read</span>
                         @endif
-                        <form style="display:inline" method="POST" action="{{ route('notifications.destroy', $notification->id) }}">
+                    </td>
+                    <td>{{ $notification->created_at->format('Y-m-d H:i') }}</td>
+                    <td>
+                        @if($notification->Status == 'Unread')
+                        <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-primary">Mark as Read</button>
+                        </form>
+                        @endif
+                        <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-danger">Delete</button>
+                            <button type="submit" onclick="return confirm('Delete this notification?')" class="btn btn-sm btn-danger">Delete</button>
                         </form>
-                    </span>
-                </li>
+                    </td>
+                </tr>
             @endforeach
-        </ul>
+            </tbody>
+        </table>
     @else
-        <p>You don’t have any notifications at the moment.</p>
+        <p>No notifications.</p>
     @endif
 </div>
 @endsection

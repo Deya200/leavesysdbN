@@ -519,8 +519,8 @@
 
   <!-- Footer -->
   <footer class="text-white text-center py-3 mt-4">
-    <p class="mb-0">&copy; {{ date('Y') }} ABC Mission Hospital. All rights reserved.</p>
-    <p class="mb-0">Developed by MUST INTERNS</p>
+    <p class="mb-0">&copy; {{ date('Y') }} Leave Management System.</p>
+    <p class="mb-0">Developed by</p>
   </footer>
 </body>
 </html>

@@ -1,70 +1,154 @@
 @extends('layouts.app')
 
-@section('title', 'Leave Requests')
+@section('title', 'Supervisor Dashboard')
+
+@section('styles')
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .card-custom {
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+        padding: 10px 12px;
+        background: white;
+    }
+
+    .card-custom:hover {
+        transform: scale(1.01);
+    }
+
+    .summary-card h6 {
+        font-size: 13px;
+        margin-bottom: 4px;
+        color: #333;
+    }
+
+    .summary-card p {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0;
+        color: #2E3A87;
+    }
+
+    .table thead {
+        background-color: rgb(235, 236, 240);
+        color: #2E3A87;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px;
+        text-align: center;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .hover-up:hover {
+        transform: translateY(-3px);
+        transition: transform 0.3s ease;
+    }
+
+    .badge {
+        font-size: 13px;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    .badge-approved {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .badge-rejected {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .badge-pending {
+        background-color: #2E3A87;
+        color: white;
+    }
+
+    .btn-outline-primary,
+    .btn-outline-secondary {
+        font-size: 0.85rem;
+        padding: 6px 16px;
+        border-radius: 6px;
+    }
+
+    .hidden-row {
+        display: none;
+    }
+</style>
+@endsection
 
 @section('content')
-<div class="container mt-4">
-    <h2 class="fw-bold text-center mb-4" style="color: black;">Supervisor Dashboard</h2>
+<div class="dashboard-container">
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-info shadow-sm text-center p-3">
-                <h5><i class="fas fa-users"></i> Total Employees Under Supervision</h5>
-                <strong class="fs-3">{{ $totalEmployees }}</strong>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning shadow-sm text-center p-3">
-                <h5><i class="fas fa-female"></i> Total Female Employees</h5>
-                <strong class="fs-3">{{ $totalFemaleEmployees }}</strong>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-primary shadow-sm text-center p-3">
-                <h5><i class="fas fa-male"></i> Total Male Employees</h5>
-                <strong class="fs-3">{{ $totalMaleEmployees }}</strong>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success shadow-sm text-center p-3">
-                <h5><i class="fas fa-user-clock"></i> Employees Currently on Leave</h5>
-                <strong class="fs-3">{{ $employeesOnLeave }}</strong>
-            </div>
-        </div>
+    <!-- Welcome Section -->
+    <div class="card card-custom mb-4 text-center" style="background-color: #2E3A87; color: white;">
+        <h4 class="fw-bold mb-1">Welcome, {{ auth()->user()->FirstName ?? 'Supervisor' }}!</h4>
+        <p class="mb-2">Here’s an overview of your team’s leave activity.</p>
     </div>
 
-    <!-- Pending Requests Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card text-white bg-danger shadow-sm text-center p-3">
-                <h5><i class="fas fa-hourglass-half"></i> Pending Supervisor Approval</h5>
-                <strong class="fs-3">{{ $pendingSupervisorRequests }}</strong>
+    <!-- Summary Cards -->
+    <div class="row text-center g-2 mb-4">
+        <div class="col-6 col-md-2 summary-card">
+            <div class="card-custom">
+                <h6><i class="fas fa-users"></i> Supervised</h6>
+                <p>{{ $totalEmployees }}</p>
             </div>
         </div>
-        @if ($totalEmployees > 0)
-            <div class="col-md-6">
-                <div class="card text-white bg-dark shadow-sm text-center p-3">
-                    <h5><i class="fas fa-user-check"></i> Pending Admin Approval</h5>
-                    <strong class="fs-3">{{ $pendingAdminRequests }}</strong>
-                </div>
+        <div class="col-6 col-md-2 summary-card">
+            <div class="card-custom">
+                <h6><i class="fas fa-female"></i> Female</h6>
+                <p>{{ $totalFemaleEmployees }}</p>
             </div>
-        @endif
+        </div>
+        <div class="col-6 col-md-2 summary-card">
+            <div class="card-custom">
+                <h6><i class="fas fa-male"></i> Male</h6>
+                <p>{{ $totalMaleEmployees }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-2 summary-card">
+            <div class="card-custom">
+                <h6><i class="fas fa-user-clock"></i> On Leave</h6>
+                <p>{{ $employeesOnLeave }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-2 summary-card">
+            <div class="card-custom">
+                <h6><i class="fas fa-hourglass-half"></i> Supervisor Pending</h6>
+                <p>{{ $pendingSupervisorRequests }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-2 summary-card">
+            <div class="card-custom">
+                <h6><i class="fas fa-user-check"></i> Admin Pending</h6>
+                <p>{{ $pendingAdminRequests }}</p>
+            </div>
+        </div>
     </div>
 
     <!-- Leave Requests Table -->
-    <div class="card shadow-sm p-3 mb-4">
-        <h4 class="fw-bold text-center">Leave Requests</h4>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle table-bordered" id="leaveRequestsTable">
-                <thead class="table-light text-center">
+    <div class="card card-custom mb-4">
+        <h5 class="fw-bold text-center mt-3">Leave Requests</h5>
+        <div class="table-responsive p-3">
+            <table class="table table-bordered align-middle" id="leaveRequestsTable">
+                <thead>
                     <tr>
                         <th>#</th>
                         <th>Employee</th>
                         <th>Leave Type</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Total Days</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Days</th>
                         <th>Reason</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -72,38 +156,36 @@
                 </thead>
                 <tbody>
                     @foreach ($leaveRequests as $index => $request)
-                        <tr class="{{ $index >= 5 ? 'hidden-row' : '' }}">
-                            <td class="text-center">{{ $index + 1 }}</td>
+                        <tr class="hover-up {{ $index >= 5 ? 'hidden-row' : '' }}">
+                            <td>{{ $index + 1 }}</td>
                             <td>{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</td>
                             <td>{{ $request->leaveType->LeaveTypeName }}</td>
                             <td>{{ $request->StartDate }}</td>
                             <td>{{ $request->EndDate }}</td>
                             <td>{{ $request->TotalDays }}</td>
                             <td>{{ $request->Reason }}</td>
-                            <td class="text-center">
-                                <span class="badge bg-{{ $request->RequestStatus === 'Approved' ? 'success' : ($request->RequestStatus === 'Rejected' ? 'danger' : ($request->RequestStatus === 'Pending Admin Verification' ? 'primary' : 'warning text-dark')) }}">
-                                    {{ ucfirst($request->RequestStatus) }}
-                                </span>
+                            <td>
+                                @php
+                                    $status = $request->RequestStatus;
+                                    $badgeClass = $status === 'Approved' ? 'badge-approved'
+                                        : ($status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+                                @endphp
+                                <span class="badge {{ $badgeClass }}">{{ ucfirst($status) }}</span>
                             </td>
-                            <td class="text-center">
-                                @if ($request->RequestStatus === 'Pending Supervisor Approval')
-                                    <!-- Buttons Row: Approve and Reject side by side -->
-                                    <div class="d-flex flex-row align-items-center gap-2">
-                                        <!-- Approve Button -->
+                            <td>
+                                @if ($status === 'Pending Supervisor Approval')
+                                    <div class="d-flex gap-2 justify-content-center">
                                         <form action="{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="btn btn-success btn-sm shadow-sm">Approve</button>
+                                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
                                         </form>
-
-                                        <!-- Reject Button (toggles the form) -->
-                                        <button type="button" class="btn btn-danger btn-sm shadow-sm" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
                                     </div>
-                                    <!-- Hidden Rejection Form (appears below the buttons when toggled) -->
-                                    <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none; margin-top:5px; width:100%;">
+                                    <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none;" class="mt-2">
                                         <form action="{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}" method="POST">
                                             @csrf
-                                            <textarea name="RejectionReason" class="form-control form-control-sm mt-1" placeholder="Enter reason" required></textarea>
-                                            <button type="submit" class="btn btn-sm btn-danger mt-1 w-100">Confirm Rejection</button>
+                                            <textarea name="RejectionReason" class="form-control form-control-sm mb-1" placeholder="Enter reason" required></textarea>
+                                            <button type="submit" class="btn btn-danger btn-sm w-100">Confirm Rejection</button>
                                         </form>
                                     </div>
                                 @endif
@@ -112,103 +194,94 @@
                     @endforeach
                 </tbody>
             </table>
-        </div>
-
-        <!-- See More / See Less Buttons -->
-        <div class="text-center mt-3">
-            <button class="btn btn-outline-primary shadow-sm" onclick="toggleLeaveTable()" id="leaveToggleButton">See More</button>
-            <button class="btn btn-outline-secondary shadow-sm" onclick="toggleLeaveTable()" id="leaveLessButton" style="display: none;">See Less</button>
+            <div class="text-center mt-3">
+                <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveToggleButton">See More</button>
+                <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveLessButton" style="display: none;">See Less</button>
+            </div>
         </div>
     </div>
 
     <!-- Employees Under Supervision -->
-    <div class="card shadow-sm p-3">
-        <h4 class="fw-bold text-center">Employees Under Your Supervision</h4>
+    <div class="card card-custom">
+        <h5 class="fw-bold text-center mt-3">Employees You Supervise</h5>
         @if ($employeesUnderSupervisor->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-hover align-middle table-bordered" id="employeeTable">
-                    <thead class="table-light text-center">
+            <div class="table-responsive p-3">
+                <table class="table table-bordered align-middle" id="employeeTable">
+                    <thead>
                         <tr>
                             <th>#</th>
-                            <th>Employee Number</th>
+                            <th>Employee No.</th>
                             <th>Name</th>
                             <th>Department</th>
                             <th>Position</th>
-                            <th>Total Annual Leave Days</th>
+                            <th>Annual Leave</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($employeesUnderSupervisor as $index => $employee)
-                            <tr class="{{ $index >= 5 ? 'hidden-row' : '' }}">
-                                <td class="text-center">{{ $index + 1 }}</td>
+                            <tr class="hover-up {{ $index >= 5 ? 'hidden-row' : '' }}">
+                                <td>{{ $index + 1 }}</td>
                                 <td>{{ $employee->EmployeeNumber }}</td>
                                 <td>{{ $employee->FirstName }} {{ $employee->LastName }}</td>
                                 <td>{{ $employee->department->DepartmentName ?? 'N/A' }}</td>
                                 <td>{{ $employee->position->PositionName ?? 'N/A' }}</td>
-                                <td class="text-center">{{ optional($employee->grade)->AnnualLeaveDays ?? 'N/A' }}</td>
+                                <td>{{ optional($employee->grade)->AnnualLeaveDays ?? 'N/A' }}</td
+                                
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-            </div>
-
-            <!-- See More / See Less Buttons -->
-            <div class="text-center mt-3">
-                <button class="btn btn-outline-primary shadow-sm" onclick="toggleEmployeeTable()" id="toggleButton">See More</button>
-                <button class="btn btn-outline-secondary shadow-sm" onclick="toggleEmployeeTable()" id="toggleLessButton" style="display: none;">See Less</button>
+                <div class="text-center mt-3">
+                    <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleButton">See More</button>
+                    <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleLessButton" style="display: none;">See Less</button>
+                </div>
             </div>
         @endif
     </div>
-
-    <script>
-        function toggleRejectForm(id) {
-            const form = document.getElementById('rejectForm-' + id);
-            if (form) {
-                form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-
-        function toggleLeaveTable() {
-            let hiddenRows = document.querySelectorAll('#leaveRequestsTable .hidden-row');
-            let moreButton = document.getElementById('leaveToggleButton');
-            let lessButton = document.getElementById('leaveLessButton');
-
-            hiddenRows.forEach(row => {
-                row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-            });
-
-            if (moreButton.style.display !== 'none') {
-                moreButton.style.display = 'none';
-                lessButton.style.display = 'inline-block';
-            } else {
-                moreButton.style.display = 'inline-block';
-                lessButton.style.display = 'none';
-            }
-        }
-
-        function toggleEmployeeTable() {
-            let hiddenRows = document.querySelectorAll('#employeeTable .hidden-row');
-            let moreButton = document.getElementById('toggleButton');
-            let lessButton = document.getElementById('toggleLessButton');
-
-            hiddenRows.forEach(row => {
-                row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-            });
-
-            if (moreButton.style.display !== 'none') {
-                moreButton.style.display = 'none';
-                lessButton.style.display = 'inline-block';
-            } else {
-                moreButton.style.display = 'inline-block';
-                lessButton.style.display = 'none';
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll('.hidden-row').forEach(row => {
-                row.style.display = 'none';
-            });
-        });
-    </script>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    function toggleRejectForm(id) {
+        const form = document.getElementById('rejectForm-' + id);
+        if (form) {
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    function toggleLeaveTable() {
+        const hiddenRows = document.querySelectorAll('#leaveRequestsTable .hidden-row');
+        const moreBtn = document.getElementById('leaveToggleButton');
+        const lessBtn = document.getElementById('leaveLessButton');
+
+        hiddenRows.forEach(row => {
+            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        });
+
+        const showingAll = moreBtn.style.display === 'none';
+        moreBtn.style.display = showingAll ? 'inline-block' : 'none';
+        lessBtn.style.display = showingAll ? 'none' : 'inline-block';
+    }
+
+    function toggleEmployeeTable() {
+        const hiddenRows = document.querySelectorAll('#employeeTable .hidden-row');
+        const moreBtn = document.getElementById('toggleButton');
+        const lessBtn = document.getElementById('toggleLessButton');
+
+        hiddenRows.forEach(row => {
+            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        });
+
+        const showingAll = moreBtn.style.display === 'none';
+        moreBtn.style.display = showingAll ? 'inline-block' : 'none';
+        lessBtn.style.display = showingAll ? 'none' : 'inline-block';
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.hidden-row').forEach(row => {
+            row.style.display = 'none';
+        });
+    });
+</script>
 @endsection

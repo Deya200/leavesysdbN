@@ -138,7 +138,8 @@
 
     <!-- Leave Requests Table -->
     <div class="card card-custom">
-        <div class="card-body table-responsive">
+        <div class="card-body table-responsive" style="background-color: #ffffff;">
+
             @if ($sortedLeaveRequests->isNotEmpty())
                 <table class="table table-bordered align-middle">
                     <thead>

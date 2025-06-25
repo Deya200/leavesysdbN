@@ -6,8 +6,8 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card" style="border: 2px solid #007bff; box-shadow: 0px 4px 8px rgba(0,0,0,0.2);">
-                <div class="card-header text-white" style="background-color: #007bff;">
+            <div class="card" style="border: 2px solidrgb(96, 173, 255); box-shadow: 0px 4px 8px rgba(0,0,0,0.2);">
+                <div class="card-header text-white" style="background-color: #2E3A87;">
                     <h5 class="mb-0">Edit Employee</h5>
                 </div>
                 <div class="card-body" style="background-color: #f8f9fa;">
@@ -120,7 +120,7 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn text-white w-100" style="background-color: #007bff;">Update Employee</button>
+                        <button type="submit" class="btn text-white w-100" style="background-color: #2E3A87;;">Update Employee</button>
                     </form>
 
                 </div>

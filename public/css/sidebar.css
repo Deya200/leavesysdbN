@@ -1,0 +1,149 @@
+/* Offcanvas Menu */
+.offcanvas {
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 18px;
+    /* You can tweak the 18px to your preferred roundness */
+    /* Optionally add a subtle box-shadow for a softer look */
+    box-shadow: 2px 0 18px rgba(0,0,0,0.10);
+}
+
+    .offcanvas.offcanvas-start {
+        background: #605DFF; /* Try #5A60E0 or #7B6CF6 for variety */
+        color: #fff;
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+        box-shadow: 2px 0 18px rgba(0,0,0,0.12);
+    }
+
+    .offcanvas .nav-link,
+    .offcanvas .nav-link i,
+    .offcanvas .menu-text {
+        color: #fff !important;
+    }
+
+        .offcanvas .nav-link:hover,
+        .offcanvas .nav-link:focus {
+            background: rgba(255,255,255,0.09);
+            color: #ffe870 !important; /* Gold accent on hover, tweak as you wish */
+        }
+
+    .offcanvas .sidebar-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.17);
+        margin: 2px 0 2px 18px;
+        width: calc(100% - 36px);
+        border: none;
+    }
+
+    .logo {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+    }
+
+    .offcanvas-menu .toggle-btn {
+        background: none;
+        border: none;
+        color: white;
+        margin: 10px;
+        font-size: 1.2rem;
+    }
+
+    .offcanvas-menu .nav {
+        width: 100%;
+        margin-top: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding-top: 24px;
+        padding-bottom: 24px;
+    }
+
+    .offcanvas-menu .nav-link {
+        flex-direction: row;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        border-radius: 6px;
+        padding: 10px 18px 10px 16px;
+        font-size: 0.96rem;
+        font-weight: 500;
+        color: #fff;
+        background: none;
+        width: 100%;
+        margin: 0;
+        transition: background 0.2s, color 0.2s;
+        text-align: left;
+        gap: 10px;
+
+    }
+
+        .offcanvas-menu .nav-link i {
+            font-size: 20px;
+            min-width: 24px;
+            margin-right: 8px;
+            color: #fff;
+            transition: color 0.2s;
+        }
+
+        .offcanvas-menu .nav-link:hover,
+        .offcanvas-menu .nav-link:focus {
+            background: rgba(255,255,255,0.09);
+            color: #fff;
+        }
+
+        .offcanvas-menu .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-weight: 600;
+        }
+
+    .offcanvas-menu .sidebar-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.12);
+        margin: 2px 0 2px 18px; /* Top/bottom margin reduced for tightness, left indent for style */
+        width: calc(100% - 36px); /* Make line indented from left, not full width */
+        border: none;
+    }
+
+    .offcanvas-menu ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .offcanvas-menu .nav-link i {
+        font-size: 18px;
+        margin-right: 10px;
+    }
+
+.menu-text {
+    font-size: 0.96rem;
+    opacity: 1 !important;
+    transform: none !important;
+    display: inline;
+}
+
+.offcanvas-menu.expanded .menu-text {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.submenu {
+    list-style: none; /* Removes bullets */
+    padding-left: 20px; /* Optional: keeps indentation */
+    margin-bottom: 0;
+}
+
+    .submenu li {
+        margin-bottom: 2px; /* Tighter spacing, optional */
+    }
+
+.offcanvas .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.offcanvas .nav-link i {
+    margin-right: 10px;
+}

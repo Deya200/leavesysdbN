@@ -118,7 +118,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('leave_requests.store') }}" class="needs-validation" novalidate>
+     <form method="POST" action="{{ route('leave_requests.review') }}" class="needs-validation" novalidate>
                         @csrf
 
                         <!--Steps-->
@@ -209,7 +209,7 @@
                             <button type="submit" class="btn btn-primary btn-lg px-4 py-3 shadow-sm"
                                     style="background:  #1e3c72; border: none;">
                                 <span class="submit-text">
-                                    <i class="fas fa-paper-plane me-2"></i>Submit Request
+                                    <i class="fas fa-paper-plane me-2"></i>Review
                                 </span>
                                 <span class="spinner-border spinner-border-sm d-none" role="status"></span>
                             </button>

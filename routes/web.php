@@ -17,9 +17,9 @@ use App\Http\Controllers\{
     AdminController
 };
 
-Route::fallback(function () {
-    return redirect()->route('dashboard')->with('error', 'Page not found.');
-});
+//Route::fallback(function () {
+//    return redirect()->route('dashboard')->with('error', 'Page not found.');
+//});
 
 //Resources
 Route::resource('employees', EmployeeController::class);
@@ -59,28 +59,14 @@ Route::middleware(['auth'])->group(function () {
 
 
     // Leave Requests
-    Route::get('/leave-requests/{leaveRequest}/edit', [LeaveRequestController::class, 'edit'])->name('leave_requests.edit');
-
-    Route::prefix('leave-requests')->group(function () {
-        Route::get('/', [LeaveRequestController::class, 'index'])->name('leave_requests.index');
-        Route::get('/create', [LeaveRequestController::class, 'create'])->name('leave_requests.create');
-        Route::get('/leave-requests/{leaveRequest}/edit', [LeaveRequestController::class, 'edit'])->name('leave_requests.edit');
-
-        Route::post('/', [LeaveRequestController::class, 'store'])->name('leave_requests.store');
-        Route::get('/{leaveRequest}/show', [LeaveRequestController::class, 'show'])->name('leave_requests.show');
-        Route::get('/{leaveRequest}/edit', [LeaveRequestController::class, 'edit'])->name('leave_requests.edit');
-        Route::put('/{leaveRequest}/update', [LeaveRequestController::class, 'update'])->name('leave_requests.update');
-        Route::get('/my-requests', [LeaveRequestController::class, 'myLeaveRequests'])->name('leave_requests.my-requests');
-        Route::get('/calculate-leave-days', [LeaveRequestController::class, 'calculateRemainingLeaveDays'])->name('leave_requests.calculate-days');
-    });
-
+   
     // Approval Routes
-    Route::prefix('leave-requests')->group(function () {
+    
         Route::post('/{leaveRequest}/supervisor-approve', [LeaveRequestController::class, 'supervisorApprove'])->name('leave_requests.supervisor.approve');
         Route::post('/{leaveRequest}/supervisor-reject', [LeaveRequestController::class, 'supervisorReject'])->name('leave_requests.supervisor.reject');
         Route::post('/{leaveRequest}/admin-approve', [LeaveRequestController::class, 'adminApprove'])->name('leave_requests.admin.approve');
         Route::post('/{leaveRequest}/admin-reject', [LeaveRequestController::class, 'adminReject'])->name('leave_requests.admin.reject');
-    });
+    
 
     // Admin Routes
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -114,12 +100,11 @@ s', [LeaveRequestController::class, 'index'])->name('leave_requests');
     });
 
     // Notifications
-    Route::prefix('notifications')->group(function () {
-        Route::get('/notification', [NotificationController::class, 'index'])->name('notifications');
-        Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
-        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
-    });
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+        Route::post('/notifications/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+        Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+        Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    
 
     // Employee Dashboard
     Route::get('/dashboards/employee', [LeaveRequestController::class, 'employeeDashboard'])->name('dashboards.employee');
@@ -166,15 +151,24 @@ Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.e
 Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
 Route::get('/users/{user}/delete', [UserController::class, 'destroy'])->name('users.destroy');
 
+//Leave routes
 Route::get('/leave-requests', [LeaveRequestController::class, 'index'])->name('leave_requests.index');
 Route::get('/leave-requests/create', [LeaveRequestController::class, 'create'])->name('leave_requests.create');
-Route::post('/leave-requests', [LeaveRequestController::class, 'store'])->name('leave_requests.store');
+Route::post('/leave-requests/store', [LeaveRequestController::class, 'store'])->name('leave_requests.store');
+
+Route::post('/', [LeaveRequestController::class, 'review'])->name('leave_requests.review');
+Route::post('/leave-requests/review', [LeaveRequestController::class, 'review'])->name('leave_requests.review');
+Route::get('/leave-requests/{leaveRequest}/show', [LeaveRequestController::class, 'show'])->name('leave_requests.show');
+Route::get('/leave-requests/{leaveRequest}/submitted', [LeaveRequestController::class, 'submitted'])->name('leave_requests.submitted');
+Route::get('leave-requests/review', [LeaveRequestController::class, 'showReview'])->name('leave_requests.review.show');
+
 Route::get('/leave-requests/{leaveRequest}/edit', [LeaveRequestController::class, 'edit'])->name('leave_requests.edit');
 Route::put('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'update'])->name('leave_requests.update');
 Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'destroy'])->name('leave_requests.destroy');
+
+
 Route::get('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave_requests.approve');
 Route::get('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave_requests.reject');
-Route::get('/leave-requests/{leaveRequest}/show', [LeaveRequestController::class, 'show'])->name('leave_requests.show');
 Route::post('/leave-requests/{leaveRequest}/supervisor-approve', [LeaveRequestController::class, 'supervisorApprove'])->name('leave_requests.supervisor.approve');
 Route::post('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestController::class, 'supervisorReject'])->name('leave_requests.supervisor.reject');
 
@@ -182,16 +176,9 @@ Route::post('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestCon
 Route::post('/leave_requests/supervisor/reject/{id}', [SupervisorController::class, 'reject'])
     ->name('leave_requests.supervisor.reject');
 
-//Route::get('/leave-requests/{leaveRequest}/admin-approve', [LeaveRequestController::class, 'adminApprove'])->name('leave_requests.admin.approve');
-//Route::get('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestController::class, 'adminReject'])->name('leave_requests.admin.reject');
-
 Route::get('/leave-requests/my-requests', [LeaveRequestController::class, 'myLeaveRequests'])->name('leave_requests.my_requests');
 Route::get('/leave-requests/calculate-leave-days', [LeaveRequestController::class, 'calculateRemainingLeaveDays'])->name('leave_requests.calculate_days');
-Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
 
-Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
-Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
 Route::get('/departments/{department}/employees', [DepartmentController::class, 'getEmployeesByDepartment'])->name('departments.employees');
 

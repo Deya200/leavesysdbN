@@ -1,0 +1,102 @@
+body, header, .dropdown-menu, .card, .modal-content, .form-control, .table, .btn {
+    transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+
+    body.dark-mode {
+        background: #151b29 !important;
+        color: #c9d1d9 !important;
+    }
+
+        body.dark-mode header,
+        body.dark-mode header.bg-dark,
+        body.dark-mode header.bg-white {
+            background: #20284a !important;
+            color: #fff;
+            border-bottom: 1px solid #333b5c;
+            box-shadow: 0 2px 8px #151b29;
+        }
+
+        body.dark-mode .dropdown-menu {
+            background: #232c44;
+            color: #fff;
+        }
+
+        body.dark-mode .dropdown-item:hover,
+        body.dark-mode .dropdown-item:focus {
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+        }
+
+        body.dark-mode .dropdown-divider {
+            border-top: 1px solid #333b5c;
+        }
+
+        body.dark-mode .card, body.dark-mode .modal-content {
+            background: #232c44;
+            color: #fff;
+            border-color: #222f52;
+        }
+
+        body.dark-mode .table {
+            background: #1c2237;
+            color: #c9d1d9;
+        }
+
+            body.dark-mode .table th, body.dark-mode .table td {
+                border-color: #222f52;
+            }
+
+        body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+            background: #20284a;
+        }
+
+        body.dark-mode .form-control,
+        body.dark-mode .form-select {
+            background: #151b29;
+            color: #c9d1d9;
+            border-color: #222f52;
+        }
+
+            body.dark-mode .form-control::placeholder {
+                color: #8b98b8;
+            }
+
+            body.dark-mode .form-control:focus {
+                background: #232c44;
+                color: #fff;
+                border-color: #3D519F;
+            }
+
+        body.dark-mode .btn {
+            background: #232c44;
+            color: #c9d1d9;
+            border-color: #2b3970;
+        }
+
+            body.dark-mode .btn:hover, body.dark-mode .btn:focus {
+                background: #3D519F;
+                color: #fff;
+            }
+
+        body.dark-mode a {
+            color: #82aaff;
+        }
+
+            body.dark-mode a:hover, body.dark-mode a:focus {
+                color: #b3d3ff;
+                text-decoration: underline;
+            }
+
+        body.dark-mode ::-webkit-scrollbar {
+            width: 12px;
+            background: #20284a;
+        }
+
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background: #2b3970;
+            border-radius: 6px;
+        }
+
+            body.dark-mode ::-webkit-scrollbar-thumb:hover {
+                background: #3D519F;
+            }

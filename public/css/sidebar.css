@@ -1,149 +1,106 @@
-/* Offcanvas Menu */
+/* ==== SIDEBAR STYLES (Bootstrap Offcanvas) ==== */
+
+/* Blueish purple background, only round the right edges, sidebar touches top and bottom */
+.offcanvas,
+.offcanvas .offcanvas-body,
+.offcanvas .offcanvas-header {
+    background: #3D519F !important;
+    color: #fff;
+    font-family: system-ui, "Segoe UI", Arial, sans-serif;
+}
+
+/* Sidebar: only round top-right and bottom-right, no extra margin, flush with top and bottom */
 .offcanvas {
     border-top-right-radius: 18px;
     border-bottom-right-radius: 18px;
-    /* You can tweak the 18px to your preferred roundness */
-    /* Optionally add a subtle box-shadow for a softer look */
-    box-shadow: 2px 0 18px rgba(0,0,0,0.10);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    box-shadow: 0 8px 32px rgba(61, 81, 159, 0.18);
+    overflow: hidden;
+    margin: 0;
 }
 
-    .offcanvas.offcanvas-start {
-        background: #605DFF; /* Try #5A60E0 or #7B6CF6 for variety */
-        color: #fff;
-        border-top-right-radius: 20px;
-        border-bottom-right-radius: 20px;
-        box-shadow: 2px 0 18px rgba(0,0,0,0.12);
+    /* Sidebar header: widen the logo */
+    .offcanvas .offcanvas-header {
+        border-bottom: none; /* Remove the line under the header */
+        border-top-right-radius: 18px;
     }
 
-    .offcanvas .nav-link,
-    .offcanvas .nav-link i,
-    .offcanvas .menu-text {
-        color: #fff !important;
-    }
-
-        .offcanvas .nav-link:hover,
-        .offcanvas .nav-link:focus {
-            background: rgba(255,255,255,0.09);
-            color: #ffe870 !important; /* Gold accent on hover, tweak as you wish */
+        .offcanvas .offcanvas-header img {
+            width: 60px; /* Increased width */
+            height: 60px; /* Increased height */
+            object-fit: cover;
+            margin-left: 4px;
         }
 
-    .offcanvas .sidebar-divider {
-        height: 1px;
-        background: rgba(255,255,255,0.17);
-        margin: 2px 0 2px 18px;
-        width: calc(100% - 36px);
-        border: none;
-    }
-
-    .logo {
-        width: 56px;
-        height: 56px;
-        object-fit: contain;
-    }
-
-    .offcanvas-menu .toggle-btn {
-        background: none;
-        border: none;
-        color: white;
-        margin: 10px;
-        font-size: 1.2rem;
-    }
-
-    .offcanvas-menu .nav {
-        width: 100%;
-        margin-top: 18px;
+    /* Sidebar body */
+    .offcanvas .offcanvas-body {
+        padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 3px;
-        padding-top: 24px;
-        padding-bottom: 24px;
+        height: 100%;
+        border-bottom-right-radius: 18px;
     }
 
-    .offcanvas-menu .nav-link {
-        flex-direction: row;
-        width: 48px;
-        height: 48px;
+    /* Sidebar nav links */
+    .offcanvas .nav-link {
+        color: #fff;
+        border-radius: 10px;
+        transition: background 0.16s, color 0.16s;
+        padding: 10px 18px;
         display: flex;
         align-items: center;
-        border-radius: 6px;
-        padding: 10px 18px 10px 16px;
-        font-size: 0.96rem;
-        font-weight: 500;
-        color: #fff;
-        background: none;
-        width: 100%;
-        margin: 0;
-        transition: background 0.2s, color 0.2s;
-        text-align: left;
         gap: 10px;
-
+        font-size: 1rem;
+        font-family: inherit;
     }
 
-        .offcanvas-menu .nav-link i {
-            font-size: 20px;
-            min-width: 24px;
-            margin-right: 8px;
-            color: #fff;
-            transition: color 0.2s;
+        .offcanvas .nav-link i {
+            width: 22px;
+            text-align: center;
+            font-size: 18px;
         }
 
-        .offcanvas-menu .nav-link:hover,
-        .offcanvas-menu .nav-link:focus {
-            background: rgba(255,255,255,0.09);
+        .offcanvas .nav-link.active,
+        .offcanvas .nav-link:hover {
+            background: rgba(255,255,255,0.16);
             color: #fff;
         }
 
-        .offcanvas-menu .nav-link.active {
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            font-weight: 600;
-        }
-
-    .offcanvas-menu .sidebar-divider {
-        height: 1px;
-        background: rgba(255,255,255,0.12);
-        margin: 2px 0 2px 18px; /* Top/bottom margin reduced for tightness, left indent for style */
-        width: calc(100% - 36px); /* Make line indented from left, not full width */
-        border: none;
+    .offcanvas .collapse .nav-link {
+        padding-left: 36px;
+        font-size: 0.97rem;
     }
 
-    .offcanvas-menu ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
+    .offcanvas .border-top {
+        border-color: #2b3970 !important;
     }
 
-    .offcanvas-menu .nav-link i {
-        font-size: 18px;
-        margin-right: 10px;
+    .offcanvas ::-webkit-scrollbar {
+        width: 8px;
+        background: transparent;
     }
 
-.menu-text {
-    font-size: 0.96rem;
-    opacity: 1 !important;
-    transform: none !important;
-    display: inline;
-}
-
-.offcanvas-menu.expanded .menu-text {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.submenu {
-    list-style: none; /* Removes bullets */
-    padding-left: 20px; /* Optional: keeps indentation */
-    margin-bottom: 0;
-}
-
-    .submenu li {
-        margin-bottom: 2px; /* Tighter spacing, optional */
+    .offcanvas ::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
     }
 
-.offcanvas .nav-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
+    /* Sidebar repository avatar */
+    .offcanvas img.rounded-circle {
+        width: 20px;
+        height: 20px;
+        object-fit: cover;
+    }
 
-.offcanvas .nav-link i {
-    margin-right: 10px;
+    /* Sidebar footer */
+    .offcanvas .small {
+        font-size: 0.92rem;
+    }
+
+/* Responsive: ensure offcanvas width */
+@media (min-width: 992px) {
+    .offcanvas-start {
+        width: 320px !important;
+    }
 }

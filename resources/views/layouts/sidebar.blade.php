@@ -45,7 +45,6 @@
                             </ul>
                         </div>
                     </li>
-                    
                     <!-- Positions Dropdown -->
                     <li class="nav-item">
                         <a class="nav-link text-white d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#offcanvasPositions" role="button" aria-expanded="false" aria-controls="offcanvasPositions">
@@ -73,11 +72,23 @@
                             </ul>
                         </div>
                     </li>
+                    <!-- Grades -->
+                     <li class="nav-item">
+                        <a class="nav-link text-white d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#offcanvasGrades" role="button" aria-expanded="false" aria-controls="offcanvasGrades">
+                            <i class="fas fa-briefcase"></i> Grades
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse ps-4" id="offcanvasGrades">
+                            <ul class="nav flex-column">
+                                 <li><a class="nav-link text-white-50" href="{{ route('grades.index') }}"><i class="fas fa-eye"></i>View Grades</a></li>
+                                 <li><a class="nav-link text-white-50" href="{{ route('grades.create') }}"><i class="fas fa-plus"></i>Add Grade</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                                        
                 @endif
 
                 @if(auth()->user()->role_id === 2)
-                <!-- Leave Requests Notification -->
-                    
                     <li class="nav-item">
                         <a class="nav-link text-white d-flex align-items-center gap-2" href="{{ route('supervisor.index') }}">
                             <i class="fas fa-home"></i> Dashboard
@@ -115,58 +126,9 @@
                         </a>
                     </li>
                 @endif
-
-                <!-- Divider --
-                <li class="border-top my-2"></li>
-                <!-- Example: Extra section like "Explore", "Marketplace" --
-                <li class="nav-item">
-                    <a class="nav-link text-white d-flex align-items-center gap-2" href="#">
-                        <i class="fas fa-compass"></i> Explore
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white d-flex align-items-center gap-2" href="#">
-                        <i class="fas fa-store"></i> Marketplace
-                    </a>
-                </li>
-
-                <!-- Divider --
-                <li class="border-top my-2"></li>
-
-                <!-- Repositories Section (Example, customize as needed) -->
-                <!--<div class="px-3 pt-2 pb-1 text-uppercase fw-bold small text-white-50 d-flex align-items-center justify-content-between">
-                    Repositories
-                    <i class="fas fa-search"></i>
-                </div>
-                <ul class="nav flex-column px-3">
-                    {{-- Example repositories, customize dynamically as needed --}}
-                    <li class="nav-item d-flex align-items-center gap-2 mb-1">
-                        <img src="https://avatars.githubusercontent.com/u/3369400?v=4" class="rounded-circle" style="width:20px;height:20px;" alt="repo">
-                        <a href="#" class="nav-link text-white-50 p-0">Deya200/leavesysdbN</a>
-                    </li>
-                    <li class="nav-item d-flex align-items-center gap-2 mb-1">
-                        <img src="https://avatars.githubusercontent.com/u/3369400?v=4" class="rounded-circle" style="width:20px;height:20px;" alt="repo">
-                        <a href="#" class="nav-link text-white-50 p-0">Noel265/Noe</a>
-                    </li>
-                    <li class="nav-item d-flex align-items-center gap-2 mb-1">
-                        <img src="https://avatars.githubusercontent.com/u/3369400?v=4" class="rounded-circle" style="width:20px;height:20px;" alt="repo">
-                        <a href="#" class="nav-link text-white-50 p-0">Noel265/Employee-Management</a>
-                    </li>
-                    <li class="nav-item d-flex align-items-center gap-2 mb-1">
-                        <img src="https://avatars.githubusercontent.com/u/3369400?v=4" class="rounded-circle" style="width:20px;height:20px;" alt="repo">
-                        <a href="#" class="nav-link text-white-50 p-0">Noel265/leavesys</a>
-                    </li>
-                    <li class="nav-item d-flex align-items-center gap-2 mb-1">
-                        <img src="https://avatars.githubusercontent.com/u/3369400?v=4" class="rounded-circle" style="width:20px;height:20px;" alt="repo">
-                        <a href="#" class="nav-link text-white-50 p-0">Noel265/skills-introduction-to-github</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link text-white-50 ps-4">Show more</a>
-                    </li>
-                </ul>
             </ul>
         </nav>
-        <!-- Footer -->
+        <!-- Footer (optional) -->
         <div class="border-top p-3 small text-white-50">
             <div class="d-flex flex-column gap-1">
                 <span>© 2025 GitHub, Inc.</span>
@@ -182,4 +144,3 @@
         </div>
     </div>
 </div>
-

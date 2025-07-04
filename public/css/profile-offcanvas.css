@@ -1,0 +1,53 @@
+.telegram-profile-drawer {
+    width: 400px;
+    max-width: 95vw;
+    background: #222d3b !important;
+    color: #fff;
+    border-radius: 18px 0 0 18px;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.19), 0 4px 32px rgba(0,0,0,0.08);
+    overflow: hidden;
+    top: 30px !important;
+    height: calc(100% - 60px) !important;
+    margin-right: 30px;
+    border: none;
+}
+
+@media (max-width: 600px) {
+    .telegram-profile-drawer {
+        border-radius: 0;
+        margin-right: 0;
+        top: 0 !important;
+        height: 100% !important;
+        width: 100vw;
+    }
+}
+
+.telegram-profile-drawer .offcanvas-header {
+    background: #222f52;
+    border-bottom: 1px solid #2b3970;
+    padding-top: 18px;
+    padding-bottom: 14px;
+}
+
+.telegram-profile-drawer .offcanvas-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.telegram-profile-drawer .btn-close {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
+.profile-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
+    .profile-photo:hover {
+        transform: scale(1.05);
+    }

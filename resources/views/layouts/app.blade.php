@@ -252,6 +252,18 @@
 </script>
   @yield('scripts')
 
+  <script>
+    function previewImage(event) {
+        let reader = new FileReader();
+        reader.onload = function() {
+            let output = document.getElementById('imagePreview');
+            output.src = reader.result;
+            output.style.display = 'block';
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+
   <footer class="text-white text-center py-3 mt-4">
     <p class="mb-0">&copy; {{ date('Y') }} Leave Management System.</p>
     <p class="mb-0">Developed by</p>

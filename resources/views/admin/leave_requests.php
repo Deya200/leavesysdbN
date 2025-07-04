@@ -9,33 +9,68 @@
         margin: auto;
         padding: 20px;
     }
-    .card-section {
-        background-color: #fff;
+
+    .card-custom {
+        background-color: #ffffff;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         padding: 20px;
     }
-    .table th, .table td {
-        vertical-align: middle;
+
+    .table {
+        background-color: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+
     .table thead {
         background-color: #2E3A87;
-        color: white;
+        color: #ffffff;
     }
+
+    .table tbody tr {
+        background-color: #ffffff;
+        color: #000000;
+    }
+
+    .table th, .table td {
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
     .badge {
         font-size: 13px;
         padding: 6px 10px;
         border-radius: 12px;
     }
+
     .form-control {
         font-size: 0.9rem;
+    }
+
+    .btn-sm {
+        font-size: 0.8rem;
+    }
+
+    .text-muted {
+        color: #777 !important;
     }
 </style>
 @endsection
 
 @section('content')
 <div class="admin-container">
-    <h4 class="mb-4 fw-bold text-dark">Admin Leave Verification</h4>
+
+    <!-- Welcome Section -->
+    <div class="card-custom text-center mb-4" style="background-color: #2E3A87; color: white;">
+        <h4 class="fw-bold mb-1">Welcome, {{ auth()->user()->FirstName ?? 'Administrator' }}!</h4>
+        <p class="mb-2">You can review, approve, or reject leave requests submitted by employees.</p>
+    </div>
 
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -51,7 +86,7 @@
         </div>
     @endif
 
-    <div class="card-section">
+    <div class="card-custom">
         @if ($leaveRequests->isNotEmpty())
             <div class="table-responsive">
                 <table class="table table-bordered align-middle">
@@ -77,10 +112,10 @@
                                 <td>{{ $request->EndDate }}</td>
                                 <td>{{ $request->TotalDays }}</td>
                                 <td>
-                                    <span class="badge 
-                                        @if($request->RequestStatus === 'Approved') bg-success 
-                                        @elseif($request->RequestStatus === 'Rejected by Admin') bg-danger 
-                                        @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary 
+                                    <span class="badge
+                                        @if($request->RequestStatus === 'Approved') bg-success
+                                        @elseif($request->RequestStatus === 'Rejected by Admin') bg-danger
+                                        @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
                                         @else bg-warning text-dark @endif">
                                         {{ ucfirst($request->RequestStatus) }}
                                     </span>
@@ -92,9 +127,9 @@
                                             <button type="submit" class="btn btn-sm btn-success mb-1">Approve</button>
                                         </form>
                                         <button type="button" class="btn btn-sm btn-danger mb-1" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
-                                        <form id="rejectForm-{{ $request->LeaveRequestID }}" 
-                                              action="{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}" 
-                                              method="POST" 
+                                        <form id="rejectForm-{{ $request->LeaveRequestID }}"
+                                              action="{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}"
+                                              method="POST"
                                               style="display:none; margin-top:5px;">
                                             @csrf
                                             <textarea name="RejectionReason" class="form-control mb-2" placeholder="Enter rejection reason" required></textarea>

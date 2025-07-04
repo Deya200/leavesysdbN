@@ -96,7 +96,7 @@ s', [LeaveRequestController::class, 'index'])->name('leave_requests');
         Route::resource('grades', GradeController::class);
 
         // Leave Types Management
-        Route::resource('leave-types', LeaveTypeController::class);
+        Route::resource('leave_types', LeaveTypeController::class);
     });
 
     // Notifications

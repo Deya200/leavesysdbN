@@ -41,7 +41,7 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                             <!-- ...profile menu items... -->
                             <li>
-                                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                <a class="dropdown-item" href="#" data-bs-toggle="offcanvas" data-bs-target="#profileEditOffcanvas" aria-controls="profileEditOffcanvas">
                                     <i class="fas fa-user me-2"></i> Profile
                                 </a>
                             </li>

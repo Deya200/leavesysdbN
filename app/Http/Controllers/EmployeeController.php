@@ -21,24 +21,32 @@ class EmployeeController extends Controller
  
     public function index(Request $request)
     {
-         // Get the search query from the request
+        // Get the search query from the request
         $search = $request->input('search');
+        $sortColumn = $request->input('sort', 'FirstName');   // default sort column
+        $sortOrder = $request->input('order', 'asc'); 
 
-       // Fetch employees with optional search filtering
-       $employees = Employee::with('department') // Assuming a relationship exists for the department
-        ->when($search, function ($query, $search) {
-            $query->where('FirstName', 'like', "%{$search}%")
-                  ->orWhere('LastName', 'like', "%{$search}%")
-                  ->orWhereHas('department', function ($departmentQuery) use ($search) {
-                      $departmentQuery->where('DepartmentName', 'like', "%{$search}%");
-                  });
-        })
-        ->orderBy('FirstName', 'asc')
-        ->get();
+        // Fetch employees with optional search filtering
+        $employees = Employee::with(['department', 'role'])
+            ->when($search, function ($query, $search) {
+                $query->where('FirstName', 'like', "%{$search}%")
+                      ->orWhere('LastName', 'like', "%{$search}%")
+                      ->orWhereHas('department', function ($departmentQuery) use ($search) {
+                          $departmentQuery->where('DepartmentName', 'like', "%{$search}%");
+                      });
+            })
+            ->orderBy('FirstName', 'asc')
+            ->paginate(10) //
+            ->appends([
+                        'search' => $search,
+                        'sort' => $sortColumn,
+                        'order' => $sortOrder,
+                    ]); //
 
-    // Return the view with the employees and search query
-    return view('employees.index', compact('employees', 'search'));
- }
+        // Return the view with the employees and search query
+        return view('employees.index', compact('employees', 'search','sortColumn', 'sortOrder'));
+    }
+
 
     /**
      * Show the form for creating a new employee.
@@ -75,7 +83,9 @@ class EmployeeController extends Controller
 
         // Set a default role_id for a new employee.
         // Adjust the value as needed (for example, if role "Employee" has an id of 2).
-        $validatedData['role_id'] = 2;
+        $defaultRole = Role::where('name', 'Employee')->first();
+        $validatedData['role_id'] = $defaultRole ? $defaultRole->id : null;
+
 
         $employee = Employee::create($validatedData);
         // No need to call assignRole since role_id defines the employee’s role.
@@ -165,8 +175,11 @@ class EmployeeController extends Controller
 
         // Update the employee's role to Supervisor.
         // Assuming the Supervisor role has an id of 3.
-        $employee->role_id = 3;
-        $employee->save();
+        $supervisorRole = Role::where('name', 'Supervisor')->first();
+        if ($supervisorRole) {
+        $employee->role_id = $supervisorRole->id;
+        $employee->save();}
+               
 
         return redirect()->route('employees.index')
                          ->with('success', 'Employee assigned as Supervisor successfully!');

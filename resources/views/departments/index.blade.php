@@ -77,15 +77,22 @@
         <p class="mb-2">Here you can view, edit, and manage all departments and their supervisors.</p>
     </div>
 
-    <!-- Search Form -->
-    <div class="text-center mb-4">
-        <form action="{{ route('departments.index') }}" method="GET" style="max-width: 600px; margin: auto;">
-            <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search by Department or Supervisor Name" value="{{ $search ?? '' }}">
-                <button type="submit" class="btn btn-success" style="background-color: #2E3A87; color: white;">Search</button>
-            </div>
-        </form>
+   <!-- Search Bar & Add Button Row -->
+<div class="row mb-4" style="max-width: 800px; margin: 0 auto;">
+    <div class="col-12 d-flex align-items-center gap-2">
+        <div class="flex-grow-1">
+            <input 
+                type="text"
+                id="departmentSearch"
+                class="form-control"
+                placeholder="Search by Department or Supervisor"
+            >
+        </div>
+        <a href="{{ route('departments.create') }}" class="btn btn-success flex-shrink-0">
+            Add New Department
+        </a>
     </div>
+</div>
 
     <!-- Flash Messages -->
     @if (session('success'))
@@ -95,11 +102,7 @@
         </div>
     @endif
 
-    <!-- Add Department Button -->
-    <div class="mb-4 text-end">
-        <a href="{{ route('departments.create') }}" class="btn btn-success">Add New Department</a>
-    </div>
-
+   
     <!-- Departments Table -->
     <div class="card-custom">
         <div class="table-responsive">
@@ -114,7 +117,7 @@
                 </thead>
                 <tbody>
                     @forelse ($departments as $department)
-                        <tr>
+                        <tr class="department-row">
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $department->DepartmentName }}</td>
                             <td>
@@ -145,4 +148,34 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('departmentSearch');
+    const departmentRows = document.querySelectorAll('.department-row');
+
+    if (searchInput && departmentRows.length > 0) {
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.trim().toLowerCase();
+
+            departmentRows.forEach(row => {
+                // Get department name and supervisor name from columns
+                const departmentName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const supervisorName = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+
+                if (
+                    departmentName.includes(searchTerm) ||
+                    supervisorName.includes(searchTerm)
+                ) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 @endsection

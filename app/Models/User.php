@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Employee;
 use App\Models\Grade;
 use App\Models\Role;
+use App\Models\Department;
 use App\Models\LeaveRequest;
-use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
     use HasFactory;
 
-    protected $primaryKey = 'EmployeeNumber'; // Define correct primary key
+    protected $primaryKey = 'EmployeeNumber';
     protected $keyType = 'string';
     public $incrementing = false;
 
@@ -24,7 +24,9 @@ class User extends Authenticatable
         'password',
         'EmployeeNumber',
         'role_id',
-        'profile_photo' // ✅ Ensure correct foreign key for roles
+        'profile_photo',
+        'DepartmentID',
+        'SupervisorID',
     ];
 
     protected $hidden = [
@@ -32,25 +34,21 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * Relationship with Role Table (FIXED)
-     */
+    /** ✅ Relationships **/
+
+    // Role
     public function role()
     {
-        return $this->belongsTo(Role::class, 'role_id', 'id'); // ✅ Correct role relationship
+        return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    /**
-     * Relationship with Employee Table
-     */
+    // Employee
     public function employee()
     {
         return $this->hasOne(Employee::class, 'EmployeeNumber', 'EmployeeNumber');
     }
 
-    /**
-     * Relationship with Grade through Employee
-     */
+    // Grade (via Employee)
     public function grade()
     {
         return $this->hasOneThrough(
@@ -63,55 +61,59 @@ class User extends Authenticatable
         );
     }
 
-    /**
-     * Relationship with Leave Requests
-     */
+    // Leave Requests
     public function leaveRequests()
     {
         return $this->hasMany(LeaveRequest::class, 'EmployeeNumber', 'EmployeeNumber');
     }
 
-    /**
-     * Determine if User is Admin (Fixes Role-Based Routing)
-     */
-    public function isAdmin()
+    // Department
+    public function department()
     {
-        // Check if the user has role_id == 1 OR the role name is 'admin'
-        return ($this->role_id === 1)
-            || ($this->role && strtolower($this->role->name) === 'admin');
-    }
-    public function isSupervisor()
-{
-    return $this->role_id === 2; // Adjust based on your actual supervisor role ID
-}
-    public function isEmployee()
-    {
-        return $this->role_id === 3; // Adjust based on your actual employee role ID
+        return $this->belongsTo(Department::class, 'DepartmentID');
     }
 
-    /**
-     * Accessor for First Name (Now Uses Relationship)
-     */
+    // Supervisor
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'SupervisorID');
+    }
+
+    /** ✅ Role Checks **/
+
+    public function isAdmin()
+    {
+        return $this->role_id === 1
+            || ($this->role && strtolower($this->role->name) === 'admin');
+    }
+
+    public function isSupervisor()
+    {
+        return $this->role_id === 2;
+    }
+
+    public function isEmployee()
+    {
+        return $this->role_id === 3;
+    }
+
+    /** ✅ Accessors **/
+
     public function getFirstNameAttribute()
     {
         return optional($this->employee)->FirstName ?? 'N/A';
     }
 
-    /**
-     * Accessor for Role Name (Fixes Undefined Role Issues)
-     */
     public function getRoleNameAttribute()
     {
         return ucfirst(optional($this->role)->name ?? 'Employee');
     }
-        public function getProfilePhotoUrlAttribute()
+
+    public function getProfilePhotoUrlAttribute()
     {
         if (!empty($this->profile_photo) && file_exists(public_path($this->profile_photo))) {
-            return asset($this->profile_photo); // ✅ Correct file retrieval
+            return asset($this->profile_photo);
         }
-        return asset('images/default-avatar.png'); // ✅ Default image fallback
+        return asset('images/default-avatar.png');
     }
-
-    
-
 }

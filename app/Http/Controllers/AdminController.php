@@ -11,32 +11,36 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
-
-// public function __construct()
-//{
-//    $this->middleware('admin');
-//}
-
-public function index()
-{
-    $user = auth()->user();
-    $employee = Employee::where('EmployeeNumber', $user->EmployeeNumber)->first();
-    $totalEmployees = Employee::count();
-    $totalLeaveRequests = LeaveRequest::count();
-    $pendingLeaves = LeaveRequest::where('RequestStatus', 'Pending Admin Verification')->count();
-    $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->latest()->get();
-
-    return view('dashboards.admin', compact(
-        'employee', 
-        'totalEmployees', 
-        'totalLeaveRequests', 
-        'pendingLeaves', 
-        'leaveRequests'
-    ));
-}
+    // Optional middleware for admin-only access
+    // public function __construct()
+    // {
+    //     $this->middleware('admin');
+    // }
 
     /**
-     * View all employees.
+     * Admin dashboard overview.
+     */
+    public function index()
+    {
+        $user = auth()->user();
+        $employee = Employee::where('EmployeeNumber', $user->EmployeeNumber)->first();
+
+        $totalEmployees = Employee::count();
+        $totalLeaveRequests = LeaveRequest::count();
+        $pendingLeaves = LeaveRequest::where('RequestStatus', 'Pending Admin Verification')->count();
+        $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->latest()->get();
+
+        return view('dashboards.admin', compact(
+            'employee',
+            'totalEmployees',
+            'totalLeaveRequests',
+            'pendingLeaves',
+            'leaveRequests'
+        ));
+    }
+
+    /**
+     * View all employees with their roles.
      */
     public function employees()
     {
@@ -65,10 +69,13 @@ public function index()
 
     /**
      * Reject a leave request with a reason.
+     * Standardized to use 'Rejected' as the status.
      */
     public function rejectLeave(Request $request, $leaveRequestId)
     {
-        $request->validate(['RejectionReason' => 'required|string|max:255']);
+        $request->validate([
+            'RejectionReason' => 'required|string|max:255',
+        ]);
 
         $leaveRequest = LeaveRequest::findOrFail($leaveRequestId);
 
@@ -77,7 +84,7 @@ public function index()
         }
 
         $leaveRequest->update([
-            'RequestStatus' => 'Rejected by Admin',
+            'RequestStatus' => 'Rejected', // Standardized status
             'AdminApproval' => false,
             'RejectionReason' => $request->RejectionReason,
         ]);
@@ -86,7 +93,7 @@ public function index()
     }
 
     /**
-     * Manage roles - view all roles.
+     * View all roles.
      */
     public function roles()
     {
@@ -110,7 +117,7 @@ public function index()
     }
 
     /**
-     * Fetch all leave requests for admin verification.
+     * View all leave requests.
      */
     public function leaveRequests()
     {

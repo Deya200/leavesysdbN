@@ -9,7 +9,6 @@
         margin: auto;
         padding: 20px;
     }
-    /* Card Custom */
     .card-custom {
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -20,7 +19,6 @@
     .card-custom:hover {
         transform: scale(1.01);
     }
-    /* Status Badge */
     .status-badge {
         font-size: 13px;
         padding: 4px 10px;
@@ -38,7 +36,6 @@
         background-color: #2E3A87;
         color: white;
     }
-    /* Summary Cards */
     .summary-card h6 {
         font-size: 13px;
         margin-bottom: 4px;
@@ -50,15 +47,13 @@
         margin: 0;
         color: #2E3A87;
     }
-    /* Table Styling */
     .table thead {
         background-color:rgb(235, 236, 240);
-        color: white;
+        color: #333;
     }
     .table th, .table td {
         padding: 12px;
     }
-    /* Hover effect for table rows */
     .hover-up:hover {
         transform: translateY(-3px);
         transition: transform 0.3s ease;
@@ -70,22 +65,40 @@
 
 @php
     $employee = auth()->user();
+
     $leaveRequests = \App\Models\LeaveRequest::where('EmployeeNumber', $employee->EmployeeNumber)
         ->orderBy('created_at', 'desc')
         ->get();
+
+    $normalizeStatus = fn($s) => trim(strtolower((string) ($s ?? '')));
+
     $totalAssigned = optional($employee->grade)->AnnualLeaveDays ?? 0;
-    $approvedLeaveDays = $leaveRequests->where('RequestStatus', 'Approved')->sum('TotalDays');
+    $approvedLeaveDays = $leaveRequests
+        ->filter(fn($r) => $normalizeStatus($r->RequestStatus) === 'approved')
+        ->sum('TotalDays');
     $remainingDays = max(0, $totalAssigned - $approvedLeaveDays);
 
-    // Sorting leave requests by priority
-    $sortedLeaveRequests = $leaveRequests->sortBy(function ($request) {
-        return [
-            $request->RequestStatus === 'Pending Supervisor Approval' ? 1 : 0,
-            $request->RequestStatus === 'Pending Admin Verification' ? 2 : 0,
-            $request->RequestStatus === 'Rejected' ? 3 : 0,
-            $request->RequestStatus === 'Approved' ? 4 : 0,
-        ];
-    });
+    $counts = [
+        'approved' => $leaveRequests->filter(fn($r) => $normalizeStatus($r->RequestStatus) === 'approved')->count(),
+        'rejected' => $leaveRequests->filter(fn($r) => in_array($normalizeStatus($r->RequestStatus), ['rejected', 'rejected by admin']))->count(),
+        'pending_supervisor' => $leaveRequests->filter(fn($r) => $normalizeStatus($r->RequestStatus) === 'pending supervisor approval')->count(),
+        'pending_admin' => $leaveRequests->filter(fn($r) => $normalizeStatus($r->RequestStatus) === 'pending admin verification')->count(),
+    ];
+
+    $priorityMap = [
+        'pending supervisor approval' => 1,
+        'pending admin verification' => 2,
+        'rejected' => 3,
+        'rejected by admin' => 3,
+        'approved' => 4,
+    ];
+
+    $sortedLeaveRequests = $leaveRequests->sortBy(function ($request) use ($normalizeStatus, $priorityMap) {
+        $statusKey = $normalizeStatus($request->RequestStatus);
+        $priority = $priorityMap[$statusKey] ?? 5;
+        $timePriority = -strtotime($request->created_at ?? now());
+        return [$priority, $timePriority];
+    })->values();
 @endphp
 
 @if(session('success'))
@@ -96,36 +109,34 @@
 
 <div class="dashboard-container">
 
-    <!-- Welcome Section -->
     <div class="card card-custom mb-4 text-center" style="background-color: #2E3A87; color: white;">
-        <h4 class="fw-bold mb-1">Welcome, {{ $employee->FirstName ?? 'Employee' }}!</h4>
+        <h4 class="fw-bold mb-1">Welcome, {{ $employee->FirstName ?? $employee->name ?? 'Employee' }}!</h4>
         <p class="mb-2">Here’s your leave overview.</p>
     </div>
 
-    <!-- Summary Cards Row -->
     <div class="row text-center g-2 mb-4">
         <div class="col-6 col-md-2 summary-card">
             <div class="card-custom">
                 <h6><i class="fas fa-check-circle"></i> Approved</h6>
-                <p>{{ $leaveRequests->where('RequestStatus', 'Approved')->count() }}</p>
+                <p>{{ $counts['approved'] }}</p>
             </div>
         </div>
         <div class="col-6 col-md-2 summary-card">
             <div class="card-custom">
                 <h6><i class="fas fa-times-circle"></i> Rejected</h6>
-                <p>{{ $leaveRequests->where('RequestStatus', 'Rejected')->count() }}</p>
+                <p>{{ $counts['rejected'] }}</p>
             </div>
         </div>
         <div class="col-6 col-md-2 summary-card">
             <div class="card-custom">
                 <h6><i class="fas fa-hourglass-half"></i> Pending Supervisor</h6>
-                <p>{{ $leaveRequests->where('RequestStatus', 'Pending Supervisor Approval')->count() }}</p>
+                <p>{{ $counts['pending_supervisor'] }}</p>
             </div>
         </div>
         <div class="col-6 col-md-2 summary-card">
             <div class="card-custom">
                 <h6><i class="fas fa-user-clock"></i> Pending Admin</h6>
-                <p>{{ $leaveRequests->where('RequestStatus', 'Pending Admin Verification')->count() }}</p>
+                <p>{{ $counts['pending_admin'] }}</p>
             </div>
         </div>
         <div class="col-6 col-md-2 summary-card">
@@ -142,10 +153,8 @@
         </div>
     </div>
 
-    <!-- Leave Requests Table -->
     <div class="card card-custom">
         <div class="card-body table-responsive" style="background-color: #ffffff;">
-
             @if ($sortedLeaveRequests->isNotEmpty())
                 <table class="table table-bordered align-middle">
                     <thead>
@@ -159,28 +168,33 @@
                     </thead>
                     <tbody>
                         @foreach ($sortedLeaveRequests as $request)
+                            @php
+                                $statusNormalized = $normalizeStatus($request->RequestStatus);
+                                $isRejected = in_array($statusNormalized, ['rejected', 'rejected by admin']);
+                                $badgeClass = $isRejected ? 'badge-rejected'
+                                           : ($statusNormalized === 'approved' ? 'badge-approved' : 'badge-pending');
+                                $rejectReason = $request->RejectionReason ?? $request->RejectioReason ?? null;
+                                $friendlyStatus = ucwords($statusNormalized);
+                            @endphp
                             <tr class="hover-up">
                                 <td>{{ optional($request->leaveType)->LeaveTypeName ?? 'N/A' }}</td>
                                 <td>
-                                    @php
-                                        $status = $request->RequestStatus;
-                                        $badgeClass = $status === 'Approved' ? 'badge-approved' :
-                                                      ($status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
-                                    @endphp
                                     <span class="status-badge {{ $badgeClass }}">
-                                        {{ ucfirst($status) }}
+                                        {{ $friendlyStatus }}
                                     </span>
                                 </td>
                                 <td>{{ $request->StartDate ?? 'N/A' }}</td>
                                 <td>{{ $request->EndDate ?? 'N/A' }}</td>
                                 <td>
-                                    @if($status === 'Rejected' && $request->RejectionReason)
-                                        {{ $request->RejectionReason }}
-                                    @elseif($status === 'Approved')
+                                    @if ($isRejected && !empty($rejectReason))
+                                        {{ $rejectReason }}
+                                    @elseif ($isRejected)
+                                        Rejected
+                                    @elseif ($statusNormalized === 'approved')
                                         Approved
-                                    @elseif($status === 'Pending Supervisor Approval')
+                                    @elseif ($statusNormalized === 'pending supervisor approval')
                                         Pending Supervisor Approval
-                                    @elseif($status === 'Pending Admin Verification')
+                                    @elseif ($statusNormalized === 'pending admin verification')
                                         Pending Admin Verification
                                     @else
                                         Pending

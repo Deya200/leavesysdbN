@@ -131,7 +131,7 @@
         <!-- Footer (optional) -->
         <div class="border-top p-3 small text-white-50">
             <div class="d-flex flex-column gap-1">
-                <span>© 2025 GitHub, Inc.</span>
+                <span>© 2025 CYBERTECH</span>
                 <div>
                     <a href="#" class="text-white-50 me-2">About</a>
                     <a href="#" class="text-white-50 me-2">Blog</a>

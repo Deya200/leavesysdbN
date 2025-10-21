@@ -98,6 +98,7 @@
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Total Days</th>
+                            <th>Reason</th> <!-- ✅ New column -->
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -111,10 +112,11 @@
                                 <td>{{ $request->StartDate }}</td>
                                 <td>{{ $request->EndDate }}</td>
                                 <td>{{ $request->TotalDays }}</td>
+                                <td>{{ $request->Reason ?? 'N/A' }}</td> <!-- ✅ New cell -->
                                 <td>
                                     <span class="badge
                                         @if($request->RequestStatus === 'Approved') bg-success
-                                        @elseif($request->RequestStatus === 'Rejected by Admin') bg-danger
+                                        @elseif($request->RequestStatus === 'Rejected by Admin' || $request->RequestStatus === 'Rejected') bg-danger
                                         @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
                                         @else bg-warning text-dark @endif">
                                         {{ ucfirst($request->RequestStatus) }}

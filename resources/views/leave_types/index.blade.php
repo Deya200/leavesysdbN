@@ -53,6 +53,12 @@
     .btn-sm {
         font-size: 0.8rem;
     }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+        border-radius: 6px;
+    }
 </style>
 @endsection
 
@@ -89,6 +95,7 @@
                             <th>Name</th>
                             <th>Paid</th>
                             <th>Gender</th>
+                            <th>Deducts from Annual</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -97,8 +104,17 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $leaveType->LeaveTypeName }}</td>
-                                <td>{{ $leaveType->IsPaidLeave ? 'Yes' : 'No' }}</td>
+                                <td>
+                                    <span class="badge {{ $leaveType->IsPaidLeave ? 'bg-success' : 'bg-secondary' }}">
+                                        {{ $leaveType->IsPaidLeave ? 'Yes' : 'No' }}
+                                    </span>
+                                </td>
                                 <td>{{ $leaveType->GenderApplicable }}</td>
+                                <td>
+                                    <span class="badge {{ $leaveType->deductsFromAnnual() ? 'bg-success' : 'bg-secondary' }}">
+                                        {{ $leaveType->deductsFromAnnual() ? 'Yes' : 'No' }}
+                                    </span>
+                                </td>
                                 <td>
                                     <div class="d-flex gap-2 justify-content-center">
                                         <a href="{{ route('leave_types.edit', $leaveType->LeaveTypeID) }}" class="btn btn-sm btn-edit">Edit</a>

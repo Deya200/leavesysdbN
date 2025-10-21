@@ -89,8 +89,8 @@
                 <select id="IsPaidLeave" name="IsPaidLeave"
                         class="form-select @error('IsPaidLeave') is-invalid @enderror" required>
                     <option value="" disabled selected>Select an option</option>
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
+                    <option value="1" {{ old('IsPaidLeave') === '1' ? 'selected' : '' }}>Yes</option>
+                    <option value="0" {{ old('IsPaidLeave') === '0' ? 'selected' : '' }}>No</option>
                 </select>
                 @error('IsPaidLeave')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -102,9 +102,9 @@
                 <select id="GenderApplicable" name="GenderApplicable"
                         class="form-select @error('GenderApplicable') is-invalid @enderror" required>
                     <option value="" disabled selected>Select an option</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Both">Both</option>
+                    <option value="Male" {{ old('GenderApplicable') === 'Male' ? 'selected' : '' }}>Male</option>
+                    <option value="Female" {{ old('GenderApplicable') === 'Female' ? 'selected' : '' }}>Female</option>
+                    <option value="Both" {{ old('GenderApplicable') === 'Both' ? 'selected' : '' }}>Both</option>
                 </select>
                 @error('GenderApplicable')
                     <div class="invalid-feedback">{{ $message }}</div>

@@ -4,39 +4,51 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Employee;
 
 class LeaveType extends Model
 {
     use HasFactory;
 
-    // Specify the primary key if it's not "id"
+    // Primary key configuration
     protected $primaryKey = 'LeaveTypeID';
-    public $incrementing = true; // or false if not auto-increment
-    protected $keyType = 'int'; // or 'string' if it's not int
+    public $incrementing = true;
+    protected $keyType = 'int';
 
-    // Fillable fields for mass assignment
+    // Mass assignable fields
     protected $fillable = [
         'LeaveTypeName',
         'IsPaidLeave',
         'GenderApplicable',
         'MaxLeaveDays',
         'MinServiceYears',
+        // Removed 'DeductsFromAnnual' to enforce logic via name
     ];
 
-    //Leave checks
-    public function isAnnualLeave()
+    // Type casting for boolean fields
+    protected $casts = [
+        'IsPaidLeave' => 'boolean',
+        // Removed 'DeductsFromAnnual' cast
+    ];
+
+    // Convenience methods
+    public function isAnnualLeave(): bool
     {
         return $this->LeaveTypeName === 'Annual Leave';
     }
 
-    public function isPartenityLeave()
+    public function isPaternityLeave(): bool
     {
-        return $this->LeaveTypeName === 'Partenity Leave';
+        return $this->LeaveTypeName === 'Paternity Leave';
     }
 
-    public function isSickLeave()
+    public function isSickLeave(): bool
     {
         return $this->LeaveTypeName === 'Sick Leave';
+    }
+
+    // ✅ Centralized deduction logic
+    public function deductsFromAnnual(): bool
+    {
+        return $this->isAnnualLeave();
     }
 }

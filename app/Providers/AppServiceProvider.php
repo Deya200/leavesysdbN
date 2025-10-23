@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Pagination\Paginator; // ✅ Import this
 use App\Models\Employee;
 use App\Models\Supervisor;
 
@@ -16,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // ✅ Force Bootstrap pagination
+        Paginator::useBootstrap();
+
         // Bind the {employee} parameter to the Employee model.
         Route::model('employee', Employee::class);
 

@@ -170,4 +170,22 @@ class Employee extends Authenticatable
     {
         return $this->roles->pluck('name')->implode(', ');
     }
+
+        public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'id');
+    }
+
+    // ✅ Check if employee has any role
+    public function hasRole(string $roleName): bool
+    {
+        return $this->role && strtolower($this->role->name) === strtolower($roleName);
+    }
+
+    // ✅ Check if employee is admin
+   // public function isAdmin(): bool
+    //{
+    //    return $this->hasRole('admin');
+    //}
+
 }

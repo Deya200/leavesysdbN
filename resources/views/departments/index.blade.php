@@ -4,96 +4,156 @@
 
 @section('styles')
 <style>
+    /* Main Container */
     .departments-container {
         max-width: 1200px;
         margin: auto;
         padding: 20px;
     }
-    .btn-edit {
-    background-color: #2E3A87;
-    color: white;
-    font-size: 0.8rem;
-    padding: 6px 12px;
-    border-radius: 4px;
-    border: none;
-}
-.btn-edit:hover {
-    background-color:rgb(31, 117, 53);
-    color: white;
-}
 
-
+    /* Cards */
     .card-custom {
         background-color: #ffffff;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         padding: 20px;
+        transition: box-shadow 0.3s ease;
     }
 
+    /* Header Card */
+    .card-custom[style*="background-color: #2E3A87"] {
+        background: linear-gradient(135deg, #2E3A87 0%, #6a1b9a 100%);
+    }
+    
+    .card-custom[style*="background-color: #2E3A87"]:hover {
+        box-shadow: 0 4px 20px rgba(46, 58, 135, 0.3);
+    }
+
+    /* Table Styling */
     .table {
         background-color: #ffffff;
         border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         overflow: hidden;
-        box-shadow: 0 4px 6px rgba(68, 9, 219, 0.1);
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
-    .table thead {
-        background-color: #2E3A87;
-        color: #ffffff;
+    /* Table Header - Purple */
+    .table thead tr {
+        background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+        color: white;
+        font-weight: 500;
     }
 
+    /* Table Body */
     .table tbody tr {
         background-color: #ffffff;
         color: #000000;
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
     .table th, .table td {
         padding: 12px;
-        text-align: center;
         vertical-align: middle;
+        text-align: center;
         border: none;
     }
 
-    .table tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.03);
+    /* Zebra Striping for Better Readability */
+    .table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
     }
 
+    /* Buttons */
     .btn-sm {
         font-size: 0.8rem;
+        transition: all 0.2s ease;
+        padding: 0.35rem 0.75rem;
     }
 
-    .form-control {
-        font-size: 0.9rem;
+    .btn[style*="background-color: #2E3A87"] {
+        background-color: #6a1b9a;
+        border-color: #6a1b9a;
+    }
+    
+    .btn[style*="background-color: #2E3A87"]:hover {
+        background-color: #4a148c !important;
+        transform: scale(1.03);
+    }
+
+    .btn-danger:hover {
+        background-color: #c62828 !important;
+        transform: scale(1.03);
+    }
+
+    /* Search Bar */
+    .input-group-text {
+        transition: all 0.3s ease;
+    }
+
+    .input-group-text:hover {
+        background-color: #f1f3ff !important;
+    }
+
+    /* Pagination Styling */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #6a1b9a;
+        border-color: #6a1b9a;
+    }
+    
+    .page-link {
+        color: #6a1b9a;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 0.75rem;
+        margin: 0 2px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .page-link:hover {
+        color: #4a148c;
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+    
+    .page-item.disabled .page-link {
+        color: #6c757d;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .table-responsive {
+            border-radius: 8px;
+        }
+        
+        .table th, .table td {
+            padding: 8px;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
     }
 </style>
 @endsection
 
 @section('content')
 <div class="departments-container">
-
-    <!-- Welcome Section -->
-    <div class="card-custom text-center mb-4" style="background-color: #2E3A87; color: white;">
-        <h4 class="fw-bold mb-1">Welcome, {{ auth()->user()->FirstName ?? 'Admin' }}!</h4>
-        <p class="mb-2">Here you can view, edit, and manage all departments and their supervisors.</p>
-    </div>
-
-   <!-- Search Bar & Add Button Row -->
-<div class="row mb-4" style="max-width: 800px; margin: 0 auto;">
-    <div class="col-12 d-flex align-items-center gap-2">
-        <div class="flex-grow-1">
-            <input 
-                type="text"
-                id="departmentSearch"
-                class="form-control"
-                placeholder="Search by Department or Supervisor"
-            >
-        </div>
-        <a href="{{ route('departments.create') }}" class="btn btn-success flex-shrink-0">
-            Add New Department
-        </a>
-    </div>
-</div>
-
     <!-- Flash Messages -->
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -102,50 +162,96 @@
         </div>
     @endif
 
-   
+    <!-- Page Header with Search and Add Button -->
+    <div class="card-custom mb-4 p-3">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+            <!-- Title -->
+            <h5 class="mb-3 mb-md-0" style="font-weight: 600; color: #2E3A87;">Department List</h5>
+            
+            <!-- Search and Add Button Container -->
+            <div class="d-flex flex-column flex-md-row gap-3">
+                <!-- Search Bar -->
+                <div class="flex-grow-1" style="min-width: 250px;">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            id="departmentSearch" 
+                            class="form-control" 
+                            placeholder="Search by Department or Supervisor..."
+                        >
+                        <button class="btn btn-outline-secondary input-group-text" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Add New Department Button -->
+                <a href="{{ route('departments.create') }}" 
+                   class="btn btn-primary" 
+                   style="background-color: #6a1b9a; border-color: #6a1b9a; white-space: nowrap;">
+                    <i class="fas fa-plus me-1"></i> Add Department
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Departments Table -->
     <div class="card-custom">
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Department Name</th>
-                        <th>Supervisor</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($departments as $department)
-                        <tr class="department-row">
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $department->DepartmentName }}</td>
-                            <td>
-                                @if ($department->SupervisorID)
-                                    {{ $department->supervisor->FirstName ?? 'N/A' }} {{ $department->supervisor->LastName ?? '' }}
-                                @else
-                                    Not Assigned
-                                @endif
-                            </td>
-                            <td>
-                                <div class="d-flex gap-2 justify-content-center">
-                                    <a href="{{ route('departments.edit', $department->DepartmentID) }}" class="btn btn-success">Edit</a>
-                                    <form action="{{ route('departments.destroy', $department->DepartmentID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this department?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
+        @if ($departments->isNotEmpty())
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead>
                         <tr>
-                            <td colspan="4" class="text-center">No departments found.</td>
+                            <th>#</th>
+                            <th>Department Name</th>
+                            <th>Supervisor</th>
+                            <th>Actions</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach ($departments as $department)
+                            <tr class="department-row">
+                                <td>{{ ($departments->currentPage() - 1) * $departments->perPage() + $loop->iteration }}</td>
+                                <td>{{ $department->DepartmentName }}</td>
+                                <td>
+                                    @if ($department->SupervisorID)
+                                        {{ $department->supervisor->FirstName ?? 'N/A' }} {{ $department->supervisor->LastName ?? '' }}
+                                    @else
+                                        Not Assigned
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a href="{{ route('departments.edit', $department->DepartmentID) }}" 
+                                           class="btn btn-sm" 
+                                           style="background-color: #2E3A87; color: white;">
+                                           <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('departments.destroy', $department->DepartmentID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this department?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-4">
+                    {{ $departments->onEachSide(1)->links() }}
+                </div>
+            </div>
+        @else
+            <div class="alert alert-info text-center m-0">
+                No departments found. Use the "Add New Department" button to create one.
+            </div>
+        @endif
     </div>
 </div>
 @endsection
@@ -153,26 +259,16 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Search/Filter Feature
     const searchInput = document.getElementById('departmentSearch');
     const departmentRows = document.querySelectorAll('.department-row');
 
     if (searchInput && departmentRows.length > 0) {
         searchInput.addEventListener('input', function () {
             const searchTerm = this.value.trim().toLowerCase();
-
             departmentRows.forEach(row => {
-                // Get department name and supervisor name from columns
-                const departmentName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                const supervisorName = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-
-                if (
-                    departmentName.includes(searchTerm) ||
-                    supervisorName.includes(searchTerm)
-                ) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? 'table-row' : 'none';
             });
         });
     }

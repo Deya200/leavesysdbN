@@ -21,29 +21,31 @@
                     </li>
                     <!-- Employees Dropdown -->
                     <li class="nav-item">
-                        <a class="nav-link text-white d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#offcanvasEmployees" role="button" aria-expanded="false" aria-controls="offcanvasEmployees">
+                        <a class="nav-link text-white d-flex align-items-center gap-2"
+                           href="{{ route('employees.index') }}">
                             <i class="fas fa-users"></i> Employees
-                            <i class="fas fa-chevron-down ms-auto"></i>
                         </a>
-                        <div class="collapse ps-4" id="offcanvasEmployees">
+                    
+                        <!--<div class="collapse ps-4" id="offcanvasEmployees">
                             <ul class="nav flex-column">
                                 <li><a class="nav-link text-white-50" href="{{ route('employees.index') }}"><i class="fas fa-eye"></i> View Employees</a></li>
                                 <li><a class="nav-link text-white-50" href="{{ route('employees.create') }}"><i class="fas fa-plus"></i> Add Employee</a></li>
                             </ul>
-                        </div>
+                        </div> -->
                     </li>
+
                     <!-- Departments Dropdown -->
                     <li class="nav-item">
-                        <a class="nav-link text-white d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#offcanvasDepartments" role="button" aria-expanded="false" aria-controls="offcanvasDepartments">
-                            <i class="fas fa-building"></i> Departments
-                            <i class="fas fa-chevron-down ms-auto"></i>
+                        <a class="nav-link text-white d-flex align-items-center gap-2"
+                           href="{{ route('departments.index') }}">
+                            <i class="fas fa-users"></i> Departments
                         </a>
-                        <div class="collapse ps-4" id="offcanvasDepartments">
+                        <!--div class="collapse ps-4" id="offcanvasDepartments">
                             <ul class="nav flex-column">
                                 <li><a class="nav-link text-white-50" href="{{ route('departments.index') }}"><i class="fas fa-eye"></i> View Departments</a></li>
                                 <li><a class="nav-link text-white-50" href="{{ route('departments.create') }}"><i class="fas fa-plus"></i> Add Department</a></li>
                             </ul>
-                        </div>
+                        </div-->
                     </li>
                     <!-- Positions Dropdown -->
                     <li class="nav-item">

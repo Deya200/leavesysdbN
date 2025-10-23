@@ -228,3 +228,6 @@ Route::get('/employee-gender/{employeeNumber}', [EmployeeController::class, 'get
 
     //Modifications
 Route::get('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestController::class, 'showAdminRejectForm'])->name('leave_requests.admin.reject.form');
+use App\Http\Controllers\ReportController;
+
+Route::get('/leave-report-pdf', [ReportController::class, 'generatePDF'])->name('leave.report.pdf');

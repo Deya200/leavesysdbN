@@ -37,7 +37,7 @@
 
     .table thead {
         background-color: rgb(235, 236, 240);
-        color: #2E3A87;
+        color: #d4d6ddff;
     }
 
     .table th,
@@ -136,108 +136,111 @@
         </div>
     </div>
 
-    <!-- Leave Requests Table -->
-    <div class="card card-custom mb-4">
-        <h5 class="fw-bold text-center mt-3">Leave Requests</h5>
+   <!-- Leave Requests Table -->
+<div class="card card-custom mb-4">
+    <h5 class="fw-bold text-center mt-3">Leave Requests</h5>
+    <div class="table-responsive p-3">
+        <table class="table table-bordered align-middle" id="leaveRequestsTable">
+            <thead>
+                <tr>
+                    <th>#1</th>
+                    <th>Employee</th>
+                    <th>Leave Type</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Days</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($leaveRequests as $index => $request)
+                    <tr class="hover-up {{ $index >= 5 ? 'hidden-row' : '' }}">
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</td>
+                        <td>{{ $request->leaveType->LeaveTypeName }}</td>
+                        <td>{{ $request->StartDate }}</td>
+                        <td>{{ $request->EndDate }}</td>
+                        <td>{{ $request->TotalDays }}</td>
+                        <td>{{ $request->Reason }}</td>
+                        <td>
+                            <span class="badge text-dark bg-light border">{{ ucfirst($request->RequestStatus) }}</span>
+                        </td>
+                        <td>
+                            @if ($request->RequestStatus === 'Pending Supervisor Approval')
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <form action="{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                    </form>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
+                                </div>
+                                <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none;" class="mt-2">
+                                    <form action="{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}" method="POST">
+                                        @csrf
+                                        <textarea name="RejectionReason" class="form-control form-control-sm mb-1" placeholder="Enter reason" required></textarea>
+                                        <button type="submit" class="btn btn-danger btn-sm w-100">Confirm Rejection</button>
+                                    </form>
+                                </div>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <!-- PDF Report Button -->
+        <div class="text-center mt-3">
+            <a href="{{ route('leave.report.pdf') }}" class="btn btn-outline-secondary shadow-sm btn-sm">
+                📄 Download Leave Report (PDF)
+            </a>
+        </div>
+
+        <div class="text-center mt-3">
+            <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveToggleButton">See More</button>
+            <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveLessButton" style="display: none;">See Less</button>
+        </div>
+    </div>
+</div>
+
+<!-- Employees Under Supervision -->
+<div class="card card-custom">
+    <h5 class="fw-bold text-center mt-3">Employees You Supervise</h5>
+    @if ($employeesUnderSupervisor->count() > 0)
         <div class="table-responsive p-3">
-            <table class="table table-bordered align-middle" id="leaveRequestsTable">
+            <table class="table table-bordered align-middle text-dark bg-white" id="employeeTable">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Employee</th>
-                        <th>Leave Type</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Days</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>Employee No.</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Annual Leave</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($leaveRequests as $index => $request)
+                    @foreach ($employeesUnderSupervisor as $index => $employee)
                         <tr class="hover-up {{ $index >= 5 ? 'hidden-row' : '' }}">
                             <td>{{ $index + 1 }}</td>
-                            <td>{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</td>
-                            <td>{{ $request->leaveType->LeaveTypeName }}</td>
-                            <td>{{ $request->StartDate }}</td>
-                            <td>{{ $request->EndDate }}</td>
-                            <td>{{ $request->TotalDays }}</td>
-                            <td>{{ $request->Reason }}</td>
-                            <td>
-                                @php
-                                    $status = $request->RequestStatus;
-                                    $badgeClass = $status === 'Approved' ? 'badge-approved'
-                                        : ($status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
-                                @endphp
-                                <span class="badge {{ $badgeClass }}">{{ ucfirst($status) }}</span>
-                            </td>
-                            <td>
-                                @if ($status === 'Pending Supervisor Approval')
-                                    <div class="d-flex gap-2 justify-content-center">
-                                        <form action="{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                                        </form>
-                                        <button type="button" class="btn btn-danger btn-sm" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
-                                    </div>
-                                    <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none;" class="mt-2">
-                                        <form action="{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}" method="POST">
-                                            @csrf
-                                            <textarea name="RejectionReason" class="form-control form-control-sm mb-1" placeholder="Enter reason" required></textarea>
-                                            <button type="submit" class="btn btn-danger btn-sm w-100">Confirm Rejection</button>
-                                        </form>
-                                    </div>
-                                @endif
-                            </td>
+                            <td>{{ $employee->EmployeeNumber }}</td>
+                            <td>{{ $employee->FirstName }} {{ $employee->LastName }}</td>
+                            <td>{{ $employee->department->DepartmentName ?? 'N/A' }}</td>
+                            <td>{{ $employee->position->PositionName ?? 'N/A' }}</td>
+                            <td>{{ optional($employee->grade)->AnnualLeaveDays ?? 'N/A' }}</td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
             <div class="text-center mt-3">
-                <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveToggleButton">See More</button>
-                <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveLessButton" style="display: none;">See Less</button>
+                <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleButton">See More</button>
+                <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleLessButton" style="display: none;">See Less</button>
             </div>
         </div>
-    </div>
+    @endif
+</div>
 
-    <!-- Employees Under Supervision -->
-    <div class="card card-custom">
-        <h5 class="fw-bold text-center mt-3">Employees You Supervise</h5>
-        @if ($employeesUnderSupervisor->count() > 0)
-            <div class="table-responsive p-3">
-                <table class="table table-bordered align-middle" id="employeeTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Employee No.</th>
-                            <th>Name</th>
-                            <th>Department</th>
-                            <th>Position</th>
-                            <th>Annual Leave</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($employeesUnderSupervisor as $index => $employee)
-                            <tr class="hover-up {{ $index >= 5 ? 'hidden-row' : '' }}">
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $employee->EmployeeNumber }}</td>
-                                <td>{{ $employee->FirstName }} {{ $employee->LastName }}</td>
-                                <td>{{ $employee->department->DepartmentName ?? 'N/A' }}</td>
-                                <td>{{ $employee->position->PositionName ?? 'N/A' }}</td>
-                                <td>{{ optional($employee->grade)->AnnualLeaveDays ?? 'N/A' }}</td
-                                
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                <div class="text-center mt-3">
-                    <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleButton">See More</button>
-                    <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleLessButton" style="display: none;">See Less</button>
-                </div>
-            </div>
-        @endif
-    </div>
 </div>
 @endsection
 

@@ -146,10 +146,16 @@
                     </tbody>
                 </table>
             </div>
+            <div class="text-center mt-3">
+            <a href="{{ route('leave.report.pdf') }}" class="btn btn-outline-secondary shadow-sm btn-sm">
+                📄 Download Leave Report (PDF)
+            </a>
+        </div>
         @else
             <div class="alert alert-info text-center m-0">
                 <h5>No leave requests pending admin verification.</h5>
             </div>
+            
         @endif
     </div>
 </div>

@@ -143,7 +143,7 @@
         <table class="table table-bordered align-middle" id="leaveRequestsTable">
             <thead>
                 <tr>
-                    <th>#1</th>
+                    <th>#</th>
                     <th>Employee</th>
                     <th>Leave Type</th>
                     <th>Start</th>

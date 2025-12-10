@@ -26,7 +26,9 @@ return new class extends Migration
         $table->foreign('LeaveTypeID')->references('LeaveTypeID')->on('leave_types')->onDelete('cascade');
         $table->timestamps();
         $table->unsignedBigInteger('SupervisorID')->nullable(false)->change();
-        
+        $table->text('SupervisorRejectionReason')->nullable();
+        $table->text('AdminRejectionReason')->nullable();
+
     });
 }
 

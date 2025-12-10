@@ -4,9 +4,12 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Pagination\Paginator; // ✅ Import this
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\Paginator;
 use App\Models\Employee;
 use App\Models\Supervisor;
+use App\Models\LeaveRequest;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +28,21 @@ class AppServiceProvider extends ServiceProvider
 
         // Bind the {supervisor} parameter to the Supervisor model.
         Route::model('supervisor', Supervisor::class);
+
+        // ✅ Share leaveRequests with all views for supervisors
+        View::composer('*', function ($view) {
+            if (Auth::check() && Auth::user()->role_id === 2) {
+                $leaveRequests = LeaveRequest::with('employee')
+                    ->whereIn('RequestStatus', [
+                        'Pending',
+                        'Pending Supervisor Approval',
+                        'Pending Admin Approval'
+                    ])
+                    ->get();
+
+                $view->with('leaveRequests', $leaveRequests);
+            }
+        });
     }
 
     /**

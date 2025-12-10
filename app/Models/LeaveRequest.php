@@ -28,6 +28,8 @@ class LeaveRequest extends Model
         'AdminApproval', // Changed HRApproval to AdminApproval for clarity.
         'RejectionReason',
         'Reason',
+        'SupervisorRejectionReason',
+        'AdminRejectionReason',
     ];
 
     /**

@@ -4,152 +4,154 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
 {
     /**
      * Display a listing of departments.
-     *
-     * @return \Illuminate\View\View
      */
     public function index()
     {
-        $departments = Department::all();
+        $departments = Department::with('supervisor')->get();
         return view('departments.index', compact('departments'));
     }
 
     /**
      * Show the form for creating a new department.
-     *
-     * @return \Illuminate\View\View
      */
     public function create()
     {
-        $employees = Employee::all(); // Fetch all employees for supervisor dropdown
-        return view('departments.create', compact('employees'));
+        // For new department creation, allow admin to pick from all supervisors
+        $supervisors = Employee::whereHas('role', function ($q) {
+            $q->where('name', 'Supervisor');
+        })->get();
+
+        return view('departments.create', compact('supervisors'));
     }
 
     /**
-     * Store a newly created department in the database.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Store a newly created department.
      */
     public function store(Request $request)
     {
-        // Validate the request data
         $validated = $request->validate([
             'DepartmentName' => 'required|string|max:255',
-            'SupervisorID' => 'nullable|exists:employees,EmployeeNumber', // Ensure SupervisorID exists in employees table
+            'SupervisorID'   => 'nullable|exists:employees,EmployeeNumber',
         ]);
 
-        // Create the department record
-        Department::create($validated);
+        $department = Department::create($validated);
 
-        session()->flash('success', 'Department created successfully!');
-        return redirect()->route('departments.index');
+        // Cascade supervisor assignment if provided
+        if (!empty($validated['SupervisorID'])) {
+            Employee::where('DepartmentID', $department->DepartmentID)
+                ->where('EmployeeNumber', '!=', $validated['SupervisorID'])
+                ->update(['SupervisorID' => $validated['SupervisorID']]);
+
+            // 🔑 Update corresponding user record
+            $supervisor = Employee::where('EmployeeNumber', $validated['SupervisorID'])->first();
+            if ($supervisor && $supervisor->user) {
+                $supervisor->user->role_id = 2; // Supervisor role
+                $supervisor->user->save();
+            }
+        }
+
+        return redirect()->route('departments.index')->with('success', 'Department created successfully!');
     }
 
     /**
      * Show the form for editing an existing department.
-     *
-     * @param string $DepartmentID
-     * @return \Illuminate\View\View
      */
     public function edit($DepartmentID)
     {
-        $department = Department::findOrFail($DepartmentID); // Find department by ID
-        $employees = Employee::all(); // Fetch all employees for supervisor dropdown
+        $department = Department::findOrFail($DepartmentID);
 
-        return view('departments.edit', compact('department', 'employees'));
+        // Only supervisors in this department
+        $supervisors = Employee::where('DepartmentID', $department->DepartmentID)
+            ->whereHas('role', function ($q) {
+                $q->where('name', 'Supervisor');
+            })
+            ->get();
+
+        return view('departments.edit', compact('department', 'supervisors'));
     }
 
     /**
-     * Update an existing department in the database.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param string $DepartmentID
-     * @return \Illuminate\Http\RedirectResponse
+     * Update an existing department.
      */
     public function update(Request $request, $DepartmentID)
     {
-        // Validate the request data
         $validated = $request->validate([
             'DepartmentName' => 'required|string|max:255',
-            'SupervisorID' => 'nullable|exists:employees,EmployeeNumber', // Ensure SupervisorID is valid
+            'SupervisorID'   => 'nullable|exists:employees,EmployeeNumber',
         ]);
 
-        // Find the department and update details
         $department = Department::findOrFail($DepartmentID);
         $department->update($validated);
 
-        session()->flash('success', 'Department updated successfully!');
-        return redirect()->route('departments.index');
+        // Cascade supervisor assignment if provided
+        if (!empty($validated['SupervisorID'])) {
+            Employee::where('DepartmentID', $DepartmentID)
+                ->where('EmployeeNumber', '!=', $validated['SupervisorID'])
+                ->update(['SupervisorID' => $validated['SupervisorID']]);
+
+            // 🔑 Update corresponding user record
+            $supervisor = Employee::where('EmployeeNumber', $validated['SupervisorID'])->first();
+            if ($supervisor && $supervisor->user) {
+                $supervisor->user->role_id = 2; // Supervisor role
+                $supervisor->user->save();
+            }
+        }
+
+        return redirect()->route('departments.index')->with('success', 'Department updated successfully!');
     }
 
     /**
-     * Remove a department from the database.
-     *
-     * @param string $DepartmentID
-     * @return \Illuminate\Http\RedirectResponse
+     * Remove a department.
      */
     public function destroy($DepartmentID)
     {
-        $department = Department::findOrFail($DepartmentID); // Find department by ID
-        $department->delete();
-
-        session()->flash('success', 'Department deleted successfully!');
-        return redirect()->route('departments.index');
+        Department::findOrFail($DepartmentID)->delete();
+        return redirect()->route('departments.index')->with('success', 'Department deleted successfully!');
     }
 
     /**
-     * Fetch employees by department ID for filtering.
-     *
-     * @param string $DepartmentID
-     * @return \Illuminate\Http\JsonResponse
+     * Fetch employees by department ID.
      */
     public function getEmployeesByDepartment($DepartmentID)
     {
         $employees = Employee::where('DepartmentID', $DepartmentID)
-            ->get(['EmployeeNumber', 'FirstName', 'LastName']); // Fetch employees by department
+            ->get(['EmployeeNumber', 'FirstName', 'LastName']);
 
-        return response()->json($employees); // Return as JSON for frontend use
+        return response()->json($employees);
     }
-    
+
     /**
-     * Assign a supervisor to the department and update all employees in that department.
-     *
-     * This method:
-     * - Validates that the provided SupervisorID exists.
-     * - Updates the department's SupervisorID.
-     * - Iterates over all employees in the department and updates their SupervisorID.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param string $DepartmentID
-     * @return \Illuminate\Http\RedirectResponse
+     * Assign a supervisor to the department and cascade to employees.
      */
     public function assignSupervisorToDepartmentEmployees(Request $request, $DepartmentID)
     {
         $validated = $request->validate([
             'SupervisorID' => 'required|exists:employees,EmployeeNumber',
         ]);
-        
-        // Find the department and update its SupervisorID.
+
         $department = Department::findOrFail($DepartmentID);
         $department->SupervisorID = $validated['SupervisorID'];
         $department->save();
 
-        // Update each employee in the department with the new supervisor.
-        $employees = Employee::where('DepartmentID', $DepartmentID)->get();
+        // Bulk update employees in this department, excluding the supervisor themself
+        Employee::where('DepartmentID', $DepartmentID)
+            ->where('EmployeeNumber', '!=', $validated['SupervisorID'])
+            ->update(['SupervisorID' => $validated['SupervisorID']]);
 
-        foreach ($employees as $employee) {
-            // Assuming employees table has a SupervisorID field.
-            $employee->SupervisorID = $validated['SupervisorID'];
-            $employee->save();
+        // 🔑 Update corresponding user record
+        $supervisor = Employee::where('EmployeeNumber', $validated['SupervisorID'])->first();
+        if ($supervisor && $supervisor->user) {
+            $supervisor->user->role_id = 2; // Supervisor role
+            $supervisor->user->save();
         }
 
-        session()->flash('success', 'Supervisor assigned to department and all its employees successfully!');
-        return redirect()->route('departments.index');
+        return redirect()->route('departments.index')->with('success', 'Supervisor assigned to department and all its employees successfully!');
     }
 }

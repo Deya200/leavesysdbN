@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
 class Role extends Model
 {
@@ -14,27 +13,39 @@ class Role extends Model
     protected $primaryKey = 'id';
     public $timestamps = true;
 
-    // Only the name is fillable because our table only has 'name'
     protected $fillable = ['name'];
 
     /**
-     * Relationship: A role can have multiple users.
+     * Relationship: A role can have multiple employees.
      */
-    public function users()
+    public function employees()
     {
-        return $this->hasMany(User::class, 'role_id');
+        return $this->hasMany(Employee::class, 'role_id', 'id');
     }
 
     /**
-     * Run the role initialization.
-     *
-     * You can call this method (for example, in your AppServiceProvider's boot method)
-     * to automatically create basic roles if they don't exist.
+     * Initialize default roles if they don't exist.
      */
     public static function run()
     {
         self::firstOrCreate(['name' => 'Admin']);
         self::firstOrCreate(['name' => 'Supervisor']);
         self::firstOrCreate(['name' => 'Employee']);
+    }
+
+    /**
+     * Helper: Check if this role is Supervisor.
+     */
+    public function isSupervisor(): bool
+    {
+        return strtolower($this->name) === 'supervisor';
+    }
+
+    /**
+     * Helper: Check if this role is Admin.
+     */
+    public function isAdmin(): bool
+    {
+        return strtolower($this->name) === 'admin';
     }
 }

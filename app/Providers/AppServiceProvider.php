@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\Paginator;
 use App\Models\Employee;
-use App\Models\Supervisor;
 use App\Models\LeaveRequest;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,21 +25,25 @@ class AppServiceProvider extends ServiceProvider
         // Bind the {employee} parameter to the Employee model.
         Route::model('employee', Employee::class);
 
-        // Bind the {supervisor} parameter to the Supervisor model.
-        Route::model('supervisor', Supervisor::class);
+        // Supervisors are just employees with the Supervisor role
+        Route::model('supervisor', Employee::class);
 
         // ✅ Share leaveRequests with all views for supervisors
         View::composer('*', function ($view) {
-            if (Auth::check() && Auth::user()->role_id === 2) {
-                $leaveRequests = LeaveRequest::with('employee')
-                    ->whereIn('RequestStatus', [
-                        'Pending',
-                        'Pending Supervisor Approval',
-                        'Pending Admin Approval'
-                    ])
-                    ->get();
+            if (Auth::check() && Auth::user() instanceof Employee) {
+                $user = Auth::user();
 
-                $view->with('leaveRequests', $leaveRequests);
+                if ($user->hasRole('Supervisor')) {
+                    $leaveRequests = LeaveRequest::with('employee')
+                        ->whereIn('RequestStatus', [
+                            'Pending',
+                            'Pending Supervisor Approval',
+                            'Pending Admin Approval'
+                        ])
+                        ->get();
+
+                    $view->with('leaveRequests', $leaveRequests);
+                }
             }
         });
     }

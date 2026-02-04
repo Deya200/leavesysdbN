@@ -25,8 +25,8 @@ class User extends Authenticatable
         'EmployeeNumber',
         'role_id',
         'profile_photo',
-        'DepartmentID',
         'SupervisorID',
+        'active',
     ];
 
     protected $hidden = [
@@ -34,7 +34,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /** ✅ Relationships **/
+    protected $casts = [
+        'active' => 'boolean',
+    ];
+
+    /** 🔗 Relationships **/
 
     // Role
     public function role()
@@ -42,10 +46,23 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    // Employee
+    // Employee record linked to this user
     public function employee()
     {
         return $this->hasOne(Employee::class, 'EmployeeNumber', 'EmployeeNumber');
+    }
+
+    // Department (via Employee)
+    public function department()
+    {
+        return $this->hasOneThrough(
+            Department::class,
+            Employee::class,
+            'EmployeeNumber',   // Foreign key on employees table
+            'DepartmentID',     // Foreign key on departments table
+            'EmployeeNumber',   // Local key on users table
+            'DepartmentID'      // Local key on employees table
+        );
     }
 
     // Grade (via Employee)
@@ -67,19 +84,13 @@ class User extends Authenticatable
         return $this->hasMany(LeaveRequest::class, 'EmployeeNumber', 'EmployeeNumber');
     }
 
-    // Department
-    public function department()
-    {
-        return $this->belongsTo(Department::class, 'DepartmentID');
-    }
-
-    // Supervisor
+    // Supervisor (User belongs to another User as supervisor)
     public function supervisor()
     {
-        return $this->belongsTo(User::class, 'SupervisorID');
+        return $this->belongsTo(User::class, 'SupervisorID', 'EmployeeNumber');
     }
 
-    /** ✅ Role Checks **/
+    /** 🔧 Role Checks **/
 
     public function isAdmin()
     {
@@ -97,7 +108,7 @@ class User extends Authenticatable
         return $this->role_id === 3;
     }
 
-    /** ✅ Accessors **/
+    /** 🔧 Accessors **/
 
     public function getFirstNameAttribute()
     {
@@ -115,5 +126,10 @@ class User extends Authenticatable
             return asset($this->profile_photo);
         }
         return asset('images/default-avatar.png');
+    }
+
+    public function getDepartmentNameAttribute()
+    {
+        return optional($this->department)->DepartmentName ?? 'Unassigned';
     }
 }

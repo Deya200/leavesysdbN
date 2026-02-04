@@ -6,11 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
+use App\Models\User;
+use App\Models\Department;
+use App\Models\LeaveRequest;
+use App\Models\Notification;
+use App\Models\Grade;
+use App\Models\Position;
+use App\Models\Role;
 
 class Employee extends Authenticatable
 {
-    use HasFactory; // Added HasRoles for role-based access
+    use HasFactory;
 
     protected $table = 'employees';
     protected $primaryKey = 'EmployeeNumber';
@@ -36,7 +42,7 @@ class Employee extends Authenticatable
         'email',
         'password',
         'role_id',
-        'RemainingAnnualLeaveDays', // Added to allow persistent tracking and updates.
+        'RemainingAnnualLeaveDays',
     ];
 
     protected $hidden = [
@@ -46,80 +52,70 @@ class Employee extends Authenticatable
 
     protected $casts = [
         'EmployeeNumber' => 'string',
-        'SupervisorID' => 'string',
-        'RemainingAnnualLeaveDays' => 'integer', // Cast to integer
+        'SupervisorID'   => 'string',
+        'RemainingAnnualLeaveDays' => 'integer',
     ];
 
+    /** 🔗 Relationships **/
 
-
-    /**
-     * Relationship: Employee's Department
-     * @return BelongsTo
-     */
+    // Employee belongs to a Department
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, 'DepartmentID', 'DepartmentID'); // Use correct FK reference
+        return $this->belongsTo(Department::class, 'DepartmentID', 'DepartmentID');
     }
 
-    /**
-     * Relationship: Employee's Supervisor
-     * @return BelongsTo
-     */
+    // Employee belongs to a Supervisor (another Employee)
     public function supervisor(): BelongsTo
     {
-        return $this->belongsTo(self::class, 'SupervisorID', 'EmployeeNumber');
+        return $this->belongsTo(self::class, 'SupervisorID', 'EmployeeNumber')
+                    ->with('user'); // ✅ eager-load supervisor's User account
     }
 
-    /**
-     * Relationship: Employees supervised by this employee.
-     * @return HasMany
-     */
+    // Employee can have many subordinates
     public function subordinates(): HasMany
     {
         return $this->hasMany(self::class, 'SupervisorID', 'EmployeeNumber');
     }
 
-    /**
-     * Relationship: Leave Requests Submitted by the Employee.
-     * @return HasMany
-     */
+    // Leave Requests
     public function leaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class, 'EmployeeNumber', 'EmployeeNumber');
     }
 
-    /**
-     * Relationship: Notifications for the Employee.
-     * @return HasMany
-     */
+    // Notifications
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class, 'EmployeeNumber', 'EmployeeNumber');
     }
 
-    /**
-     * Relationship: Employee's Grade.
-     * @return BelongsTo
-     */
+    // Grade
     public function grade(): BelongsTo
     {
         return $this->belongsTo(Grade::class, 'GradeID', 'GradeID');
     }
 
-    /**
-     * Relationship: Employee's Position
-     * @return BelongsTo
-     */
+    // Position
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class, 'PositionID', 'PositionID');
     }
 
-    /**
-     * Get the Employee's computed leave days remaining.
-     * (This is a computed accessor if you want to show the theoretical remaining days based on the grade.)
-     * @return int
-     */
+    // Role
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'id');
+    }
+
+    // Link to User account
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'EmployeeNumber', 'EmployeeNumber');
+    }
+
+    /** 🔧 Helpers **/
+
+    // Remaining leave days
     public function getLeaveDaysRemainingAttribute(): int
     {
         $totalLeaveDays = optional($this->grade)->AnnualLeaveDays ?? 0;
@@ -130,62 +126,28 @@ class Employee extends Authenticatable
         return max(0, $totalLeaveDays - $usedLeaveDays);
     }
 
-    /**
-     * Check if Employee is a Supervisor.
-     * @return bool
-     */
-    public function isSupervisor(): bool
-    {
-        return $this->subordinates()->exists();
-    }
-
-    /**
-     * Check if Employee is an Admin.
-     * @return bool
-     */
-    public function isAdmin(): bool
-    {
-        return $this->hasRole('Admin'); // Uses Spatie's role-checking method
-    }
-    
-    /**
-     * Ensure that the employee has at least one role.
-     * If no role is assigned, assign the default 'Employee' role.
-     *
-     * @return void
-     */
-    public function ensureDefaultRole(): void
-    {
-        if ($this->roles()->count() === 0) {
-            $this->assignRole('Employee');
-        }
-    }
-    
-    /**
-     * Accessor to get a comma-separated list of roles assigned to the employee.
-     *
-     * @return string
-     */
-    public function getRolesListAttribute(): string
-    {
-        return $this->roles->pluck('name')->implode(', ');
-    }
-
-        public function role(): BelongsTo
-    {
-        return $this->belongsTo(Role::class, 'role_id', 'id');
-    }
-
-    // ✅ Check if employee has any role
+    // Role checks
     public function hasRole(string $roleName): bool
     {
         return $this->role && strtolower($this->role->name) === strtolower($roleName);
     }
 
-    // ✅ Check if employee is admin
-   // public function isAdmin(): bool
-    //{
-    //    return $this->hasRole('admin');
-    //}
+    public function isSupervisor(): bool
+    {
+        return $this->hasRole('Supervisor');
+    }
 
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('Admin');
+    }
+
+    /** 🔧 Cascade Helper **/
+
+    // Update supervisor for all employees in the same department
+    public static function cascadeSupervisorUpdate(int $departmentId, string $newSupervisorId): void
+    {
+        self::where('DepartmentID', $departmentId)
+            ->update(['SupervisorID' => $newSupervisorId]);
+    }
 }

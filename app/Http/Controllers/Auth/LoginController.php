@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
@@ -18,17 +20,23 @@ class LoginController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user || !$user->role) {
-            return route('fallback.route');
+        // If user or role missing, try fallback route if defined, otherwise go to login
+        if (! $user || ! $user->role) {
+            if (Route::has('fallback.route')) {
+                return route('fallback.route');
+            }
+
+            Log::warning('Redirect target fallback.route not defined; redirecting to login.');
+            return route('login');
         }
 
         $roleName = strtolower(trim($user->role->name));
 
         return match ($roleName) {
-            'admin' => route('dashboard'),
-            'supervisor' => route('supervisor.index'),
-            'employee' => route('dashboards.employee'),
-           // default => route('employee.dashboard'),
+            'admin' => (Route::has('dashboard') ? route('dashboard') : route('login')),
+            'supervisor' => (Route::has('supervisor.index') ? route('supervisor.index') : route('login')),
+            'employee' => (Route::has('dashboards.employee') ? route('dashboards.employee') : route('login')),
+            default => route('login'),
         };
     }
 

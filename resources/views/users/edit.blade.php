@@ -27,9 +27,9 @@
                 <!-- Role Selection -->
                 <div class="mb-3">
                     <label class="form-label">Role</label>
-                    <select name="role" class="form-select" required>
+                    <select name="role_id" class="form-select" required>
                         @foreach(\App\Models\Role::all() as $role)
-                            <option value="{{ $role->name }}" {{ $user->role === $role->name ? 'selected' : '' }}>
+                            <option value="{{ $role->id }}" {{ $user->role_id == $role->id ? 'selected' : '' }}>
                                 {{ ucfirst($role->name) }}
                             </option>
                         @endforeach
@@ -45,15 +45,15 @@
                 <!-- Gender (Retrieved from Employees Table) -->
                 <div class="mb-3">
                     <label class="form-label">Gender</label>
-                    <input type="text" class="form-control" value="{{ optional($user->employee)->gender ?? 'Not Assigned' }}" readonly>
+                    <input type="text" class="form-control" value="{{ optional($user->employee)->Gender ?? 'Not Assigned' }}" readonly>
                 </div>
 
                 <!-- Account Status -->
                 <div class="mb-3">
                     <label class="form-label">Account Status</label>
-                    <select name="is_active" class="form-select">
-                        <option value="1" {{ $user->is_active ? 'selected' : '' }}>Active</option>
-                        <option value="0" {{ !$user->is_active ? 'selected' : '' }}>Disabled</option>
+                    <select name="active" class="form-select">
+                        <option value="1" {{ $user->active ? 'selected' : '' }}>Active</option>
+                        <option value="0" {{ !$user->active ? 'selected' : '' }}>Disabled</option>
                     </select>
                 </div>
 

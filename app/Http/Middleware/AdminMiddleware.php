@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Http\Models\User
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,9 +15,9 @@ class AdminMiddleware
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response)  $next
      * @return mixed
      */
-     public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-        // Check if the user is authenticated and has the 'employee' role
+        // Check if the user is authenticated and has the 'admin' role
         if (Auth::check() && Auth::user()->isAdmin()) {
             return $next($request); // Allow the request to proceed
         }

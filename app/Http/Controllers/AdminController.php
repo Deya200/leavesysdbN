@@ -8,15 +8,11 @@ use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\Role;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    // Optional middleware for admin-only access
-    // public function __construct()
-    // {
-    //     $this->middleware('admin');
-    // }
-
     /**
      * Admin dashboard overview.
      */
@@ -28,14 +24,20 @@ class AdminController extends Controller
         $totalEmployees = Employee::count();
         $totalLeaveRequests = LeaveRequest::count();
         $pendingLeaves = LeaveRequest::where('RequestStatus', 'Pending Admin Verification')->count();
+
+        // Leave requests for dashboard tab
         $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->latest()->get();
+
+        // Users for User Management tab
+        $users = User::with(['role', 'department', 'employee'])->get();
 
         return view('dashboards.admin', compact(
             'employee',
             'totalEmployees',
             'totalLeaveRequests',
             'pendingLeaves',
-            'leaveRequests'
+            'leaveRequests',
+            'users'
         ));
     }
 
@@ -69,7 +71,6 @@ class AdminController extends Controller
 
     /**
      * Reject a leave request with a reason.
-     * Standardized to use 'Rejected' as the status.
      */
     public function rejectLeave(Request $request, $leaveRequestId)
     {
@@ -84,7 +85,7 @@ class AdminController extends Controller
         }
 
         $leaveRequest->update([
-            'RequestStatus' => 'Rejected', // Standardized status
+            'RequestStatus' => 'Rejected',
             'AdminApproval' => false,
             'RejectionReason' => $request->RejectionReason,
         ]);
@@ -103,6 +104,8 @@ class AdminController extends Controller
 
     /**
      * Assign a role to an employee.
+     * If the role is Supervisor, automatically assign them as supervisor
+     * for all employees in their department.
      */
     public function assignRole(Request $request, $employeeNumber)
     {
@@ -113,7 +116,42 @@ class AdminController extends Controller
         $employee = Employee::where('EmployeeNumber', $employeeNumber)->firstOrFail();
         $employee->update(['role_id' => $request->role_id]);
 
+        // ✅ Sync role with User record
+        $user = User::where('EmployeeNumber', $employeeNumber)->first();
+        if ($user) {
+            $user->role_id = $request->role_id;
+            $user->save();
+        }
+
+        // ✅ If Supervisor, cascade assignment
+        $role = Role::find($request->role_id);
+        if ($role && strtolower($role->name) === 'supervisor') {
+            $this->assignSupervisorToDepartment($employee);
+        }
+
         return redirect()->back()->with('success', 'Role assigned successfully.');
+    }
+
+    /**
+     * Helper: Assign supervisor to all employees in their department.
+     */
+    protected function assignSupervisorToDepartment(Employee $supervisor)
+    {
+        if (! $supervisor->DepartmentID) {
+            Log::warning("Supervisor {$supervisor->EmployeeNumber} has no department.");
+            return;
+        }
+
+        $supervisorId = $supervisor->EmployeeNumber;
+        $departmentId = $supervisor->DepartmentID;
+
+        DB::transaction(function () use ($supervisorId, $departmentId) {
+            $affected = Employee::where('DepartmentID', $departmentId)
+                ->where('EmployeeNumber', '!=', $supervisorId)
+                ->update(['SupervisorID' => $supervisorId]);
+
+            Log::info("Supervisor {$supervisorId} assigned to department {$departmentId}. Employees updated: {$affected}");
+        });
     }
 
     /**

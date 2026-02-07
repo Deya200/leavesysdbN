@@ -38,12 +38,12 @@
                     <td>{{ $notification->created_at->format('Y-m-d H:i') }}</td>
                     <td>
                         @if($notification->Status == 'Unread')
-                        <form action="{{ route('notifications.markAsRead', $notification->NotificationID) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST" style="display:inline;">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-primary">Mark as Read</button>
                         </form>
                         @endif
-                        <form action="{{ route('notifications.destroy', $notification->NotificationID) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
                             <button type="submit" onclick="return confirm('Delete this notification?')" class="btn btn-sm btn-danger">Delete</button>

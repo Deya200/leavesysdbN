@@ -10,9 +10,10 @@ class Notification extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'NotificationID'; // Set NotificationID as the primary key
-    public $incrementing = true; // Auto-increment enabled
-    protected $keyType = 'int'; // Primary key is an integer
+    // Use standard 'id' as primary key to match migration
+    protected $primaryKey = 'id'; 
+    public $incrementing = true; 
+    protected $keyType = 'int'; 
 
     protected $fillable = [
         'EmployeeNumber', // Updated to match the table structure

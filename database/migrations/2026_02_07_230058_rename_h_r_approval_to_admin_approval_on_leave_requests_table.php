@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('leave_types', function (Blueprint $table) {
-            $table->dropColumn('DeductsFromAnnual');
+        Schema::table('leave_requests', function (Blueprint $table) {
+            $table->renameColumn('HRApproval', 'AdminApproval');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('leave_types', function (Blueprint $table) {
-            $table->boolean('DeductsFromAnnual')->default(false);
+        Schema::table('leave_requests', function (Blueprint $table) {
+            $table->renameColumn('AdminApproval', 'HRApproval');
         });
     }
 };

@@ -1,5 +1,5 @@
 <!-- Header -->
-<header class="py-2 border-bottom" style="position: sticky; top: 0; z-index: 1040; background: #3D519F; color: #fff; font-family: system-ui, 'Segoe UI', Arial, sans-serif;">
+<header class="py-2 border-bottom" style="position: sticky; top: 0; z-index: 1050; background: #3D519F; color: #fff; font-family: system-ui, 'Segoe UI', Arial, sans-serif;">
     <div class="container-fluid">
         <div class="d-flex align-items-center justify-content-between">
             <!-- Left: Hamburger (Sidebar Toggle) -->
@@ -18,6 +18,59 @@
                 <button id="darkModeToggle" class="btn btn-outline-secondary" type="button" aria-label="Toggle dark mode">
                     <i class="fas fa-moon"></i>
                 </button>
+
+                <!-- Notifications Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        @if(isset($unreadCount) && $unreadCount > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ $unreadCount }}
+                                <span class="visually-hidden">unread messages</span>
+                            </span>
+                        @endif
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="notificationDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li class="p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
+                            <h6 class="mb-0">Notifications</h6>
+                            @if(isset($unreadCount) && $unreadCount > 0)
+                                <form action="{{ route('notifications.markAllAsRead') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-link btn-sm text-decoration-none p-0">Mark all read</button>
+                                </form>
+                            @endif
+                        </li>
+                        @forelse($headerNotifications ?? [] as $notification)
+                            <li>
+                                <div class="dropdown-item d-flex gap-3 py-3 border-bottom {{ $notification->Status === 'Unread' ? 'bg-light' : '' }}">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                            <i class="fas fa-info text-primary small"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-1 small text-wrap">{{ $notification->Message }}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted" style="font-size: 0.75rem;">{{ $notification->created_at->diffForHumans() }}</small>
+                                            @if($notification->Status === 'Unread')
+                                                <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-link btn-sm p-0" title="Mark as read"><i class="fas fa-check"></i></button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        @empty
+                            <li class="p-4 text-center text-muted">No notifications</li>
+                        @endforelse
+                        <li class="p-2 text-center bg-light sticky-bottom">
+                            <a href="{{ route('notifications') }}" class="small text-decoration-none">View All Notifications</a>
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- Profile dropdown -->
                 <div class="dropdown">
                     <button class="profile-btn d-flex align-items-center dropdown-toggle"

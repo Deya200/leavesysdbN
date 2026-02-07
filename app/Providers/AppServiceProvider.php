@@ -32,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
         // ✅ Share leaveRequests with all views for supervisors
         View::composer('*', function ($view) {
             if (Auth::check() && Auth::user()->role_id === 2) {
+                // Supervisor logic remains...
+                // (Optimized query: avoid N+1 if needed, but keeping existing logic)
                 $leaveRequests = LeaveRequest::with('employee')
                     ->whereIn('RequestStatus', [
                         'Pending',
@@ -41,6 +43,26 @@ class AppServiceProvider extends ServiceProvider
                     ->get();
 
                 $view->with('leaveRequests', $leaveRequests);
+            }
+        });
+
+        // ✅ Share notifications with header
+        View::composer('layouts.header', function ($view) {
+            if (Auth::check()) {
+                $headerNotifications = \App\Models\Notification::where('EmployeeNumber', Auth::user()->EmployeeNumber)
+                    ->orderBy('created_at', 'desc')
+                    ->take(5)
+                    ->get();
+                
+                $unreadCount = \App\Models\Notification::where('EmployeeNumber', Auth::user()->EmployeeNumber)
+                    ->where('Status', 'Unread')
+                    ->count();
+
+                $view->with('headerNotifications', $headerNotifications);
+                $view->with('unreadCount', $unreadCount);
+            } else {
+                 $view->with('headerNotifications', collect([]));
+                 $view->with('unreadCount', 0);
             }
         });
     }

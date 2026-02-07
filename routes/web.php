@@ -14,7 +14,10 @@ use App\Http\Controllers\{
     GradeController,
     Auth\LoginController,
     SupervisorController,
-    AdminController
+    AdminController,
+    LeaveAppealController,
+    LeaveExtensionController,
+    LeaveCancellationController
 };
 
 //Route::fallback(function () {
@@ -32,7 +35,7 @@ Route::resource('employees', EmployeeController::class);
 
 
 // Public Routes
-Auth::routes();
+Auth::routes(['register' => false, 'reset' => true, 'verify' => true]);
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
@@ -171,6 +174,23 @@ Route::get('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::cl
 Route::get('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave_requests.reject');
 Route::post('/leave-requests/{leaveRequest}/supervisor-approve', [LeaveRequestController::class, 'supervisorApprove'])->name('leave_requests.supervisor.approve');
 Route::post('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestController::class, 'supervisorReject'])->name('leave_requests.supervisor.reject');
+
+// Leave Appeals
+Route::post('/leave-requests/{leaveRequest}/appeal', [LeaveRequestController::class, 'appeal'])->name('leave_requests.appeal');
+Route::resource('leave-appeals', LeaveAppealController::class)->only(['index']);
+Route::post('/leave-appeals/{leaveAppeal}/approve', [LeaveAppealController::class, 'approve'])->name('leave_appeals.approve');
+Route::post('/leave-appeals/{leaveAppeal}/reject', [LeaveAppealController::class, 'reject'])->name('leave_appeals.reject');
+
+// Leave Extensions
+Route::post('/leave-requests/{leaveRequest}/extend', [LeaveRequestController::class, 'extend'])->name('leave_requests.extend');
+Route::resource('leave-extensions', LeaveExtensionController::class)->only(['index']);
+Route::post('/leave-extensions/{leaveExtension}/approve', [LeaveExtensionController::class, 'approve'])->name('leave_extensions.approve');
+Route::post('/leave-extensions/{leaveExtension}/reject', [LeaveExtensionController::class, 'reject'])->name('leave_extensions.reject');
+
+// Leave Cancellations
+Route::post('/leave-requests/{leaveRequest}/cancel', [LeaveRequestController::class, 'cancel'])->name('leave_requests.cancel');
+Route::resource('leave-cancellations', LeaveCancellationController::class)->only(['index']);
+Route::post('/leave-cancellations/{leaveCancellation}/approve', [LeaveCancellationController::class, 'approve'])->name('leave_cancellations.approve');
 
 
 Route::post('/leave_requests/supervisor/reject/{id}', [SupervisorController::class, 'reject'])

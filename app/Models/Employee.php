@@ -37,6 +37,10 @@ class Employee extends Authenticatable
         'password',
         'role_id',
         'RemainingAnnualLeaveDays', // Added to allow persistent tracking and updates.
+        'email_notifications_enabled',
+        'system_notifications_enabled',
+        'carried_over_leave_days',
+        'last_password_reset_at',
     ];
 
     protected $hidden = [
@@ -48,6 +52,10 @@ class Employee extends Authenticatable
         'EmployeeNumber' => 'string',
         'SupervisorID' => 'string',
         'RemainingAnnualLeaveDays' => 'integer', // Cast to integer
+        'email_notifications_enabled' => 'boolean',
+        'system_notifications_enabled' => 'boolean',
+        'carried_over_leave_days' => 'integer',
+        'last_password_reset_at' => 'datetime',
     ];
 
 
@@ -116,6 +124,33 @@ class Employee extends Authenticatable
     }
 
     /**
+     * Relationship: Leave Appeals submitted by the employee
+     * @return HasMany
+     */
+    public function leaveAppeals(): HasMany
+    {
+        return $this->hasMany(LeaveAppeal::class, 'employee_number', 'EmployeeNumber');
+    }
+
+    /**
+     * Relationship: Leave Extensions requested by the employee
+     * @return HasMany
+     */
+    public function leaveExtensions(): HasMany
+    {
+        return $this->hasMany(LeaveExtension::class, 'employee_number', 'EmployeeNumber');
+    }
+
+    /**
+     * Relationship: Leave Cancellations requested by the employee
+     * @return HasMany
+     */
+    public function leaveCancellations(): HasMany
+    {
+        return $this->hasMany(LeaveCancellation::class, 'employee_number', 'EmployeeNumber');
+    }
+
+    /**
      * Get the Employee's computed leave days remaining.
      * (This is a computed accessor if you want to show the theoretical remaining days based on the grade.)
      * @return int
@@ -125,9 +160,24 @@ class Employee extends Authenticatable
         $totalLeaveDays = optional($this->grade)->AnnualLeaveDays ?? 0;
         $usedLeaveDays = $this->leaveRequests()
             ->where('RequestStatus', 'Approved')
+            ->whereHas('leaveType', fn($q) => $q->where('LeaveTypeName', 'Annual Leave'))
             ->sum('TotalDays');
 
-        return max(0, $totalLeaveDays - $usedLeaveDays);
+        // Include carried over days from previous year
+        $totalAvailable = $totalLeaveDays + ($this->carried_over_leave_days ?? 0);
+        
+        return max(0, $totalAvailable - $usedLeaveDays);
+    }
+
+    /**
+     * Get total available leave days (grade + carried over)
+     * @return int
+     */
+    public function getTotalAvailableLeaveDays(): int
+    {
+        $gradeLeaveDays = optional($this->grade)->AnnualLeaveDays ?? 0;
+        $carriedOver = $this->carried_over_leave_days ?? 0;
+        return $gradeLeaveDays + $carriedOver;
     }
 
     /**

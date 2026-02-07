@@ -14,7 +14,8 @@ return new class extends Migration
 {
     Schema::create('leave_requests', function (Blueprint $table) {
         $table->id('LeaveRequestID'); // Primary Key
-        $table->unsignedBigInteger('EmployeeNumber'); // Foreign Key to Employees
+        $table->string('EmployeeNumber'); // Foreign Key to Employees (must match employees.EmployeeNumber type)
+        $table->string('SupervisorID'); // Supervisor ID (must match employees.EmployeeNumber type)
         $table->unsignedBigInteger('LeaveTypeID'); // Foreign Key to LeaveTypes
         $table->date('StartDate');
         $table->date('EndDate');
@@ -22,13 +23,15 @@ return new class extends Migration
         $table->boolean('SupervisorApproval')->default(false);
         $table->boolean('HRApproval')->default(false);
         $table->string('RequestStatus', 50)->default('Pending'); // Adding max length and default value
-        $table->foreign('EmployeeNumber')->references('EmployeeNumber')->on('employees')->onDelete('cascade');
-        $table->foreign('LeaveTypeID')->references('LeaveTypeID')->on('leave_types')->onDelete('cascade');
-        $table->timestamps();
-        $table->unsignedBigInteger('SupervisorID')->nullable(false)->change();
         $table->text('SupervisorRejectionReason')->nullable();
         $table->text('AdminRejectionReason')->nullable();
-
+        $table->text('Reason')->nullable(); // General reason for leave
+        $table->timestamps();
+        
+        // Foreign keys
+        $table->foreign('EmployeeNumber')->references('EmployeeNumber')->on('employees')->onDelete('cascade');
+        $table->foreign('SupervisorID')->references('EmployeeNumber')->on('employees')->onDelete('cascade');
+        $table->foreign('LeaveTypeID')->references('LeaveTypeID')->on('leave_types')->onDelete('cascade');
     });
 }
 

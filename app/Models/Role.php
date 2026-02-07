@@ -15,7 +15,7 @@ class Role extends Model
     public $timestamps = true;
 
     // Only the name is fillable because our table only has 'name'
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'description'];
 
     /**
      * Relationship: A role can have multiple users.

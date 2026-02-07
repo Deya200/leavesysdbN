@@ -54,7 +54,7 @@ class LeaveController extends Controller
             'TotalDays' => $totalDays,
             'RequestStatus' => 'Pending',
             'SupervisorApproval' => 0,
-            'HRApproval' => 0,
+            'AdminApproval' => 0,
             'reason' => $validated['reason'],
         ]);
 

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->string('EmployeeNumber')->unique()->nullable(true);// Primary key for the employees table
+            $table->string('EmployeeNumber')->primary(); // Primary key for the employees table
             $table->string('FirstName', 100); // Employee's first name
             $table->string('LastName', 100); // Employee's last name
             $table->enum('Gender', ['Male', 'Female', 'Other']); // Gender selection
@@ -20,16 +20,25 @@ return new class extends Migration
             $table->unsignedBigInteger('DepartmentID'); // Foreign key referencing departments
             $table->unsignedBigInteger('GradeID'); // Foreign key referencing grades
             $table->unsignedBigInteger('PositionID'); // Foreign key referencing positions
-            $table->string('SupervisorID')->nullable(); // Self-referencing foreign key using EmployeeNumber
-            $table->integer('role_id')->default(2);
+            $table->string('SupervisorID')->nullable(); // Self-referencing foreign key using Employee Number
+            $table->string('email')->unique()->nullable(); // Email for authentication
+            $table->string('password')->nullable(); // Password for authentication
+            $table->integer('role_id')->default(2); // Role ID (default: Employee)
+            $table->rememberToken(); // For remember me functionality
+            
             // Define foreign key constraints
             $table->foreign('DepartmentID')->references('DepartmentID')->on('departments')->onDelete('cascade');
             $table->foreign('GradeID')->references('GradeID')->on('grades')->onDelete('cascade');
             $table->foreign('PositionID')->references('PositionID')->on('positions')->onDelete('cascade');
-            $table->foreign('SupervisorID')->references('EmployeeNumber')->on('employees')->onDelete('set null');
-
+            // Self-referencing foreign key will be added in a later migration after table is fully created
+            
             // Add timestamps for created_at and updated_at
             $table->timestamps();
+        });
+        
+        // Add self-referencing foreign key after table creation
+        Schema::table('employees', function (Blueprint $table) {
+            $table->foreign('SupervisorID')->references('EmployeeNumber')->on('employees')->onDelete('set null');
         });
     }
 

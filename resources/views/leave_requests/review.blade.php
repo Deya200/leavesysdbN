@@ -171,6 +171,10 @@
                                 <div class="review-value">{{ $totalDays }}</div>
                             </div>
                             <div class="review-row">
+                                <div class="review-label">Remaining Balance</div>
+                                <div class="review-value">{{ $remainingDays }} days</div>
+                            </div>
+                            <div class="review-row">
                                 <div class="review-label">Reason</div>
                                 <div class="review-value" style="white-space: pre-line;">{{ $data['Reason'] }}</div>
                             </div>

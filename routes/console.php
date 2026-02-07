@@ -8,3 +8,15 @@ Artisan::command('inspire', function () {
     /** @var ClosureCommand $this */
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+use Illuminate\Support\Facades\Schedule;
+use App\Services\LeaveActivationService;
+use App\Services\CarryOverService;
+
+Schedule::call(function () {
+    app(LeaveActivationService::class)->activateLeaves();
+})->daily()->name('activate-leaves');
+
+Schedule::call(function () {
+    app(CarryOverService::class)->processAnnualCarryOver();
+})->yearlyOn(7, 1, '00:00')->name('process-carry-over'); // Run on July 1st

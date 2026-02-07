@@ -17,6 +17,7 @@ class Position extends Model
     protected $fillable = [
         'PositionName', // Add relevant fields here
         'GradeID', // Ensure this field exists in your database
+        'DepartmentID', 
     ];
 
     /**

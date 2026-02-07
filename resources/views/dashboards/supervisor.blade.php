@@ -96,6 +96,34 @@
         <p class="mb-2">Here’s an overview of your team’s leave activity.</p>
     </div>
 
+    <!-- Management Actions -->
+    <div class="row text-center g-2 mb-4">
+        <div class="col-md-4">
+            <a href="{{ route('leave_appeals.index') }}" class="text-decoration-none">
+                <div class="card card-custom h-100 border-warning border-2">
+                    <h5 class="text-warning"><i class="fas fa-gavel"></i> Manage Appeals</h5>
+                    <p class="text-muted small">Review rejected leave appeals</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ route('leave_extensions.index') }}" class="text-decoration-none">
+                <div class="card card-custom h-100 border-info border-2">
+                    <h5 class="text-info"><i class="fas fa-clock"></i> Manage Extensions</h5>
+                    <p class="text-muted small">Review leave extension requests</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ route('leave_cancellations.index') }}" class="text-decoration-none">
+                <div class="card card-custom h-100 border-danger border-2">
+                    <h5 class="text-danger"><i class="fas fa-ban"></i> Manage Cancellations</h5>
+                    <p class="text-muted small">Review leave cancellation requests</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
     <!-- Summary Cards -->
     <div class="row text-center g-2 mb-4">
         <div class="col-6 col-md-2 summary-card">

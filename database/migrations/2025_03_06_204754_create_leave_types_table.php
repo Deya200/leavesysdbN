@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('LeaveTypeName', 150); // Name of the leave type
             $table->boolean('IsPaidLeave'); // Whether the leave is paid
             $table->enum('GenderApplicable', ['Male', 'Female', 'Both']); // Gender applicability
+            $table->integer('MaxLeaveDays')->default(0); // Maximum days allowed
+            $table->integer('MinServiceYears')->default(0); // Minimum service years required
             $table->boolean('DeductsFromAnnual')->default(false); // ✅ New field: deducts from annual leave
             $table->timestamps(); // created_at and updated_at
         });

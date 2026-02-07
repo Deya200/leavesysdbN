@@ -72,19 +72,7 @@
         <p class="mb-2">You can review, approve, or reject leave requests submitted by employees.</p>
     </div>
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
 
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
 
     <div class="card-custom">
         @if ($leaveRequests->isNotEmpty())
@@ -123,20 +111,33 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if ($request->RequestStatus === 'Pending Admin Verification')
-                                        <form action="{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-success mb-1">Approve</button>
-                                        </form>
-                                        <button type="button" class="btn btn-sm btn-danger mb-1" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
-                                        <form id="rejectForm-{{ $request->LeaveRequestID }}"
-                                              action="{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}"
-                                              method="POST"
-                                              style="display:none; margin-top:5px;">
-                                            @csrf
-                                            <textarea name="RejectionReason" class="form-control mb-2" placeholder="Enter rejection reason" required></textarea>
-                                            <button type="submit" class="btn btn-sm btn-danger w-100">Confirm Rejection</button>
-                                        </form>
+                                    @php
+                                        $canAdminAction = strcasecmp($request->RequestStatus, 'Pending Admin Verification') === 0;
+                                        $canSupAction = strcasecmp($request->RequestStatus, 'Pending Supervisor Approval') === 0 && auth()->id() === $request->employee->SupervisorID;
+                                    @endphp
+
+                                    @if ($canAdminAction)
+                                        <div class="d-flex flex-column gap-2">
+                                            <button type="button" class="btn btn-sm btn-success" 
+                                                onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval')">
+                                                Approve
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                onclick="openConfirmModal('reject', '{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}', 'Admin Rejection')">
+                                                Reject
+                                            </button>
+                                        </div>
+                                    @elseif ($canSupAction)
+                                        <div class="d-flex flex-column gap-2">
+                                            <button type="button" class="btn btn-sm btn-success" 
+                                                onclick="openConfirmModal('approve', '{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}', 'Supervisor Approval', 'SupervisorApprovalNote')">
+                                                Sup. Approve
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                onclick="openConfirmModal('reject', '{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}', 'Supervisor Rejection', 'SupervisorRejectionReason')">
+                                                Sup. Reject
+                                            </button>
+                                        </div>
                                     @else
                                         <em class="text-muted">No actions available</em>
                                     @endif
@@ -155,17 +156,73 @@
             <div class="alert alert-info text-center m-0">
                 <h5>No leave requests pending admin verification.</h5>
             </div>
-            
         @endif
     </div>
 </div>
+@endsection
 
+<!-- Action Modals -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="actionForm" method="POST">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage">Are you sure you want to perform this action?</p>
+                    <div id="noteContainer">
+                        <label for="actionNote" class="form-label">Note/Reason:</label>
+                        <textarea name="note" id="actionNote" class="form-control" rows="3" placeholder="Enter details here..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section('scripts')
 <script>
-    function toggleRejectForm(id) {
-        const form = document.getElementById('rejectForm-' + id);
-        if (form) {
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    function openConfirmModal(type, url, title, fieldName = null) {
+        const form = document.getElementById('actionForm');
+        const titleEl = document.getElementById('modalTitle');
+        const messageEl = document.getElementById('modalMessage');
+        const noteEl = document.getElementById('actionNote');
+        const submitBtn = document.getElementById('submitBtn');
+        const noteContainer = document.getElementById('noteContainer');
+
+        form.action = url;
+        titleEl.innerText = title;
+        
+        // Reset note field
+        noteEl.value = '';
+        noteEl.required = (type === 'reject');
+        
+        // Determine field name (for controller validation)
+        let defaultField = '';
+        if (type === 'approve') {
+            defaultField = url.includes('admin') ? 'AdminApprovalNote' : 'SupervisorApprovalNote';
+            messageEl.innerText = 'Please provide an optional approval note.';
+            submitBtn.className = 'btn btn-success';
+            submitBtn.innerText = 'Confirm Approval';
+        } else {
+            defaultField = url.includes('admin') ? 'AdminRejectionReason' : 'SupervisorRejectionReason';
+            messageEl.innerText = 'Please provide a mandatory rejection reason.';
+            submitBtn.className = 'btn btn-danger';
+            submitBtn.innerText = 'Confirm Rejection';
         }
+        
+        noteEl.name = fieldName || defaultField;
+        noteEl.placeholder = type === 'reject' ? 'Rejection reason is required...' : 'Optional approval notes...';
+
+        const modal = new bootstrap.Modal(document.getElementById('actionModal'));
+        modal.show();
     }
 </script>
 @endsection

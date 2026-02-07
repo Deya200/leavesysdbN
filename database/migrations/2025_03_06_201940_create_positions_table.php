@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('positions', function (Blueprint $table) {
             $table->id('PositionID'); // Primary Key
             $table->string('PositionName', 150); // Adding max length for consistency
-            $table->unsignedBigInteger('GradeID'); // Foreign Key to Grades
+            $table->unsignedBigInteger('GradeID')->nullable(); // Foreign Key to Grades
+            $table->unsignedBigInteger('DepartmentID')->nullable(); // Foreign Key to Departments
             $table->foreign('GradeID')->references('GradeID')->on('grades')->onDelete('cascade');
+            $table->foreign('DepartmentID')->references('DepartmentID')->on('departments')->onDelete('cascade');
             $table->timestamps();
         });
     }

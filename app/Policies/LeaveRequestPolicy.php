@@ -3,55 +3,55 @@
 namespace App\Policies;
 
 use App\Models\LeaveRequest;
-use App\Models\User;
+use App\Models\Employee;
 
 class LeaveRequestPolicy
 {
-    public function viewAny(User $user)
+    public function viewAny(Employee $user)
     {
         return $user->isAdmin() || $user->isSupervisor();
     }
 
-    public function view(User $user, LeaveRequest $leaveRequest)
+    public function view(Employee $user, LeaveRequest $leaveRequest)
     {
         return $user->EmployeeNumber === $leaveRequest->EmployeeNumber
             || $user->isAdmin()
             || $user->isSupervisor();
     }
 
-    public function create(User $user)
+    public function create(Employee $user)
     {
-        return $user->isEmployee();
+        return $user->isEmployee(); // Or ensureDefaultRole logic
     }
 
-    public function update(User $user, LeaveRequest $leaveRequest)
+    public function update(Employee $user, LeaveRequest $leaveRequest)
     {
         return $user->EmployeeNumber === $leaveRequest->EmployeeNumber
-            && in_array($leaveRequest->RequestStatus, [
-                'Pending Supervisor Approval',
-                'Pending Admin Verification'
+            && in_array(strtolower($leaveRequest->RequestStatus), [
+                'pending supervisor approval',
+                'pending admin verification'
             ]);
     }
 
-    public function delete(User $user, LeaveRequest $leaveRequest)
+    public function delete(Employee $user, LeaveRequest $leaveRequest)
     {
         return $user->isAdmin();
     }
 
-    public function supervisorApprove(User $user, LeaveRequest $leaveRequest)
+    public function supervisorApprove(Employee $user, LeaveRequest $leaveRequest)
     {
         return $user->isSupervisor()
             && $user->EmployeeNumber === $leaveRequest->employee->SupervisorID
-            && $leaveRequest->RequestStatus === 'Pending Supervisor Approval';
+            && strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
     }
 
-    public function adminApprove(User $user, LeaveRequest $leaveRequest)
+    public function adminApprove(Employee $user, LeaveRequest $leaveRequest)
     {
         return $user->isAdmin()
-            && $leaveRequest->RequestStatus === 'Pending Admin Verification';
+            && strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') === 0;
     }
 
-    public function supervisorReject(User $user, LeaveRequest $leaveRequest)
+    public function supervisorReject(Employee $user, LeaveRequest $leaveRequest)
     {
         return $this->supervisorApprove($user, $leaveRequest);
     }

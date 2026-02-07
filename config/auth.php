@@ -17,10 +17,10 @@ return [
     ],
 
     'providers' => [
-        // ✅ Ensure the users provider uses the User model, NOT Employee.
+        // ✅ Ensure the users provider uses the Employee model for this system
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => App\Models\Employee::class,
         ],
         'employees' => [
             'driver' => 'eloquent',

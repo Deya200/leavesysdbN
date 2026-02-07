@@ -12,7 +12,7 @@ return new class extends Migration
     public function up()
 {
     Schema::create('employee_leave_balance', function (Blueprint $table) {
-        $table->unsignedBigInteger('EmployeeNumber')->primary(); // Primary Key and Foreign Key
+        $table->string('EmployeeNumber')->primary(); // Primary Key and Foreign Key (matches employees table)
         $table->integer('AnnualLeaveBalance')->unsigned(); // Leave balance cannot be negative
         $table->foreign('EmployeeNumber')->references('EmployeeNumber')->on('employees')->onDelete('cascade');
         $table->timestamps();

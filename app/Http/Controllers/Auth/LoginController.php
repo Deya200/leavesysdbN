@@ -46,6 +46,12 @@ class LoginController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    /**
+     * Get the login credentials from the request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
     protected function credentials(Request $request)
     {
         return $request->only('EmployeeNumber', 'password'); // ✅ Login via EmployeeNumber
@@ -73,7 +79,7 @@ class LoginController extends Controller
     protected function validateLogin(Request $request)
     {
         $request->validate([
-            'EmployeeNumber' => 'required|string|exists:users,EmployeeNumber',
+            'EmployeeNumber' => 'required|string|exists:employees,EmployeeNumber',
             'password' => 'required|string|min:6',
         ]);
     }

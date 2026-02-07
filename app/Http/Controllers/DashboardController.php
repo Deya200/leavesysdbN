@@ -20,8 +20,8 @@ class DashboardController extends Controller
 {
     // Total employee statistics
     $totalEmployees = Employee::count();
-    $maleEmployees = Employee::where('gender', 'male')->count();
-    $femaleEmployees = Employee::where('gender', 'female')->count();
+    $maleEmployees = Employee::where('Gender', 'Male')->count();
+    $femaleEmployees = Employee::where('Gender', 'Female')->count();
 
     // Positions and Grades statistics
     $totalPositions = Position::count(); // Count all positions

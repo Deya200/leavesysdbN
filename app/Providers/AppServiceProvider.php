@@ -29,15 +29,14 @@ class AppServiceProvider extends ServiceProvider
         // Bind the {supervisor} parameter to the Supervisor model.
         Route::model('supervisor', Supervisor::class);
 
-        // ✅ Share leaveRequests with all views for supervisors
+        // ✅ Share leaveRequests with all views for authenticated users (for sidebar badges)
         View::composer('*', function ($view) {
-            if (Auth::check() && Auth::user()->role_id === 2) {
-                // Supervisor logic remains...
-                // (Optimized query: avoid N+1 if needed, but keeping existing logic)
-                $leaveRequests = LeaveRequest::with('employee')
-                    ->whereIn('RequestStatus', [
+            if (Auth::check()) {
+                // Fetch all pending requests regardless of role (sidebar logic handles filtering)
+                $leaveRequests = LeaveRequest::whereIn('RequestStatus', [
                         'Pending',
                         'Pending Supervisor Approval',
+                        'Pending Admin Verification',
                         'Pending Admin Approval'
                     ])
                     ->get();

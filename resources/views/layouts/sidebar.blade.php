@@ -119,7 +119,7 @@
                             <div class="position-relative">
                                 <i class="fas fa-list-alt fs-5" style="width: 24px;"></i>
                                 @php
-                                    $allPending = $leaveRequests->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Approval'])->count();
+                                    $allPending = $leaveRequests->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification', 'Pending Admin Approval'])->count();
                                 @endphp
                                 @if($allPending > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="width: 8px; height: 8px;"></span>
@@ -146,7 +146,7 @@
                             <div class="position-relative">
                                 <i class="fas fa-bell fs-5" style="width: 24px;"></i>
                                 @php
-                                    $pendingRequests = $leaveRequests->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Approval'])->count();
+                                    $pendingRequests = $leaveRequests->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification', 'Pending Admin Approval'])->count();
                                 @endphp
                                 @if($pendingRequests > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="width: 8px; height: 8px;"></span>

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use App\Models\Role;
 
 class UserController extends Controller
 {
@@ -26,7 +29,7 @@ class UserController extends Controller
     //  */
     public function create()
     {
-        return view('users.create');
+        return view('user.create');
     }
 
     // /
@@ -40,15 +43,29 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|exists:roles,id',
+            'role_id' => 'required|exists:roles,id',
+            'EmployeeNumber' => 'nullable|string|unique:users,EmployeeNumber',
         ]);
 
-        $validatedData['password'] = bcrypt($validatedData['password']); // Hash the password
+        // Generate a random password for new users
+        $password = Str::random(12);
+        $validatedData['password'] = bcrypt($password);
+        $validatedData['is_active'] = true;
 
-        User::create($validatedData);
+        $user = User::create($validatedData);
 
-        session()->flash('success', 'User has been successfully added!');
+        // Send invitation link
+        try {
+            // Since Employee is the auth model, and User shares EmployeeNumber,
+            // we should send the notification to the Employee model if possible,
+            // or just use the Password broker which is configured for Employee.
+            $token = \Illuminate\Support\Facades\Password::getRepository()->create($user);
+            $user->sendPasswordResetNotification($token);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send invitation to new user: " . $e->getMessage());
+        }
+
+        session()->flash('success', 'User has been successfully added! An invitation has been sent to their email.');
         return redirect()->route('users.index');
     }
 
@@ -61,7 +78,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        return view('users.edit', compact('user'));
+        return view('user.edit', compact('user'));
     }
 
     public function toggleStatus($id)
@@ -86,13 +103,13 @@ class UserController extends Controller
 {
     $request->validate([
         'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $id,
-        'role' => 'required|string',
+        'email' => 'required|email|unique:users,email,' . $id . ',EmployeeNumber',
+        'role_id' => 'required|exists:roles,id',
         'is_active' => 'required|boolean',
     ]);
 
     $user = User::findOrFail($id);
-    $user->update($request->only('name', 'email', 'role', 'is_active'));
+    $user->update($request->only('name', 'email', 'role_id', 'is_active'));
 
     return redirect()->route('users.index')->with('success', 'User updated successfully.');
 }

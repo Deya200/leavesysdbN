@@ -49,6 +49,7 @@ Route::get('/register/thankyou', function () {
     return view('auth.thankyou');
 })->name('register.thankyou');
 
+
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {
 
@@ -85,7 +86,9 @@ s', [LeaveRequestController::class, 'index'])->name('leave_requests');
         Route::prefix('employees')->group(function () {
             Route::get('/', [EmployeeController::class, 'index'])->name('manage.employees');
             Route::post('/{employee}/assign-supervisor', [EmployeeController::class, 'assignSupervisor'])->name('employees.assignSupervisor');
-            
+            Route::post('/{employee}/send-invitation', [EmployeeController::class, 'sendInvitation'])->name('employees.sendInvitation');
+            Route::post('/{employee}/manual-set-password', [EmployeeController::class, 'manualSetPassword'])->name('employees.manualSetPassword');
+            Route::post('/bulk-send-invitations', [EmployeeController::class, 'bulkSendInvitations'])->name('employees.bulkSendInvitations');
         });
         Route::resource('employees', EmployeeController::class);
         //Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
@@ -193,8 +196,7 @@ Route::resource('leave-cancellations', LeaveCancellationController::class)->only
 Route::post('/leave-cancellations/{leaveCancellation}/approve', [LeaveCancellationController::class, 'approve'])->name('leave_cancellations.approve');
 
 
-Route::post('/leave_requests/supervisor/reject/{id}', [SupervisorController::class, 'reject'])
-    ->name('leave_requests.supervisor.reject');
+
 
 Route::get('/leave-requests/my-requests', [LeaveRequestController::class, 'myLeaveRequests'])->name('leave_requests.my_requests');
 Route::get('/leave-requests/calculate-leave-days', [LeaveRequestController::class, 'calculateRemainingLeaveDays'])->name('leave_requests.calculate_days');

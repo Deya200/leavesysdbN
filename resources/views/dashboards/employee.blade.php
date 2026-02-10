@@ -101,11 +101,7 @@
     })->values();
 @endphp
 
-@if(session('success'))
-    <div class="alert alert-success mt-3">
-        {{ session('success') }}
-    </div>
-@endif
+
 
 <div class="dashboard-container">
 
@@ -214,9 +210,9 @@
                         <tr>
                             <th>Leave Type</th>
                             <th>Status</th>
-                            <th>Start</th>
-                            <th>End</th>
-                            <th>Actions</th> <!-- Added Actions Column -->
+                            <th>Dates</th>
+                            <th>Notes/Comments</th>
+                            <th>Quick Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -251,22 +247,31 @@
                                         <i class="{{ $statusIcon }} me-1"></i> {{ $friendlyStatus }}
                                     </span>
                                 </td>
-                                <td>{{ $request->StartDate ? \Carbon\Carbon::parse($request->StartDate)->format('Y-m-d') : 'N/A' }}</td>
-                                <td>{{ $request->EndDate ? \Carbon\Carbon::parse($request->EndDate)->format('Y-m-d') : 'N/A' }}</td>
                                 <td>
-                                    @if ($isRejected && !empty($rejectReason))
-                                        {{ $rejectReason }}
-                                    @elseif ($isRejected)
-                                        Rejected
-                                    @elseif ($statusNormalized === 'approved')
-                                        Approved
-                                    @elseif ($statusNormalized === 'pending supervisor approval')
-                                        Pending Supervisor
-                                    @elseif ($statusNormalized === 'pending admin verification')
-                                        Pending Admin
-                                    @else
-                                        Pending
-                                    @endif
+                                    <div class="small fw-bold">{{ $request->StartDate ? \Carbon\Carbon::parse($request->StartDate)->format('M d, Y') : 'N/A' }}</div>
+                                    <div class="small text-muted">to {{ $request->EndDate ? \Carbon\Carbon::parse($request->EndDate)->format('M d, Y') : 'N/A' }}</div>
+                                    <div class="text-primary small">({{ $request->TotalDays }} days)</div>
+                                </td>
+                                <td>
+                                    <div class="small text-wrap" style="max-width: 250px;">
+                                        @if($request->SupervisorApprovalNote)
+                                            <div class="mb-1"><strong>Sup. Note:</strong> {{ $request->SupervisorApprovalNote }}</div>
+                                        @endif
+                                        
+                                        @if($request->AdminApprovalNote)
+                                            <div class="mb-1"><strong>Admin Note:</strong> {{ $request->AdminApprovalNote }}</div>
+                                        @endif
+
+                                        @if($isRejected)
+                                            <div class="text-danger">
+                                                <strong>Reason:</strong> {{ $rejectReason ?? 'No reason provided' }}
+                                            </div>
+                                        @endif
+
+                                        @if(!$request->SupervisorApprovalNote && !$request->AdminApprovalNote && !$isRejected)
+                                            <em class="text-muted small">Awaiting review...</em>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     <!-- Action Buttons -->

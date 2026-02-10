@@ -17,6 +17,7 @@ class LeaveRequest extends Model
     public $timestamps = true;
 
     protected $fillable = [
+        'LeaveRequestID',
         'EmployeeNumber',
         'SupervisorID', // Ensure SupervisorID is mass assignable.
         'LeaveTypeID',

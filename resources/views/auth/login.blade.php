@@ -251,6 +251,7 @@
                                 Forgot password?
                             </a>
                         </div>
+                        </div>
 
                         <!-- Submit Button -->
                         <div class="d-grid">

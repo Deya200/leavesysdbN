@@ -156,7 +156,7 @@
   <div class="d-flex flex-grow-1">
       @include('layouts.sidebar')
       
-      <main class="flex-grow-1 px-3 py-4" style="margin-left: 0px; transition: margin-left 0.3s ease;">
+      <main class="flex-grow-1 py-4" style="transition: all 0.3s ease; width: 100%; overflow-x: hidden;">
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                 <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
@@ -200,13 +200,14 @@
       if (sidebar && mainContent) {
         const bsOffcanvas = new bootstrap.Offcanvas(sidebar);
 
-        // Function to adjust margin
+        // Function to adjust layout
         function adjustLayout(isOpen) {
             if (window.innerWidth >= 992) { // Desktop breakpoint (lg)
-                // Add extra 20px for gap
-                mainContent.style.marginLeft = isOpen ? (sidebarWidth + 20) + 'px' : '0px';
+                mainContent.style.paddingLeft = isOpen ? (sidebarWidth + 20) + 'px' : '20px';
+                mainContent.style.paddingRight = '20px';
             } else {
-                mainContent.style.marginLeft = '0px'; // Always 0 on mobile
+                mainContent.style.paddingLeft = '15px';
+                mainContent.style.paddingRight = '15px';
             }
         }
 
@@ -219,18 +220,20 @@
             bsOffcanvas.show(); // Auto-show on desktop
              // adjustLayout(true) will be triggered by the show event, 
             // but we can force it immediately to avoid layout shift if needed
-             mainContent.style.marginLeft = (sidebarWidth + 20) + 'px';
         }
 
         // Handle Window Resize
         window.addEventListener('resize', function() {
             if (window.innerWidth < 992) {
-                 mainContent.style.marginLeft = '0px';
+                 mainContent.style.paddingLeft = '15px';
+                 mainContent.style.paddingRight = '15px';
             } else {
-                // If sidebar is currently open (check class 'show'), restore margin
                 if (sidebar.classList.contains('show')) {
-                    mainContent.style.marginLeft = (sidebarWidth + 20) + 'px';
+                    mainContent.style.paddingLeft = (sidebarWidth + 20) + 'px';
+                } else {
+                    mainContent.style.paddingLeft = '20px';
                 }
+                mainContent.style.paddingRight = '20px';
             }
         });
 

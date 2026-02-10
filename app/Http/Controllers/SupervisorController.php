@@ -19,21 +19,51 @@ class SupervisorController extends Controller
             abort(404, 'Supervisor not found or EmployeeNumber missing.');
         }
 
+        // --- Personal Leave Stats (Supervisor as Employee) ---
+        $personalLeaveBalance = $supervisor->RemainingAnnualLeaveDays;
+        $personalRecentRequests = LeaveRequest::where('EmployeeNumber', $supervisor->EmployeeNumber)
+            ->with('leaveType')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // --- Team Stats & Lists ---
         $employeesUnderSupervisor = Employee::where('SupervisorID', $supervisor->EmployeeNumber)->get();
 
         $leaveRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
             ->with('employee', 'leaveType')
-            ->orderByRaw("FIELD(RequestStatus, 'Pending Supervisor Approval', 'Pending Admin Verification', 'Rejected', 'Approved')")
+            ->orderByRaw("CASE \"RequestStatus\" 
+                WHEN 'Pending Supervisor Approval' THEN 1 
+                WHEN 'Pending Admin Verification' THEN 2 
+                WHEN 'Rejected' THEN 3 
+                WHEN 'Approved' THEN 4 
+                ELSE 5 END")
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $pendingSupervisorRequests = $leaveRequests->where('RequestStatus', 'Pending Supervisor Approval')->count();
-        $pendingAdminRequests = LeaveRequest::where('RequestStatus', 'Pending Admin Verification')->count();
-
-        $employeesOnLeave = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
-            ->where('RequestStatus', 'Approved')
-            ->where('EndDate', '>=', now())
+        $pendingSupervisorRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('RequestStatus', 'Pending Supervisor Approval')
             ->count();
+            
+        $approvedTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('RequestStatus', 'Approved')
+            ->count();
+
+        $rejectedTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('RequestStatus', 'Rejected')
+            ->count();
+            
+        $totalTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->count();
+
+        // Employees Currently on Leave (Team only)
+        $today = now()->format('Y-m-d');
+        $employeesOnLeave = LeaveRequest::with(['employee', 'employee.department', 'leaveType'])
+            ->whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('RequestStatus', 'Approved')
+            ->where('StartDate', '<=', $today)
+            ->where('EndDate', '>=', $today)
+            ->get();
 
         $totalEmployees = $employeesUnderSupervisor->count();
         $totalFemaleEmployees = $employeesUnderSupervisor->where('Gender', 'Female')->count();
@@ -42,12 +72,17 @@ class SupervisorController extends Controller
         return view('dashboards.supervisor', compact(
             'leaveRequests',
             'pendingSupervisorRequests',
-            'pendingAdminRequests',
+            'approvedTeamRequests',
+            'rejectedTeamRequests',
+            'totalTeamRequests',
             'employeesOnLeave',
             'totalEmployees',
             'totalFemaleEmployees',
             'totalMaleEmployees',
-            'employeesUnderSupervisor'
+            'employeesUnderSupervisor',
+            'personalLeaveBalance',
+            'personalRecentRequests',
+            'supervisor'
         ));
     }
 
@@ -68,36 +103,5 @@ class SupervisorController extends Controller
         return redirect()->back()->with('success', 'Leave request approved. Now pending admin verification.');
     }
 
-    public function reject(Request $request, $id)
-    {
-        $request->validate(['RejectionReason' => 'required|string|max:255']);
 
-        $leaveRequest = LeaveRequest::findOrFail($id);
-
-        if ($leaveRequest->RequestStatus !== 'Pending Supervisor Approval' ||
-            $leaveRequest->employee->SupervisorID !== auth()->user()->EmployeeNumber) {
-            return redirect()->back()->with('error', 'This leave request cannot be rejected.');
-        }
-
-        $leaveRequest->SupervisorApproval = false;
-        $leaveRequest->RequestStatus = 'Rejected by Supervisor';
-        $leaveRequest->RejectionReason = $request->RejectionReason;
-        $leaveRequest->SupervisorRejectionReason = $request->RejectionReason;
-
-        // ✅ Point 1: Timestamp for rejection
-        $leaveRequest->updated_at = now();
-
-        $leaveRequest->save();
-
-        Log::info("Supervisor rejected leave request ID {$id} | Reason: " . $request->RejectionReason);
-
-        // ✅ Point 3: Notify admin (optional implementation)
-        // You can create a notification class LeaveRejectedBySupervisor and send it to all admins
-        /*
-        $admins = Employee::where('role_id', 1)->get();
-        Notification::send($admins, new LeaveRejectedBySupervisor($leaveRequest));
-        */
-
-        return redirect()->back()->with('success', 'Leave request rejected by supervisor.');
-    }
 }

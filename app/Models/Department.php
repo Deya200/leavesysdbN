@@ -17,6 +17,7 @@ class Department extends Model
 
     // Mass-assignable attributes
     protected $fillable = [
+        'DepartmentID',
         'DepartmentName',
         'SupervisorID', // Supervisor assignment
     ];

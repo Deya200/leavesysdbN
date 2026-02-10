@@ -17,9 +17,8 @@ return new class extends Migration
             $table->text('Description')->nullable(); // Department Description
             
             // These will be added as foreign keys in a later migration (after employees table exists)
-            $table->unsignedBigInteger('SupervisorID')->nullable(); 
-            $table->unsignedBigInteger('HeadOfDepartmentID')->nullable(); 
-            
+            $table->string('SupervisorID')->nullable(); // Alphanumeric Employee Number
+            $table->string('HeadOfDepartmentID')->nullable(); // Alphanumeric Employee Number            
             $table->timestamps(); // created_at and updated_at timestamps
         });
     }

@@ -224,5 +224,23 @@
         const modal = new bootstrap.Modal(document.getElementById('actionModal'));
         modal.show();
     }
+
+    // Prevent double form submissions
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (form.classList.contains('submitting')) {
+                    e.preventDefault();
+                    return false;
+                }
+                form.classList.add('submitting');
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Processing...';
+                }
+            });
+        });
+    });
 </script>
 @endsection

@@ -17,36 +17,61 @@ class DashboardController extends Controller
      * @return \Illuminate\View\View
      */
     public function index()
-{
-    // Total employee statistics
-    $totalEmployees = Employee::count();
-    $maleEmployees = Employee::where('Gender', 'Male')->count();
-    $femaleEmployees = Employee::where('Gender', 'Female')->count();
+    {
+        // Redirect non-admins to their respective dashboards
+        if (auth()->user()->role_id == 2) {
+            return redirect()->route('supervisor.index');
+        } elseif (auth()->user()->role_id == 3) {
+            return redirect()->route('dashboards.employee');
+        }
 
-    // Positions and Grades statistics
-    $totalPositions = Position::count(); // Count all positions
-    $totalGrades = Grade::count(); // Count all grades
+        // --- Personal Leave Stats (Admin as Employee) ---
+        $user = auth()->user();
+        $personalLeaveBalance = $user ? $user->RemainingAnnualLeaveDays : 0;
+        $personalRecentRequests = LeaveRequest::where('EmployeeNumber', $user->EmployeeNumber)
+            ->with('leaveType')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
 
-    // Departments with employee counts
-    $departments = Department::withCount('employees')->get();
-    $departments = Department::withCount('employees')->with('supervisor')->get();
+        // --- Global Stats ---
+        $totalEmployees = Employee::count();
+        $maleEmployees = Employee::where('Gender', 'Male')->count();
+        $femaleEmployees = Employee::where('Gender', 'Female')->count();
 
+        // Positions and Grades statistics
+        $totalPositions = Position::count();
+        $totalGrades = Grade::count();
 
-    // Recent leave requests
-    $recentLeaveRequests = LeaveRequest::with(['employee', 'leaveType'])
-        ->latest()
-        ->take(5)
-        ->get();
+        // Departments with employee counts
+        $departments = Department::withCount('employees')->with('supervisor')->get();
 
-    return view('dashboards.index', [ // dashboard.index is the main dashboard in the admin function
-        'totalEmployees' => $totalEmployees, 
-        'maleEmployees' => $maleEmployees,
-        'femaleEmployees' => $femaleEmployees,
-        'totalPositions' => $totalPositions,
-        'totalGrades' => $totalGrades,
-        'departments' => $departments,
-        'recentLeaveRequests' => $recentLeaveRequests,
-    ]);
+        // Recent leave requests (Global)
+        $recentLeaveRequests = LeaveRequest::with(['employee', 'leaveType'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // --- Employees Currently on Leave (Global) ---
+        $today = now()->format('Y-m-d');
+        $employeesOnLeave = LeaveRequest::with(['employee', 'employee.department', 'leaveType'])
+            ->where('RequestStatus', 'Approved')
+            ->where('StartDate', '<=', $today)
+            ->where('EndDate', '>=', $today)
+            ->get();
+
+        return view('dashboards.index', compact(
+            'totalEmployees',
+            'maleEmployees',
+            'femaleEmployees',
+            'totalPositions',
+            'totalGrades',
+            'departments',
+            'recentLeaveRequests',
+            'personalLeaveBalance',
+            'personalRecentRequests',
+            'employeesOnLeave'
+        ));
 }
 
 public function admin()

@@ -37,23 +37,50 @@ class LeaveRequestController extends Controller
 
     public function index(Request $request)
     {
-        $leaveRequests = LeaveRequest::with([
+        $query = LeaveRequest::with([
             'employee:EmployeeNumber,FirstName,LastName',
             'leaveType:LeaveTypeID,LeaveTypeName',
             'supervisor:EmployeeNumber,FirstName,LastName'
-        ])
-        ->when($request->search, function ($query, $search) {
+        ]);
+
+        // Apply Search
+        if ($request->search) {
+            $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('EmployeeNumber', 'like', "%{$search}%")
-                  ->orWhereHas('employee', fn($q) => $q->where('FullName', 'like', "%{$search}%"))
                   ->orWhere('RequestStatus', 'like', "%{$search}%")
-                  ->orWhereHas('leaveType', fn($q) => $q->where('TypeName', 'like', "%{$search}%"));
+                  ->orWhereHas('employee', function ($q) use ($search) {
+                      $q->where('FirstName', 'like', "%{$search}%")
+                        ->orWhere('LastName', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('leaveType', function ($q) use ($search) {
+                      $q->where('LeaveTypeName', 'like', "%{$search}%");
+                  });
             });
-        })
-        ->orderByDesc('created_at')
-        ->paginate(15);
+        }
 
-        return view('leave_requests.index', compact('leaveRequests'));
+        // Apply Status Filter
+        if ($request->status) {
+            $query->where('RequestStatus', $request->status);
+        }
+
+        // Clone query for stats BEFORE pagination
+        $statsQuery = clone $query;
+        $totalCount = $statsQuery->count();
+        $approvedCount = (clone $statsQuery)->where('RequestStatus', 'Approved')->count();
+        $rejectedCount = (clone $statsQuery)->where('RequestStatus', 'Rejected')->count();
+        $pendingCount = (clone $statsQuery)->where('RequestStatus', 'Pending Admin Verification')->count();
+
+        $leaveRequests = $query->orderByDesc('created_at')->paginate(15);
+
+        return view('leave_requests.index', [
+            'leaveRequests' => $leaveRequests,
+            'totalCount' => $totalCount,
+            'approvedCount' => $approvedCount,
+            'rejectedCount' => $rejectedCount,
+            'pendingCount' => $pendingCount,
+            'employee' => auth()->user(),
+        ]);
     }
 
     public function create()
@@ -228,7 +255,6 @@ class LeaveRequestController extends Controller
             $leaveRequest->update([
                 'RequestStatus' => 'Rejected',
                 'SupervisorRejectionReason' => $validated['SupervisorRejectionReason'],
-                'RejectionReason' => $validated['SupervisorRejectionReason'], // Keep both for safety
             ]);
 
             if ($leaveRequest->wasChanged()) {
@@ -300,7 +326,6 @@ class LeaveRequestController extends Controller
             $leaveRequest->update([
                 'RequestStatus' => 'Rejected by Admin',
                 'AdminRejectionReason' => $validated['AdminRejectionReason'],
-                'RejectionReason' => $validated['AdminRejectionReason'], // Keep both for safety
                 'AdminVerified' => false,
             ]);
 

@@ -12,9 +12,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Call the LeaveSysSeeder
+        // Call the production data seeder
         $this->call([
-            LeaveSysSeeder::class,
+            ProductionDataSeeder::class,
         ]);
     }
 }

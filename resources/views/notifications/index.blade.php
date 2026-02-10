@@ -6,9 +6,7 @@
 <div class="container">
     <h1>Notifications</h1>
     
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+
 
     @if($notifications->count())
         <form action="{{ route('notifications.markAllAsRead') }}" method="POST" style="display:inline;">

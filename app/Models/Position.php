@@ -15,6 +15,7 @@ class Position extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
+        'PositionID',
         'PositionName', // Add relevant fields here
         'GradeID', // Ensure this field exists in your database
         'DepartmentID', 

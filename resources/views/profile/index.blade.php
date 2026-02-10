@@ -6,11 +6,7 @@
 <div class="container mt-4 profile-container">
     <h2 class="text-center text-primary">User Profile</h2>
 
-    @if(session('success'))
-        <div class="alert alert-success text-center">
-            {{ session('success') }}
-        </div>
-    @endif
+
 
     <!-- Display Profile Photo -->
     <div class="text-center">

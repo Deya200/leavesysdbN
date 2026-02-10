@@ -6,13 +6,7 @@
 <div class="container mt-5">
     <h2 class="mb-4">Leave Request Form</h2>
 
-    <!-- Success Message -->
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+
 
     <!-- Error Message -->
     @if ($errors->any())

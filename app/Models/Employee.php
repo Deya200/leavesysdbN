@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
+use Illuminate\Notifications\Notifiable;
 
 class Employee extends Authenticatable
 {
-    use HasFactory; // Added HasRoles for role-based access
+    use HasFactory, Notifiable; // Added Notifiable for invitation emails
 
     protected $table = 'employees';
     protected $primaryKey = 'EmployeeNumber';
@@ -66,7 +66,7 @@ class Employee extends Authenticatable
      */
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, 'DepartmentID', 'DepartmentID'); // Use correct FK reference
+        return $this->belongsTo(Department::class, 'DepartmentID', 'DepartmentID'); // Use correct FK and Pascal PK
     }
 
     /**

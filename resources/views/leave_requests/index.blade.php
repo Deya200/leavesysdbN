@@ -14,7 +14,7 @@
    <div class="row text-center">
     <!-- Welcome Section -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-              <img src="{{ asset('welcomedash.svg') }}" alt="Welcome Illustration" class="illustration">
+
 
               <div class="flex justify-between items-center">
               <div class="animate__animated animate__fadeInDown text-center mt-5">
@@ -25,45 +25,92 @@
               </div>
     </div>
     </div>
-    <!-- Summary Cards for Admin -->
-    <div class="row mb-4" style="padding-top: 10px;">
-
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-5">
         <div class="col-md-3">
-            <div class="card shadow ">
-                <div class="card-body text-center" style="background-color: #5169C4; color: white;">
-                    <h5>Total Requests</h5>
-                    <h3>{{ $leaveRequests->count() }}</h3>
+            <div class="card border-0 rounded-4 shadow-sm overflow-hidden h-100 animate__animated animate__fadeInUp">
+                <div class="card-body p-4" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">
+                    <div class="d-flex align-items-center justify-content-between mb-3 text-white">
+                        <div class="bg-white bg-opacity-20 p-3 rounded-3">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="text-white text-opacity-75 mb-1 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Total Requests</h6>
+                            <h2 class="mb-0 fw-bold">{{ $totalCount ?? $leaveRequests->total() }}</h2>
+                        </div>
+                    </div>
+                    <div class="progress bg-white bg-opacity-20" style="height: 4px;">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: 100%"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card shadow border-success">
-                <div class="card-body text-center" style="background-color: #5169C4; color: white;">
-                    <h5>Approved Requests</h5>
-                    <h3 style="color: #A3E4A7;">{{ $leaveRequests->where('RequestStatus', 'Approved')->count() }}</h3>
+            <div class="card border-0 rounded-4 shadow-sm overflow-hidden h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                <div class="card-body p-4" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <div class="d-flex align-items-center justify-content-between mb-3 text-white">
+                        <div class="bg-white bg-opacity-20 p-3 rounded-3">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="text-white text-opacity-75 mb-1 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Approved</h6>
+                            <h2 class="mb-0 fw-bold">{{ $approvedCount ?? 0 }}</h2>
+                        </div>
+                    </div>
+                    @php 
+                        $approvedPercent = ($totalCount > 0) ? ($approvedCount / $totalCount) * 100 : 0;
+                    @endphp
+                    <div class="progress bg-white bg-opacity-20" style="height: 4px;">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: {{ $approvedPercent }}%"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card shadow border-danger">
-                <div class="card-body text-center" style="background-color: #5169C4; color: white;">
-                    <h5 >Rejected Requests</h5>
-                    <h3 class="text-danger">{{ $leaveRequests->where('RequestStatus', 'Rejected')->count() }}</h3>
+            <div class="card border-0 rounded-4 shadow-sm overflow-hidden h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="card-body p-4" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <div class="d-flex align-items-center justify-content-between mb-3 text-white">
+                        <div class="bg-white bg-opacity-20 p-3 rounded-3">
+                            <i class="fas fa-times-circle fa-2x"></i>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="text-white text-opacity-75 mb-1 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Rejected</h6>
+                            <h2 class="mb-0 fw-bold">{{ $rejectedCount ?? 0 }}</h2>
+                        </div>
+                    </div>
+                    @php 
+                        $rejectedPercent = ($totalCount > 0) ? ($rejectedCount / $totalCount) * 100 : 0;
+                    @endphp
+                    <div class="progress bg-white bg-opacity-20" style="height: 4px;">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: {{ $rejectedPercent }}%"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card shadow border-warning">
-                <div class="card-body text-center" style="background-color: #5169C4; color: white;">
-                    <h5>Pending Requests</h5>
-                    <h3 class="text-warning">{{ $leaveRequests->where('RequestStatus', 'Pending Admin Verification')->count() }}</h3>
+            <div class="card border-0 rounded-4 shadow-sm overflow-hidden h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                <div class="card-body p-4" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <div class="d-flex align-items-center justify-content-between mb-3 text-white">
+                        <div class="bg-white bg-opacity-20 p-3 rounded-3">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="text-white text-opacity-75 mb-1 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Pending</h6>
+                            <h2 class="mb-0 fw-bold">{{ $pendingCount ?? 0 }}</h2>
+                        </div>
+                    </div>
+                    @php 
+                        $pendingPercent = ($totalCount > 0) ? ($pendingCount / $totalCount) * 100 : 0;
+                    @endphp
+                    <div class="progress bg-white bg-opacity-20" style="height: 4px;">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: {{ $pendingPercent }}%"></div>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Filters for Admin/Supervisor -->
@@ -248,6 +295,22 @@
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Prevent double form submissions
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (form.classList.contains('submitting')) {
+                    e.preventDefault();
+                    return false;
+                }
+                form.classList.add('submitting');
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Processing...';
+                }
+            });
         });
     });
 </script>

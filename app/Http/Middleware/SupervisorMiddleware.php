@@ -19,7 +19,7 @@ class SupervisorMiddleware
     public function handle(Request $request, Closure $next)
     {
         // Using Spatie's hasRole method to check if the user has the Supervisor role.
-        if ($request->user() && $request->user()->hasRole('Supervisor')) {
+        if ($request->user() && $request->user()->isSupervisor()) {
             return $next($request);
         }
 

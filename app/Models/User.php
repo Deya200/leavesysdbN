@@ -9,10 +9,11 @@ use App\Models\Grade;
 use App\Models\Role;
 use App\Models\Department;
 use App\Models\LeaveRequest;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $primaryKey = 'EmployeeNumber';
     protected $keyType = 'string';

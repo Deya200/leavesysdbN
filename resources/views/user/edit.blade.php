@@ -27,9 +27,9 @@
                 <!-- Role Selection -->
                 <div class="mb-3">
                     <label class="form-label">Role</label>
-                    <select name="role" class="form-select" required>
+                    <select name="role_id" class="form-select" required>
                         @foreach(\App\Models\Role::all() as $role)
-                            <option value="{{ $role->name }}" {{ $user->role === $role->name ? 'selected' : '' }}>
+                            <option value="{{ $role->id }}" {{ $user->role_id == $role->id ? 'selected' : '' }}>
                                 {{ ucfirst($role->name) }}
                             </option>
                         @endforeach

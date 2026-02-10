@@ -5,10 +5,7 @@
     <div class="profile-container">
         <h1 class="text-center text-primary">Edit Profile - {{ $user->name }}</h1>
 
-        <!-- Success Message -->
-        @if (session('success'))
-            <div class="alert alert-success text-center">{{ session('success') }}</div>
-        @endif
+
 
         <!-- Display Profile Picture -->
         <div class="text-center mb-3">

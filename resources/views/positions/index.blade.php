@@ -80,12 +80,7 @@
         </form>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+
 
     <div class="text-end mb-4">
         <a href="{{ route('positions.create') }}" class="btn btn-success">Add New Position</a>

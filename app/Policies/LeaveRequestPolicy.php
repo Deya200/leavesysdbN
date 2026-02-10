@@ -40,6 +40,11 @@ class LeaveRequestPolicy
 
     public function supervisorApprove(Employee $user, LeaveRequest $leaveRequest)
     {
+        // Allow admins to approve at any stage, or supervisors for their direct reports
+        if ($user->isAdmin()) {
+            return strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
+        }
+        
         return $user->isSupervisor()
             && $user->EmployeeNumber === $leaveRequest->employee->SupervisorID
             && strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
@@ -53,6 +58,19 @@ class LeaveRequestPolicy
 
     public function supervisorReject(Employee $user, LeaveRequest $leaveRequest)
     {
-        return $this->supervisorApprove($user, $leaveRequest);
+        // Allow admins to reject at any stage, or supervisors for their direct reports
+        if ($user->isAdmin()) {
+            return strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
+        }
+        
+        return $user->isSupervisor()
+            && $user->EmployeeNumber === $leaveRequest->employee->SupervisorID
+            && strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
+    }
+
+    public function adminReject(Employee $user, LeaveRequest $leaveRequest)
+    {
+        return $user->isAdmin()
+            && strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') === 0;
     }
 }

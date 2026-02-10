@@ -18,12 +18,7 @@
 <div class="container mt-3">
     <h2 class="mb-4">Leave Requests</h2>
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+
 
     @if ($leaveRequests->isNotEmpty())
         <div class="table-responsive">

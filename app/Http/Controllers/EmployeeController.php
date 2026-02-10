@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Employee;
 use App\Models\Department;
@@ -10,6 +11,9 @@ use App\Models\Position;
 use App\Models\LeaveType;
 use App\Models\LeaveRequest;
 use App\Models\Role;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
 
 class EmployeeController extends Controller
 {
@@ -88,10 +92,20 @@ class EmployeeController extends Controller
 
 
         $employee = Employee::create($validatedData);
-        // No need to call assignRole since role_id defines the employee’s role.
+
+        // Send invitation if email is provided
+        if ($employee->email) {
+            try {
+                $token = \Illuminate\Support\Facades\Password::getRepository()->create($employee);
+                $employee->sendPasswordResetNotification($token);
+            } catch (\Exception $e) {
+                // Silently fail or log if mail fails, but don't break the redirect
+                \Illuminate\Support\Facades\Log::error("Failed to send invitation to new employee: " . $e->getMessage());
+            }
+        }
 
         return redirect()->route('employees.index')
-                         ->with('success', 'Employee successfully added!');
+                         ->with('success', 'Employee successfully added! ' . ($employee->email ? 'An invitation has been sent.' : ''));
     }
 
     /**
@@ -229,5 +243,58 @@ class EmployeeController extends Controller
         return view('employees.show', compact('employee'));
     }
 
+    /**
+     * Send a password reset link as an invitation.
+     */
+    public function sendInvitation(Employee $employee)
+    {
+        if (!$employee->email) {
+            return back()->with('error', "Employee {$employee->FirstName} does not have an email address.");
+        }
 
+        $token = Password::getRepository()->create($employee);
+        $employee->sendPasswordResetNotification($token);
+
+        return back()->with('success', "Invitation sent to {$employee->FirstName} ({$employee->email}).");
+    }
+
+    /**
+     * Bulk send invitations.
+     */
+    public function bulkSendInvitations(Request $request)
+    {
+        $employeeNumbers = $request->input('employee_numbers', []);
+        
+        if ($request->input('scope') === 'all') {
+            $employees = Employee::whereNotNull('email')->get();
+        } else {
+            $employees = Employee::whereIn('EmployeeNumber', $employeeNumbers)->whereNotNull('email')->get();
+        }
+
+        if ($employees->isEmpty()) {
+            return back()->with('error', "No employees with email addresses selected.");
+        }
+
+        foreach ($employees as $employee) {
+            $token = Password::getRepository()->create($employee);
+            $employee->sendPasswordResetNotification($token);
+        }
+
+        return back()->with('success', "Invitations sent to " . $employees->count() . " employees.");
+    }
+
+    /**
+     * Manually set password for an employee.
+     */
+    public function manualSetPassword(Request $request, Employee $employee)
+    {
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $employee->password = Hash::make($request->password);
+        $employee->save();
+
+        return back()->with('success', "Password manually set for {$employee->FirstName} {$employee->LastName}.");
+    }
 }

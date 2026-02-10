@@ -6,9 +6,7 @@
 <style>
     /* Main Container */
     .manage-container {
-        max-width: 1200px;
-        margin: auto;
-        padding: 20px;
+        /* Layout handled globally */
     }
 
     /* Cards */
@@ -173,10 +171,19 @@
     <div class="card-custom mb-4 p-3">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
             <!-- Title -->
-            <h5 class="mb-3 mb-md-0" style="font-weight: 600; color: #2E3A87;">Employee List</h5>
-            
-            <!-- Search and Add Button Container -->
+            <!-- Search and Bulk Action Container -->
             <div class="d-flex flex-column flex-md-row gap-3">
+                <!-- Bulk Actions -->
+                <div id="bulkActions" style="display: none;" class="animate__animated animate__fadeIn">
+                    <form action="{{ route('admin.employees.bulkSendInvitations') }}" method="POST" id="bulkInviteForm">
+                        @csrf
+                        <input type="hidden" name="scope" value="selected">
+                        <button type="button" onclick="submitBulkInvite()" class="btn btn-warning btn-sm">
+                            <i class="fas fa-paper-plane me-1"></i> Send Selected Invites
+                        </button>
+                    </form>
+                </div>
+
                 <!-- Search Bar -->
                 <div class="flex-grow-1" style="min-width: 250px;">
                     <div class="input-group">
@@ -209,6 +216,7 @@
                 <table class="table table-bordered align-middle">
                     <thead>
                         <tr>
+                            <th><input type="checkbox" id="selectAll"></th>
                             <th>No</th>
                             <th>Employee Number</th>
                             <th>First Name</th>
@@ -224,6 +232,7 @@
                     <tbody>
                         @foreach ($employees as $employee)
                             <tr class="employee-row">
+                                <td><input type="checkbox" class="employee-checkbox" name="selected_employees[]" value="{{ $employee->EmployeeNumber }}"></td>
                                 <td>{{ ($employees->currentPage() - 1) * $employees->perPage() + $loop->iteration }}</td>
                                 <td>{{ $employee->EmployeeNumber }}</td>
                                 <td>{{ $employee->FirstName }}</td>
@@ -235,15 +244,35 @@
                                 <td>{{ $employee->role->name ?? 'N/A' }}</td>
                                 <td>
                                     <div class="d-flex gap-2 justify-content-center">
+                                        <!-- Invitation -->
+                                        @if($employee->email)
+                                            <form action="{{ route('admin.employees.sendInvitation', $employee->EmployeeNumber) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-info text-white" title="Send Invitation">
+                                                    <i class="fas fa-envelope-open-text"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        <!-- Manual Password -->
+                                        <button type="button" class="btn btn-sm btn-warning" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#passwordModal"
+                                                data-emp-num="{{ $employee->EmployeeNumber }}"
+                                                data-emp-name="{{ $employee->FirstName }} {{ $employee->LastName }}"
+                                                title="Set Password Manually">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+
                                         <a href="{{ route('employees.edit', $employee->EmployeeNumber) }}" 
                                            class="btn btn-sm" 
-                                           style="background-color: #2E3A87; color: white;">
+                                           style="background-color: #2E3A87; color: white;" title="Edit">
                                            <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('employees.destroy', $employee->EmployeeNumber) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Delete">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>
@@ -259,11 +288,42 @@
                     {{ $employees->onEachSide(1)->links() }}
                 </div>
             </div>
-        @else
-            <div class="alert alert-info text-center m-0">
-                No employees found. Use the "Add New Employee" button to create one.
+            @else
+                <div class="alert alert-info text-center m-0">
+                    No employees found. Use the "Add New Employee" button to create one.
+                </div>
+            @endif
+    </div>
+</div>
+
+<!-- Manual Password Modal (Moved outside to ensure visibility/z-index) -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog">
+        <form id="passwordForm" method="POST">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary fw-bold">Set Password for <span id="modalEmployeeName"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="password" class="form-label small fw-bold">New Password</label>
+                        <input type="password" class="form-control" name="password" required minlength="8" placeholder="Enter at least 8 characters">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password_confirmation" class="form-label small fw-bold">Confirm Password</label>
+                        <input type="password" class="form-control" name="password_confirmation" required minlength="8" placeholder="Repeat password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save Password
+                    </button>
+                </div>
             </div>
-        @endif
+        </form>
     </div>
 </div>
 @endsection
@@ -275,15 +335,68 @@
         const searchInput = document.getElementById('employeeSearch');
         const employeeRows = document.querySelectorAll('.employee-row');
 
-        if (searchInput && employeeRows.length > 0) {
+        if (searchInput && employeeRows.length \u003e 0) {
             searchInput.addEventListener('input', function () {
                 const searchTerm = this.value.trim().toLowerCase();
-                employeeRows.forEach(row => {
+                employeeRows.forEach(row =\u003e {
                     const text = row.textContent.toLowerCase();
                     row.style.display = text.includes(searchTerm) ? 'table-row' : 'none';
                 });
             });
         }
+
+        // Bulk Selection Logic
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.employee-checkbox');
+        const bulkActions = document.getElementById('bulkActions');
+
+        function updateBulkHeader() {
+            const anyChecked = Array.from(checkboxes).some(cb =\u003e cb.checked);
+            bulkActions.style.display = anyChecked ? 'block' : 'none';
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb =\u003e cb.checked = selectAll.checked);
+                updateBulkHeader();
+            });
+        }
+
+        checkboxes.forEach(cb =\u003e {
+            cb.addEventListener('change', updateBulkHeader);
+        });
     });
+
+    // Handle Password Modal show event to populate data
+    const passwordModal = document.getElementById('passwordModal');
+    if (passwordModal) {
+        passwordModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const empNum = button.getAttribute('data-emp-num');
+            const name = button.getAttribute('data-emp-name');
+            
+            document.getElementById('modalEmployeeName').textContent = name;
+            document.getElementById('passwordForm').action = '/admin/employees/' + empNum + '/manual-set-password';
+        });
+    }
+
+    function submitBulkInvite() {
+        const selected = Array.from(document.querySelectorAll('.employee-checkbox:checked')).map(cb =\u003e cb.value);
+        if (selected.length === 0) return;
+
+        const form = document.getElementById('bulkInviteForm');
+        // Clear existing hidden inputs
+        form.querySelectorAll('input[name="employee_numbers[]"]').forEach(el =\u003e el.remove());
+        
+        selected.forEach(num =\u003e {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'employee_numbers[]';
+            input.value = num;
+            form.appendChild(input);
+        });
+
+        form.submit();
+    }
 </script>
 @endsection

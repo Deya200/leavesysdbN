@@ -3,9 +3,7 @@
     
     <!-- Sidebar Header -->
     <div class="offcanvas-header border-bottom border-light border-opacity-10 py-4 d-flex flex-column align-items-center">
-        <div class="p-2 bg-white rounded-circle shadow-sm mb-2 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
-            <img src="{{ asset('logo3.png') }}" alt="Logo" class="img-fluid" style="max-height: 40px;">
-        </div>
+
         <h5 class="offcanvas-title mt-2 fw-bold text-white small text-uppercase tracking-wider text-center">ABC Leave Management System</h5>
         <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 d-md-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
@@ -19,12 +17,14 @@
                 <li class="nav-item px-3 mb-2 small text-uppercase text-white-50 fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Menu</li>
 
                 <!-- Main Navigation -->
+                @if(auth()->user()->role_id === 1)
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all" href="{{ route('dashboard') }}">
                         <i class="fas fa-home fs-5 " style="width: 24px;"></i> 
                         <span>Home</span>
                     </a>
                 </li>
+                @endif
 
                 @if(auth()->user()->role_id === 1)
                     <li class="nav-item">
@@ -119,7 +119,7 @@
                             <div class="position-relative">
                                 <i class="fas fa-list-alt fs-5" style="width: 24px;"></i>
                                 @php
-                                    $allPending = $leaveRequests->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification', 'Pending Admin Approval'])->count();
+                                    $allPending = $globalPendingLeaves->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification', 'Pending Admin Approval'])->count();
                                 @endphp
                                 @if($allPending > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="width: 8px; height: 8px;"></span>
@@ -146,7 +146,7 @@
                             <div class="position-relative">
                                 <i class="fas fa-bell fs-5" style="width: 24px;"></i>
                                 @php
-                                    $pendingRequests = $leaveRequests->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification', 'Pending Admin Approval'])->count();
+                                    $pendingRequests = $globalPendingLeaves->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification', 'Pending Admin Approval'])->count();
                                 @endphp
                                 @if($pendingRequests > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="width: 8px; height: 8px;"></span>

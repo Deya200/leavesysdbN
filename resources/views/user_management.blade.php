@@ -8,76 +8,127 @@
     $users = \App\Models\User::with('employee')->orderBy('created_at', 'desc')->get();
 @endphp
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4">User Management</h2>
+@section('styles')
+<style>
+    .manage-container {
+        /* max-width handled globally */
+    }
 
-    <div class="row mb-3">
-        <div class="col-md-12 text-end">
-            <a href="{{ route('users.create') }}" class="btn btn-success btn-lg shadow">Add New User</a>
+    .card-custom {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        padding: 20px;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .table {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow: hidden;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead tr {
+        background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+        color: white;
+    }
+
+    .table th, .table td {
+        padding: 12px;
+        vertical-align: middle;
+        text-align: center;
+        border: none;
+    }
+
+    .hover-up:hover {
+        transform: translateY(-2px);
+        transition: all 0.2s ease;
+    }
+</style>
+@endsection
+
+@section('content')
+@php
+    $users = \App\Models\User::with('employee')->orderBy('created_at', 'desc')->get();
+@endphp
+
+<div class="manage-container py-4">
+    <!-- Header Card -->
+    <div class="card-custom mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold text-primary mb-0">User Management</h4>
+            <a href="{{ route('users.create') }}" class="btn btn-primary" style="background-color: #6a1b9a; border-color: #6a1b9a;">
+                <i class="fas fa-plus me-1"></i> Add New User
+            </a>
         </div>
     </div>
 
-    <!-- Users Table -->
-    <div class="card shadow">
-        <div class="card-header bg-secondary text-white">
-            <h5>Registered Users</h5>
-        </div>
-        <div class="card-body">
-            @if ($users->isNotEmpty())
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-primary text-center">
-                            <tr>
-                                <th>Full Name</th>
-                                <th>Gender</th>
-                                <th>Role</th>
-                                <th>Email</th>
-                                <th>Employee Number</th>
-                                <th>Registration Date</th>
-                                <th>Account Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($users as $user)
-                                <tr>
-                                    <td>{{ $user->name }}</td>
-                                    <td>{{ optional($user->employee)->gender ?? 'Not Assigned' }}</td> <!-- ✅ Improved gender retrieval -->
-                                    <td>{{ ucfirst($user->role) }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->EmployeeNumber ?? 'Not Available' }}</td>
-                                    <td>{{ $user->created_at->format('Y-m-d') }}</td>
-                                    <td>
-                                        <span class="badge {{ $user->is_active ? 'bg-success' : 'bg-danger' }}">
-                                            {{ $user->is_active ? 'Active' : 'Disabled' }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-primary">Edit</a> <!-- ✅ Edit Button -->
-
-                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</button>
-                                        </form>
-
-                                        <form action="{{ route('users.toggleStatus', $user->id) }}" method="POST" style="display:inline;">
+    <!-- Users Table Card -->
+    <div class="card-custom">
+        @if ($users->isNotEmpty())
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Role</th>
+                            <th>Email</th>
+                            <th>Employee No.</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($users as $user)
+                            <tr class="hover-up">
+                                <td class="fw-bold">{{ $user->name }}</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ ucfirst($user->role->name ?? 'N/A') }}
+                                    </span>
+                                </td>
+                                <td>{{ $user->email }}</td>
+                                <td><code class="text-primary">{{ $user->EmployeeNumber ?? 'N/A' }}</code></td>
+                                <td>{{ $user->created_at->format('M d, Y') }}</td>
+                                <td>
+                                    <span class="badge {{ $user->is_active ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $user->is_active ? 'Active' : 'Disabled' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('users.toggleStatus', $user->id) }}" method="POST">
                                             @csrf
                                             @method('PUT')
-                                            <button type="submit" class="btn btn-sm {{ $user->is_active ? 'btn-warning' : 'btn-success' }}">
-                                                {{ $user->is_active ? 'Deactivate' : 'Activate' }}
+                                            <button type="submit" class="btn btn-sm {{ $user->is_active ? 'btn-outline-warning' : 'btn-outline-success' }}" title="{{ $user->is_active ? 'Deactivate' : 'Activate' }}">
+                                                <i class="fas {{ $user->is_active ? 'fa-user-slash' : 'fa-user-check' }}"></i>
                                             </button>
                                         </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="alert alert-info text-center">No users found.</div>
-            @endif
-        </div>
+                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Delete this user?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="alert alert-info text-center m-0">No users found.</div>
+        @endif
     </div>
 </div>
 @endsection

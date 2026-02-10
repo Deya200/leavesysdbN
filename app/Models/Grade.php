@@ -27,6 +27,7 @@ class Grade extends Model
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
+        'GradeID',
         'GradeName',        // Name of the grade
         'AnnualLeaveDays',  // Number of annual leave days
     ];
@@ -40,6 +41,6 @@ class Grade extends Model
      */
     public function employees()
     {
-        return $this->hasMany(Employee::class, 'GradeID', 'GradeID');
+        return $this->hasMany(Employee::class, 'GradeID', 'gradeid');
     }
 }

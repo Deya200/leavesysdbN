@@ -71,13 +71,7 @@
         <p class="mb-2">Manage different types of leave available to employees.</p>
     </div>
 
-    <!-- Flash Message -->
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+
 
     <!-- Add New Button -->
     <div class="text-end mb-3">

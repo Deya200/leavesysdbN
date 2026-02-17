@@ -23,18 +23,22 @@
   <style>
     :root {
       --font-primary: 'Inter', sans-serif;
-      --color-bg: #f3f4f6;
+      --color-bg: #f8f9fa; /* Softer light gray */
       --color-surface: #ffffff;
-      --color-primary: #4f46e5; /* Indigo 600 */
+      --color-primary: #4f46e5; 
       --color-primary-dark: #4338ca;
       --color-secondary: #64748b;
-      --color-text-main: #111827;
-      --color-text-muted: #6b7280;
+      --color-text-main: #1e293b; /* Darker slate */
+      --color-text-muted: #64748b;
+      --sidebar-width: 280px;
+      --header-height: 60px;
+      
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --radius-md: 0.5rem;
-      --radius-lg: 0.75rem;
+      
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
     }
 
     body {
@@ -43,109 +47,91 @@
       color: var(--color-text-main);
       -webkit-font-smoothing: antialiased;
     }
-
-    /* Transitions */
-    body, .card, .btn, .form-control {
-      transition: all 0.2s ease-in-out;
+    
+    /* Layout Logic */
+    @media (min-width: 992px) {
+        /* Force Sidebar Visible & Fixed */
+        #mainSidebar {
+            transform: none !important;
+            visibility: visible !important;
+            top: var(--header-height) !important;
+            height: calc(100vh - var(--header-height)) !important;
+            box-shadow: none !important; /* Remove offcanvas shadow */
+        }
+        
+        /* Shift Main Content */
+        main {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 2rem !important; /* Proper padding for desktop */
+        }
+        
+        /* Hide backdrop if it appears */
+        .offcanvas-backdrop {
+            display: none !important;
+        }
+    }
+    
+    @media (max-width: 991.98px) {
+        main {
+            margin-left: 0;
+            width: 100%;
+            padding: 1rem;
+        }
     }
 
-    h1, h2, h3, h4, h5, h6 {
-      font-weight: 600;
-      color: var(--color-text-main);
-    }
-
-    /* Card Styling */
+    /* Beautification - Cards */
     .card {
       background: var(--color-surface);
-      border: none;
+      border: 1px solid rgba(226, 232, 240, 0.8);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-sm);
       margin-bottom: 1.5rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .card:hover {
       box-shadow: var(--shadow-md);
-    }
-
-    .card-header {
-      background-color: transparent;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 1.25rem 1.5rem;
-      font-weight: 600;
-      color: var(--color-text-main);
-    }
-
-    .card-body {
-      padding: 1.5rem;
-    }
-
-    /* Button Styling */
-    .btn {
-      border-radius: var(--radius-md);
-      padding: 0.5rem 1rem;
-      font-weight: 500;
-    }
-
-    .btn-primary {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
-    }
-
-    .btn-primary:hover {
-      background-color: var(--color-primary-dark);
-      border-color: var(--color-primary-dark);
-    }
-
-    /* Table Styling */
-    .table {
-      margin-bottom: 0;
-      vertical-align: middle;
+      transform: translateY(-2px);
     }
     
-    .table thead th {
-      background-color: #f9fafb;
-      color: var(--color-text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0.75rem 1.5rem;
-    }
-
-    .table tbody td {
-      padding: 1rem 1.5rem;
+    .card-header {
+      background-color: #fff;
+      border-bottom: 1px solid #f1f5f9;
+      padding: 1.25rem 1.5rem;
+      font-weight: 700;
       color: var(--color-text-main);
-      border-bottom: 1px solid #f3f4f6;
+      border-top-left-radius: var(--radius-lg) !important;
+      border-top-right-radius: var(--radius-lg) !important;
     }
 
-    .table-hover tbody tr:hover {
-      background-color: #f9fafb;
-    }
-
-    /* Badge Styling */
-    .badge {
-      padding: 0.35em 0.65em;
-      border-radius: 9999px;
+    /* Beautification - Buttons */
+    .btn {
+      border-radius: var(--radius-md);
+      padding: 0.6rem 1.2rem;
       font-weight: 500;
-      font-size: 0.75em;
+      letter-spacing: 0.01em;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--color-primary-dark);
+        border-color: var(--color-primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3);
     }
 
-    /* Footer */
-    footer {
-      background-color: white;
-      color: var(--color-text-muted);
-      padding: 1.5rem 0;
-      margin-top: auto;
-      border-top: 1px solid #e5e7eb;
-      font-size: 0.875rem;
-    }
-
-    /* Alerts */
+    /* Beautification - Alerts */
     .alert {
       border: none;
       border-radius: var(--radius-md);
-      box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-sm);
     }
   </style>
 
@@ -156,17 +142,19 @@
   <div class="d-flex flex-grow-1">
       @include('layouts.sidebar')
       
-      <main class="flex-grow-1 py-4" style="transition: all 0.3s ease; width: 100%; overflow-x: hidden;">
+      <main class="flex-grow-1" style="margin-top: 0;">
         @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+            <div class="alert alert-success alert-dismissible fade show mb-4 d-flex align-items-center" role="alert">
+                <i class="fas fa-check-circle me-3 fs-5"></i>
+                <div>{{ session('success') }}</div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+            <div class="alert alert-danger alert-dismissible fade show mb-4 d-flex align-items-center" role="alert">
+                <i class="fas fa-exclamation-circle me-3 fs-5"></i>
+                <div>{{ session('error') }}</div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -175,9 +163,9 @@
       </main>
   </div>
 
-  <footer class="text-center mt-auto">
+  <footer class="text-center mt-auto py-3 bg-white border-top">
     <div class="container">
-        <p class="mb-0">&copy; {{ date('Y') }} Leave Management System. All rights reserved.</p>
+        <p class="mb-0 text-muted small">&copy; {{ date('Y') }} Leave Management System. All rights reserved.</p>
     </div>
   </footer>
 
@@ -192,65 +180,7 @@
         return new bootstrap.Tooltip(tooltipTriggerEl)
       })
 
-      // Sidebar & Main Content Logic
-      const sidebar = document.getElementById('mainSidebar');
-      const mainContent = document.querySelector('main');
-      const sidebarWidth = 280; // Must match the width in sidebar.blade.php
-
-      if (sidebar && mainContent) {
-        const bsOffcanvas = new bootstrap.Offcanvas(sidebar);
-
-        // Function to adjust layout
-        function adjustLayout(isOpen) {
-            if (window.innerWidth >= 992) { // Desktop breakpoint (lg)
-                mainContent.style.paddingLeft = isOpen ? (sidebarWidth + 20) + 'px' : '20px';
-                mainContent.style.paddingRight = '20px';
-            } else {
-                mainContent.style.paddingLeft = '15px';
-                mainContent.style.paddingRight = '15px';
-            }
-        }
-
-        // On show/hide events
-        sidebar.addEventListener('show.bs.offcanvas', () => adjustLayout(true));
-        sidebar.addEventListener('hide.bs.offcanvas', () => adjustLayout(false));
-
-        // Initial State for Desktop
-        if (window.innerWidth >= 992) {
-            bsOffcanvas.show(); // Auto-show on desktop
-             // adjustLayout(true) will be triggered by the show event, 
-            // but we can force it immediately to avoid layout shift if needed
-        }
-
-        // Handle Window Resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth < 992) {
-                 mainContent.style.paddingLeft = '15px';
-                 mainContent.style.paddingRight = '15px';
-            } else {
-                if (sidebar.classList.contains('show')) {
-                    mainContent.style.paddingLeft = (sidebarWidth + 20) + 'px';
-                } else {
-                    mainContent.style.paddingLeft = '20px';
-                }
-                mainContent.style.paddingRight = '20px';
-            }
-        });
-
-        // Auto-close sidebar on mobile when a link is clicked
-        const navLinks = sidebar.querySelectorAll('.nav-link, .dropdown-item');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth < 992) {
-                    bsOffcanvas.hide();
-                }
-            });
-        });
-      }
-    });
-
-    // Dark Mode Logic (Preserved)
-    document.addEventListener('DOMContentLoaded', function() {
+      // Dark Mode Logic
       const btn = document.getElementById('darkModeToggle');
       if(btn) {
           const icon = btn.querySelector('i');
@@ -258,15 +188,19 @@
     
           if (localStorage.getItem('darkMode') === 'on') {
             document.body.classList.add(darkClass);
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+            if(icon) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
           }
     
           btn.addEventListener('click', function() {
             document.body.classList.toggle(darkClass);
             const isDark = document.body.classList.contains(darkClass);
-            icon.classList.toggle('fa-moon', !isDark);
-            icon.classList.toggle('fa-sun', isDark);
+            if(icon) {
+                icon.classList.toggle('fa-moon', !isDark);
+                icon.classList.toggle('fa-sun', isDark);
+            }
             localStorage.setItem('darkMode', isDark ? 'on' : 'off');
           });
       }

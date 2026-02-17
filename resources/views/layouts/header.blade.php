@@ -5,7 +5,7 @@
             <!-- Left: Hamburger (Sidebar Toggle) -->
             <div class="d-flex align-items-center gap-2">
                 <!-- Hamburger button: always visible -->
-                <button class="btn btn-outline-secondary me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar" id="menuToggle">
+                <button class="btn btn-outline-secondary me-2 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar" id="menuToggle">
                     <i class="fas fa-bars"></i>
                 </button>
                 <a href="{{ route('dashboard') }}">

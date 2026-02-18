@@ -21,7 +21,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('leave-types.update', $leaveType->LeaveTypeID) }}">
+                    <form method="POST" action="{{ route('leave_types.update', $leaveType->LeaveTypeID) }}">
                         @csrf
                         @method('PUT')
 
@@ -29,6 +29,23 @@
                             <label for="LeaveTypeName" class="form-label fw-bold">Leave Type Name</label>
                             <input type="text" class="form-control" id="LeaveTypeName" name="LeaveTypeName" 
                                    value="{{ old('LeaveTypeName', $leaveType->LeaveTypeName) }}" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="IsPaidLeave" class="form-label fw-bold">Is Paid Leave</label>
+                            <select id="IsPaidLeave" name="IsPaidLeave" class="form-select" required>
+                                <option value="1" {{ old('IsPaidLeave', $leaveType->IsPaidLeave) ? 'selected' : '' }}>Yes</option>
+                                <option value="0" {{ old('IsPaidLeave', $leaveType->IsPaidLeave) ? '' : 'selected' }}>No</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="GenderApplicable" class="form-label fw-bold">Gender Applicable</label>
+                            <select id="GenderApplicable" name="GenderApplicable" class="form-select" required>
+                                <option value="Male" {{ old('GenderApplicable', $leaveType->GenderApplicable) === 'Male' ? 'selected' : '' }}>Male</option>
+                                <option value="Female" {{ old('GenderApplicable', $leaveType->GenderApplicable) === 'Female' ? 'selected' : '' }}>Female</option>
+                                <option value="Both" {{ old('GenderApplicable', $leaveType->GenderApplicable) === 'Both' ? 'selected' : '' }}>Both</option>
+                            </select>
                         </div>
 
                         <div class="mb-4">
@@ -52,7 +69,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end">
-                            <a href="{{ route('leave-types.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                            <a href="{{ route('leave_types.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
                             <button type="submit" class="btn btn-primary" style="background: #1e3c72; border: none;">
                                 Update Leave Type
                             </button>

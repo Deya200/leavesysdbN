@@ -32,14 +32,14 @@
                                         @if($type->deductsFromAnnual())
                                             <span class="badge bg-info text-dark">Dynamic (Role/Grade Based)</span>
                                             <small class="d-block text-muted">Annual Leave follows special logic.</small>
-                                        @elseif(is_null($type->MaxLeaveDays))
+                                        @elseif(is_null($type->MaxLeaveDays) || $type->MaxLeaveDays <= 0)
                                             <span class="badge bg-success">Unlimited</span>
                                         @else
                                             {{ $type->MaxLeaveDays }} days
                                         @endif
                                     </td>
                                     <td class="text-end">
-                                        <a href="{{ route('leave-types.edit', $type->LeaveTypeID) }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ route('leave_types.edit', $type->LeaveTypeID) }}" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-edit me-1"></i> Edit
                                         </a>
                                     </td>

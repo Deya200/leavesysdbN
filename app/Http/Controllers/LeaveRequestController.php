@@ -40,8 +40,8 @@ class LeaveRequestController extends Controller
             return null;
         }
 
-        // 2. Configurable Limits (MaxLeaveDays)
-        if (!is_null($leaveType->MaxLeaveDays)) {
+        // 2. Configurable Limits (MaxLeaveDays > 0)
+        if ($leaveType->MaxLeaveDays > 0) {
             $currentYear = now()->year;
             $query = LeaveRequest::where('EmployeeNumber', $employee->EmployeeNumber)
                 ->where('LeaveTypeID', $leaveType->LeaveTypeID)
@@ -323,12 +323,15 @@ class LeaveRequestController extends Controller
 
             if ($leaveRequest->leaveType->deductsFromAnnual()) {
                 $employee = $leaveRequest->employee;
-                $employee->update([
-                    'RemainingAnnualLeaveDays' => max(
-                    0,
-                    $employee->RemainingAnnualLeaveDays - $leaveRequest->TotalDays
-                )
-                ]);
+                $oldBalance = $employee->RemainingAnnualLeaveDays;
+                $newBalance = max(0, $oldBalance - $leaveRequest->TotalDays);
+
+                $employee->update(['RemainingAnnualLeaveDays' => $newBalance]);
+
+                Log::info("Admin Approval: Deducted {$leaveRequest->TotalDays} days from Employee {$employee->EmployeeNumber}. (Old: {$oldBalance}, New: {$newBalance})");
+            }
+            else {
+                Log::info("Admin Approval: No annual leave deduction for type '{$leaveRequest->leaveType->LeaveTypeName}'");
             }
 
             $leaveRequest->update([
@@ -458,10 +461,11 @@ class LeaveRequestController extends Controller
             LeaveExtension::create([
                 'leave_request_id' => $leaveRequest->LeaveRequestID,
                 'employee_number' => auth()->user()->EmployeeNumber,
+                'original_end_date' => $leaveRequest->EndDate,
+                'requested_end_date' => Carbon::parse($leaveRequest->EndDate)->addDays($validated['ExtensionDays']),
                 'extension_days' => $validated['ExtensionDays'],
                 'reason' => $validated['Reason'],
                 'status' => 'Pending',
-                'new_end_date' => Carbon::parse($leaveRequest->EndDate)->addDays($validated['ExtensionDays']),
             ]);
 
             // We do NOT update leave request status/end date yet, only after approval

@@ -170,10 +170,27 @@
                                 <div class="review-label">Total Days</div>
                                 <div class="review-value">{{ $totalDays }}</div>
                             </div>
-                            <div class="review-row">
-                                <div class="review-label">Remaining Balance</div>
-                                <div class="review-value">{{ $remainingDays }} days</div>
-                            </div>
+                            @if($leaveType->deductsFromAnnual() || $leaveType->MaxLeaveDays > 0)
+                                <div class="review-row">
+                                    <div class="review-label">
+                                        @if($leaveType->deductsFromAnnual())
+                                            Remaining Annual Balance
+                                        @else
+                                            Remaining {{ $leaveType->LeaveTypeName }}
+                                        @endif
+                                    </div>
+                                    <div class="review-value">
+                                        @if($leaveType->deductsFromAnnual())
+                                            {{ $remainingDays }} days
+                                        @else
+                                            {{-- Calculate specific remaining for non-annual with limits if needed, 
+                                                 or just show the type-specific limit if we don't have usage data yet. 
+                                                 For now, we'll just show the limit passed or hide if unlimited. --}}
+                                            {{ $leaveType->MaxLeaveDays }} days (Limit)
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
                             <div class="review-row">
                                 <div class="review-label">Reason</div>
                                 <div class="review-value" style="white-space: pre-line;">{{ $data['Reason'] }}</div>

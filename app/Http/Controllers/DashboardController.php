@@ -21,13 +21,14 @@ class DashboardController extends Controller
         // Redirect non-admins to their respective dashboards
         if (auth()->user()->role_id == 2) {
             return redirect()->route('supervisor.index');
-        } elseif (auth()->user()->role_id == 3) {
+        }
+        elseif (auth()->user()->role_id == 3) {
             return redirect()->route('dashboards.employee');
         }
 
         // --- Personal Leave Stats (Admin as Employee) ---
         $user = auth()->user();
-        $personalLeaveBalance = $user ? $user->RemainingAnnualLeaveDays : 0;
+        $personalLeaveBalance = $user ? $user->leave_days_remaining : 0;
         $personalRecentRequests = LeaveRequest::where('EmployeeNumber', $user->EmployeeNumber)
             ->with('leaveType')
             ->orderBy('created_at', 'desc')
@@ -72,14 +73,12 @@ class DashboardController extends Controller
             'personalRecentRequests',
             'employeesOnLeave'
         ));
-}
+    }
 
-public function admin()
-{
-    //dashboard.admin is the verification page in the admin function
-    $leaveRequests = \App\Models\LeaveRequest::latest()->get();
-    return view('dashboards.admin', compact('leaveRequests')); // or whatever view you want
-}
-
-
+    public function admin()
+    {
+        // dashboard.admin is the verification page in the admin function
+        $leaveRequests = \App\Models\LeaveRequest::latest()->get();
+        return view('dashboards.admin', compact('leaveRequests'));
+    }
 }

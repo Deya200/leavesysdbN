@@ -49,7 +49,7 @@
                             <td>{{ $leaveType->GenderApplicable }}</td>
                             <td>
                                 <a href="{{ route('leave_types.edit', $leaveType->LeaveTypeID) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <form action="{{ route('leave-types.destroy', $leaveType->LeaveTypeID) }}" method="POST" style="display: inline-block;">
+                                <form action="{{ route('leave_types.destroy', $leaveType->LeaveTypeID) }}" method="POST" style="display: inline-block;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this leave type?')">Delete</button>

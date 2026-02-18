@@ -135,189 +135,197 @@
                 </div>
             </div>
 
-
-            <!-- Summary Cards -->
-            <div class="row text-center g-2 mb-4">
-                <div class="col-6 col-md-2 summary-card">
-                    <div class="card-custom">
-                        <h6><i class="fas fa-users"></i> Employees</h6>
-                        <p>{{ $totalEmployees }}</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-2 summary-card">
-                    <div class="card-custom">
-                        <h6><i class="fas fa-male"></i> Male</h6>
-                        <p>{{ $maleEmployees }}</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-2 summary-card">
-                    <div class="card-custom">
-                        <h6><i class="fas fa-female"></i> Female</h6>
-                        <p>{{ $femaleEmployees }}</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-2 summary-card">
-                    <div class="card-custom">
-                        <h6><i class="fas fa-briefcase"></i> Positions</h6>
-                        <p>{{ $totalPositions }}</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-2 summary-card">
-                    <div class="card-custom">
-                        <h6><i class="fas fa-layer-group"></i> Grades</h6>
-                        <p>{{ $totalGrades }}</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-2 summary-card">
-                    <div class="card-custom">
-                        <h6><i class="fas fa-building"></i> Departments</h6>
-                        <p>{{ $departments->count() }}</p>
-                    </div>
-                </div>
-            </div>
-
             
 
             <!-- Department Overview Table -->
-            <div class="card-custom mb-4">
-                <div id="table-header">
-                    <h5>Department Overview</h5>
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 1rem; overflow: hidden;">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-sitemap me-2"></i>Department Overview</h5>
                 </div>
-                <div class="table-responsive mt-3">
-                    @if ($departments->isNotEmpty())
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Department Name</th>
-                                    <th>Employees</th>
-                                    <th>Supervisor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($departments as $department)
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        @if ($departments->isNotEmpty())
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $department->DepartmentName }}</td>
-                                        <td>{{ $department->employees_count }}</td>
-                                        <td>{{ $department->supervisor ? $department->supervisor->FirstName . ' ' . $department->supervisor->LastName : 'N/A' }}</td>
+                                        <th class="ps-4">#</th>
+                                        <th>Department Name</th>
+                                        <th>Employees</th>
+                                        <th class="pe-4">Supervisor</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @else
-                        <div class="alert alert-info text-center m-0">No departments found.</div>
-                    @endif
+                                </thead>
+                                <tbody>
+                                    @foreach ($departments as $department)
+                                        <tr>
+                                            <td class="ps-4">{{ $loop->iteration }}</td>
+                                            <td class="fw-semibold text-dark">{{ $department->DepartmentName }}</td>
+                                            <td>
+                                                <span class="badge bg-light text-primary border px-3">
+                                                    {{ $department->employees_count }} Members
+                                                </span>
+                                            </td>
+                                            <td class="pe-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+                                                        <i class="fas fa-user-tie"></i>
+                                                    </div>
+                                                    <span class="small">{{ $department->supervisor ? $department->supervisor->FirstName . ' ' . $department->supervisor->LastName : 'N/A' }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <div class="p-4 text-center">
+                                <div class="mb-2"><i class="fas fa-info-circle text-muted fs-3"></i></div>
+                                <p class="text-muted mb-0">No departments found.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 
             <!-- Employees Currently on Leave (Global) -->
-            <div class="card-custom mb-4">
-                <div id="table-header" class="bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-plane-departure"></i> Employees Currently on Leave</h5>
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 1rem; overflow: hidden;">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                    <div class="rounded-circle bg-warning bg-opacity-20 text-warning d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
+                        <i class="fas fa-plane-departure small"></i>
+                    </div>
+                    <h5 class="mb-0 fw-bold text-dark">Employees Currently on Leave</h5>
                 </div>
-                <div class="table-responsive mt-3">
-                    @if(isset($employeesOnLeave) && $employeesOnLeave->isNotEmpty())
-                        <table class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Employee</th>
-                                    <th>Department</th>
-                                    <th>Leave Type</th>
-                                    <th>Due Back</th>
-                                    <th>Remaining Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($employeesOnLeave as $onLeave)
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        @if(isset($employeesOnLeave) && $employeesOnLeave->isNotEmpty())
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: #f8fafc;">
                                     <tr>
-                                        <td>
-                                            <div class="fw-bold">{{ $onLeave->employee->FirstName }} {{ $onLeave->employee->LastName }}</div>
-                                            <small class="text-muted">{{ $onLeave->EmployeeNumber }}</small>
-                                        </td>
-                                        <td>{{ $onLeave->employee->department->DepartmentName ?? 'N/A' }}</td>
-                                        <td><span class="badge bg-secondary">{{ $onLeave->leaveType->LeaveTypeName }}</span></td>
-                                        <td>
-                                            <span class="fw-bold text-danger">
-                                                {{ \Carbon\Carbon::parse($onLeave->EndDate)->addDay()->format('M d, Y') }}
-                                            </span>
-                                            <small class="d-block text-muted">Ends: {{ \Carbon\Carbon::parse($onLeave->EndDate)->format('M d') }}</small>
-                                        </td>
-                                        <td class="fw-bold text-center">{{ $onLeave->employee->RemainingAnnualLeaveDays }} days</td>
+                                        <th class="ps-4">Employee</th>
+                                        <th>Department</th>
+                                        <th>Leave Type</th>
+                                        <th>Due Back</th>
+                                        <th class="pe-4">Balance</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @else
-                        <div class="alert alert-light text-center border m-0">
-                            <i class="fas fa-check-circle text-success me-2"></i> No employees are currently on leave.
-                        </div>
-                    @endif
+                                </thead>
+                                <tbody>
+                                    @foreach($employeesOnLeave as $onLeave)
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px; font-weight: 600;">
+                                                        {{ substr($onLeave->employee->FirstName, 0, 1) }}
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-dark">{{ $onLeave->employee->FirstName }} {{ $onLeave->employee->LastName }}</div>
+                                                        <small class="text-muted">{{ $onLeave->EmployeeNumber }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="small">{{ $onLeave->employee->department->DepartmentName ?? 'N/A' }}</td>
+                                            <td><span class="badge bg-soft-secondary text-secondary border px-2 py-1" style="background-color: #f1f5f9;">{{ $onLeave->leaveType->LeaveTypeName }}</span></td>
+                                            <td>
+                                                <div class="text-danger fw-bold small">
+                                                    <i class="far fa-calendar-alt me-1"></i>
+                                                    {{ \Carbon\Carbon::parse($onLeave->EndDate)->addDay()->format('M d, Y') }}
+                                                </div>
+                                                <div class="text-muted" style="font-size: 0.7rem;">Ends: {{ \Carbon\Carbon::parse($onLeave->EndDate)->format('M d') }}</div>
+                                            </td>
+                                            <td class="pe-4">
+                                                <div class="fw-bold text-primary">{{ $onLeave->employee->RemainingAnnualLeaveDays }} <small class="text-muted fw-normal">days</small></div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <div class="p-4 text-center">
+                                <div class="mb-2"><i class="fas fa-check-circle text-success fs-3"></i></div>
+                                <p class="text-muted mb-0">No employees are currently on leave.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 
             <!-- Recent Leave Requests -->
-            <div class="card-custom">
-                <div id="table-header">
-                    <h5>Recent Leave Requests</h5>
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 1rem; overflow: hidden;">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
+                            <i class="fas fa-history small"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold text-dark">Recent Activity</h5>
+                    </div>
+                    <a href="{{ route('leave_requests.index') }}" class="btn btn-link btn-sm text-decoration-none fw-semibold">View All</a>
                 </div>
-                <div class="table-responsive mt-3">
-                    @if ($recentLeaveRequests->isNotEmpty())
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Employee</th>
-                                    <th>Leave Type</th>
-                                    <th>Status</th>
-                                    <th>Requested On</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($recentLeaveRequests as $request)
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        @if ($recentLeaveRequests->isNotEmpty())
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: #f8fafc;">
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</td>
-                                        <td>{{ $request->leaveType->LeaveTypeName }}</td>
-                                       <td>
-                                            <span class="badge bg-{{ match($request->RequestStatus) { 'Approved' => 'success', 'Rejected' => 'danger', default => 'warning' } }}">
-                                                {{ $request->RequestStatus }}
-                                            </span>
-                                       </td>
-                                       <td>{{ $request->created_at->format('d-m-Y') }}</td>
-                                       <td>
-                                            @if($request->RequestStatus === 'Pending Admin Verification')
-                                                <div class="d-flex gap-2 justify-content-center">
-                                                    <form action="{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                                                    </form>
-                                                    <button type="button" class="btn btn-danger btn-sm" onclick="toggleAdminRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
-                                                </div>
-                                                <div id="adminRejectForm-{{ $request->LeaveRequestID }}" style="display:none;" class="mt-2">
-                                                    <form action="{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}" method="POST">
-                                                        @csrf
-                                                        <textarea name="AdminRejectionReason" class="form-control form-control-sm mb-1" placeholder="Reason for rejection" required></textarea>
-                                                        <button type="submit" class="btn btn-danger btn-sm w-100">Confirm</button>
-                                                    </form>
-                                                </div>
-                                            @else
-                                                <span class="text-muted small">N/A</span>
-                                            @endif
-                                       </td>
+                                        <th class="ps-4">Employee</th>
+                                        <th>Leave Type</th>
+                                        <th>Requested</th>
+                                        <th>Status</th>
+                                        <th class="pe-4 text-center">Actions</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @else
-                        <div class="alert alert-info text-center m-0">No recent leave requests found.</div>
-                    @endif
-                </div>
-                <div class="text-center mt-3">
-                    <a href="{{ route('leave_requests.index') }}" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-list me-1"></i> View All Leave History
-                    </a>
+                                </thead>
+                                <tbody>
+                                    @foreach ($recentLeaveRequests as $request)
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-dark">{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</div>
+                                            </td>
+                                            <td class="small">{{ $request->leaveType->LeaveTypeName }}</td>
+                                            <td class="small text-muted">{{ $request->created_at->diffForHumans() }}</td>
+                                            <td>
+                                                <span class="badge rounded-pill px-3 py-1 bg-{{ match($request->RequestStatus) { 'Approved' => 'success', 'Rejected' => 'danger', default => 'warning text-dark' } }}">
+                                                    {{ $request->RequestStatus }}
+                                                </span>
+                                            </td>
+                                            <td class="pe-4 text-center">
+                                                @if($request->RequestStatus === 'Pending Admin Verification')
+                                                    <div class="d-flex gap-2 justify-content-center">
+                                                        <form action="{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-success px-3">Approve</button>
+                                                        </form>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="toggleAdminRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted small">No actions</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @if($request->RequestStatus === 'Pending Admin Verification')
+                                            <tr id="adminRejectFormRow-{{ $request->LeaveRequestID }}" style="display:none;">
+                                                <td colspan="5" class="bg-light p-3">
+                                                    <div class="card border shadow-none" style="max-width: 500px; margin: auto;">
+                                                        <div class="card-body">
+                                                            <form action="{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}" method="POST">
+                                                                @csrf
+                                                                <label class="form-label small fw-bold">Rejection Reason</label>
+                                                                <textarea name="AdminRejectionReason" class="form-control mb-2" rows="2" placeholder="Provide a reason for rejection..." required></textarea>
+                                                                <div class="d-flex gap-2">
+                                                                    <button type="submit" class="btn btn-danger btn-sm px-4">Confirm Rejection</button>
+                                                                    <button type="button" class="btn btn-light btn-sm px-4" onclick="toggleAdminRejectForm('{{ $request->LeaveRequestID }}')">Cancel</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <div class="p-4 text-center">
+                                <p class="text-muted mb-0 fst-italic">No recent leave requests found.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -328,9 +336,9 @@
 @section('scripts')
 <script>
     function toggleAdminRejectForm(id) {
-        const form = document.getElementById('adminRejectForm-' + id);
-        if (form) {
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        const row = document.getElementById('adminRejectFormRow-' + id);
+        if (row) {
+            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
         }
     }
 

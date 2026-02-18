@@ -112,11 +112,14 @@
             </div>
 
             <div class="mb-4">
-                <label for="DurationPeriod" class="form-label">Duration Period (Days)</label>
-                <input type="number" id="DurationPeriod" name="DurationPeriod"
-                       class="form-control @error('DurationPeriod') is-invalid @enderror"
-                       value="{{ old('DurationPeriod') }}" min="1" required>
-                @error('DurationPeriod')
+                <label for="MaxLeaveDays" class="form-label">Max Days Allowed (Per Year)</label>
+                <input type="number" id="MaxLeaveDays" name="MaxLeaveDays"
+                       class="form-control @error('MaxLeaveDays') is-invalid @enderror"
+                       value="{{ old('MaxLeaveDays') }}" min="0">
+                <div class="form-text text-muted">
+                    Leave blank to allow <strong>Unlimited</strong> days (no maximum limit).
+                </div>
+                @error('MaxLeaveDays')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

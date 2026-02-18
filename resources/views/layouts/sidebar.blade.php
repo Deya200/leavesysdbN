@@ -1,5 +1,5 @@
-<!-- Offcanvas Sidebar -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel" style="width: 280px; top: 60px; height: calc(100vh - 60px); background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%); color: white; border-right: 1px solid rgba(255,255,255,0.1);" data-bs-scroll="true" data-bs-backdrop="false">
+<!-- Modern Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start border-0 shadow-lg" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel" style="width: 280px; top: 60px; height: calc(100vh - 60px); background: #1e1b4b; color: white;" data-bs-scroll="true" data-bs-backdrop="false">
     
     <!-- Sidebar Header -->
     <div class="offcanvas-header border-bottom border-light border-opacity-10 py-4 d-flex flex-column align-items-center">
@@ -113,24 +113,7 @@
                         </div>
                     </li>
 
-                    <!-- Leave Requests Link for Admin -->
-                    <li class="nav-item">
-                        <a href="{{ route('leave_requests.index') }}" class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all {{ request()->routeIs('leave_requests.index') ? 'bg-white bg-opacity-10 text-white' : '' }}">
-                            <div class="position-relative">
-                                <i class="fas fa-list-alt fs-5" style="width: 24px;"></i>
-                                @php
-                                    $allPending = $globalPendingLeaves->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification', 'Pending Admin Approval'])->count();
-                                @endphp
-                                @if($allPending > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="width: 8px; height: 8px;"></span>
-                                @endif
-                            </div>
-                            <span class="flex-grow-1">All Leave Requests</span>
-                            @if($allPending > 0)
-                                <span class="badge bg-danger rounded-pill">{{ $allPending }}</span>
-                            @endif
-                        </a>
-                    </li>
+
                                         
                 @endif
 
@@ -190,7 +173,7 @@
                     {{ substr(Auth::user()->FirstName ?? 'U', 0, 1) }}
                  </div>
                  <div class="d-flex flex-column" style="font-size: 0.8rem; line-height: 1.2;">
-                    <span class="fw-bold text-white">{{ Auth::user()->FirstName ?? 'User' }}</span>
+                    <span class="fw-bold text-white">{{ auth()->user()->FirstName ?? 'User' }}</span>
                     <small class="text-white-50">Log out</small>
                  </div>
                  <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="ms-auto text-white-50 hover-text-white transition-all">

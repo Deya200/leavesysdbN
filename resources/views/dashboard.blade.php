@@ -19,7 +19,7 @@
                 <ul class="list-group list-group-flush">
                     <a class="nav-link btn btn-outline-primary text-black"  href="{{ route('employees.index') }}">Employees</a>
                     <a class="nav-link btn btn-outline-primary text-black"  href="{{ route('departments.index') }}">Departments</a>
-                    <a class="nav-link btn btn-outline-primary text-black"  href="{{ route('leave-types.index') }}">Leave Types</a>
+                    <a class="nav-link btn btn-outline-primary text-black"  href="{{ route('leave_types.index') }}">Leave Types</a>
                     <a class="nav-link btn btn-outline-primary text-black" href="{{ route('admin.leave_requests') }}">Admin Verification</a>
 
                 <a class="nav-link btn btn-outline-primary text-black"  href="{{ route('leave.requests.index') }}">Recent Leave Requests</a>

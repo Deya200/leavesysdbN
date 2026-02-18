@@ -20,7 +20,7 @@ class SupervisorController extends Controller
         }
 
         // --- Personal Leave Stats (Supervisor as Employee) ---
-        $personalLeaveBalance = $supervisor->RemainingAnnualLeaveDays;
+        $personalLeaveBalance = $supervisor->leave_days_remaining;
         $personalRecentRequests = LeaveRequest::where('EmployeeNumber', $supervisor->EmployeeNumber)
             ->with('leaveType')
             ->orderBy('created_at', 'desc')
@@ -44,7 +44,7 @@ class SupervisorController extends Controller
         $pendingSupervisorRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
             ->where('RequestStatus', 'Pending Supervisor Approval')
             ->count();
-            
+
         $approvedTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
             ->where('RequestStatus', 'Approved')
             ->count();
@@ -52,7 +52,7 @@ class SupervisorController extends Controller
         $rejectedTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
             ->where('RequestStatus', 'Rejected')
             ->count();
-            
+
         $totalTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
             ->count();
 
@@ -91,7 +91,7 @@ class SupervisorController extends Controller
         $leaveRequest = LeaveRequest::findOrFail($id);
 
         if ($leaveRequest->RequestStatus !== 'Pending Supervisor Approval' ||
-            $leaveRequest->employee->SupervisorID !== auth()->user()->EmployeeNumber) {
+        $leaveRequest->employee->SupervisorID !== auth()->user()->EmployeeNumber) {
             return redirect()->back()->with('error', 'This leave request cannot be approved.');
         }
 

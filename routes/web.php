@@ -92,7 +92,6 @@ s', [LeaveRequestController::class , 'index'])->name('leave_requests');
                 }
                 );
                 Route::resource('employees', EmployeeController::class);
-                Route::resource('leave-types', App\Http\Controllers\LeaveTypeController::class);
                 //Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
         
                 // Department Management
@@ -104,7 +103,7 @@ s', [LeaveRequestController::class , 'index'])->name('leave_requests');
                 Route::resource('grades', GradeController::class);
 
                 // Leave Types Management
-                Route::resource('leave_types', LeaveTypeController::class);
+                Route::resource('leave-types', LeaveTypeController::class)->names('leave_types');
             }
             );
 

@@ -24,6 +24,7 @@ class LeaveTypeController extends Controller
             'LeaveTypeName' => 'required|string|max:255',
             'IsPaidLeave' => 'required|boolean',
             'GenderApplicable' => 'required|string|max:10',
+            'MaxLeaveDays' => 'nullable|integer|min:0',
         ]);
 
         LeaveType::create($validatedData);
@@ -43,6 +44,7 @@ class LeaveTypeController extends Controller
             'LeaveTypeName' => 'required|string|max:255',
             'IsPaidLeave' => 'required|boolean',
             'GenderApplicable' => 'required|string|max:10',
+            'MaxLeaveDays' => 'nullable|integer|min:0',
         ]);
 
         $leaveType = LeaveType::findOrFail($LeaveTypeID);

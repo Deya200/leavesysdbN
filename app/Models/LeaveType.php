@@ -34,7 +34,7 @@ class LeaveType extends Model
     // Convenience methods
     public function isAnnualLeave(): bool
     {
-        return $this->LeaveTypeName === 'Annual Leave';
+        return strcasecmp($this->LeaveTypeName, 'Annual Leave') === 0;
     }
 
     public function isPaternityLeave(): bool

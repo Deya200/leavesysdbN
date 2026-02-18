@@ -66,18 +66,85 @@
 @section('content')
 <div class="admin-container">
 
-    <!-- Welcome Section -->
-    <div class="card-custom text-center mb-4" style="background-color: #2E3A87; color: white;">
-        <h4 class="fw-bold mb-1">Welcome, {{ auth()->user()->FirstName ?? 'Administrator' }}!</h4>
-        <p class="mb-3">You can review, approve, or reject leave requests submitted by employees.</p>
-        <div>
-            <a href="{{ route('leave-types.index') }}" class="btn btn-light btn-sm fw-bold text-primary shadow-sm">
-                <i class="fas fa-cogs me-1"></i> Manage Leave Types
-            </a>
+    <!-- Modern Welcome Banner -->
+    <div class="card p-0 overflow-hidden mb-4 border-0 shadow-lg" style="border-radius: 1.5rem;">
+        <div class="p-5 text-white position-relative" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+            <div class="position-relative z-1">
+                <h2 class="fw-bold mb-2">Welcome Back, {{ auth()->user()->FirstName }}!</h2>
+                <p class="opacity-75 mb-4 fs-5">You have full control over the leave management system. Review, approve, and manage with ease.</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ route('leave_types.index') }}" class="btn btn-light px-4 py-2 fw-semibold text-primary">
+                        <i class="fas fa-cog me-2"></i>Configure Leave Types
+                    </a>
+                    <a href="{{ route('leave.report.pdf') }}" class="btn btn-outline-light px-4 py-2 fw-semibold">
+                        <i class="fas fa-file-pdf me-2"></i>Generate Report
+                    </a>
+                </div>
+            </div>
+            <!-- Decorative circle -->
+            <div class="position-absolute top-50 end-0 translate-middle-y opacity-10" style="margin-right: -5%; pointer-events: none;">
+                <i class="fas fa-shield-alt" style="font-size: 15rem;"></i>
+            </div>
         </div>
     </div>
 
-
+    <!-- Quick Stats Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 p-3" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white;">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-20 p-3 me-3">
+                        <i class="fas fa-users fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Total Employees</small>
+                        <h3 class="fw-bold mb-0">{{ \App\Models\Employee::count() }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 p-3" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-20 p-3 me-3">
+                        <i class="fas fa-calendar-check fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Active Leaves</small>
+                        <h3 class="fw-bold mb-0">
+                            {{ \App\Models\LeaveRequest::where('RequestStatus', 'Approved')->where('is_active', true)->count() }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 p-3" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-20 p-3 me-3">
+                        <i class="fas fa-clock fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending Approvals</small>
+                        <h3 class="fw-bold mb-0">{{ $leaveRequests->count() }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 p-3" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white;">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-20 p-3 me-3">
+                        <i class="fas fa-building fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Departments</small>
+                        <h3 class="fw-bold mb-0">{{ \App\Models\Department::count() }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="card-custom">
         @if ($leaveRequests->isNotEmpty())

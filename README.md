@@ -20,7 +20,83 @@ leavesysdbN is a **leave request management system** built using Laravel. It pro
 - 🔄 GitHub (for version control)  
 
 ## **Installation & Setup**  
-### **1. Clone the Repository**  
+
+Follow these steps to set up the project locally:
+
+### **1. Prerequisites**
+- PHP 8.2+
+- Composer
+- Node.js & NPM
+- MySQL or PostgreSQL
+
+### **2. Clone the Repository**  
 ```bash
-git clone git@github.com:Deya200/leavesysdbN.git
+git clone https://github.com/Deya200/leavesysdbN.git
 cd leavesysdbN
+```
+
+### **3. Install Dependencies**
+```bash
+composer install
+npm install
+```
+
+### **4. Environment Configuration**
+Copy the example environment file and configure your database:
+```bash
+cp .env.example .env
+```
+Edit `.env` and set your database credentials:
+```ini
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=leavesysdb
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### **5. Generate App Key**
+```bash
+php artisan key:generate
+```
+
+### **6. Run Migrations & Seeders**
+This will create the database tables and populate them with default test data (Roles, Leave Types, default Admins).
+```bash
+php artisan migrate --seed
+```
+
+### **7. Frontend Build**
+```bash
+npm run build
+```
+
+### **8. Serve the Application**
+```bash
+php artisan serve
+```
+Visit http://127.0.0.1:8000 in your browser.
+
+---
+
+## **Default Login Credentials**
+
+Use these accounts to test different roles:
+
+**Administrator**
+- **Email**: `lumalizani@gmail.com`
+- **Password**: `Airtel@2063`
+
+**Test Admin**
+- **Email**: `test.admin@example.com`
+- **Password**: `password123`
+
+**Test Supervisor**
+- **Email**: `test.supervisor@example.com`
+- **Password**: `password123`
+
+**Test Employee**
+- **Email**: `test.employee@example.com`
+- **Password**: `password123`
+

@@ -29,7 +29,9 @@ The Leave Management System (leavesysdbN) is a robust Laravel-based application 
 ## 🔄 The Leave Lifecycle
 
 ### 1. Application
-An employee submits a leave request. The system automatically checks their remaining balance and prevents submission if they exceed their limit.
+An employee submits a leave request. The system automatically checks:
+*   **Annual Leave**: Against remaining balance (Grade + CarryOver - Used).
+*   **Other Types**: Against the configured annual maximum (if set).
 
 ### 2. Supervisor Review
 The supervisor receives a notification and sees the request on their dashboard. They can:
@@ -61,6 +63,11 @@ Users receive in-app notifications for:
 
 ### 📊 PDF Reporting
 Administrators can generate a "Leave Summary Report" in PDF format, which highlights current pending and approved requests.
+
+### 🔧 Configurable Leave Limits
+Administrators can define maximum annual leave days for each leave type (e.g., Sick Leave = 14 days).
+*   **Unlimited Option**: Admins can set a leave type to "Unlimited".
+*   **Enforcement**: The system validates annual usage against these limits during application.
 
 ---
 
@@ -105,4 +112,4 @@ Employees can **always see the reasons and notes** provided by their superiors:
 5.  **Serve**: `php artisan serve`
 
 ---
-*Created by Cyber-tech Solutions*
+

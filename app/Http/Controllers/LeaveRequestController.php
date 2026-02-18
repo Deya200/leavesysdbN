@@ -394,14 +394,45 @@ class LeaveRequestController extends Controller
     public function employeeDashboard()
     {
         $employee = auth()->user();
+        $leaveTypes = LeaveType::all();
+        $leaveRequests = $employee->leaveRequests()->with('leaveType')->get();
+
+        $dashboardData = $leaveTypes->map(function ($type) use ($employee, $leaveRequests) {
+            $taken = $leaveRequests->where('LeaveTypeID', $type->LeaveTypeID)
+                ->where('RequestStatus', 'Approved')
+                ->sum('TotalDays');
+
+            if ($type->deductsFromAnnual()) {
+                $total = $employee->getTotalAvailableLeaveDays();
+                $remaining = $employee->leave_days_remaining;
+                $isUnlimited = false;
+            }
+            else {
+                $total = $type->MaxLeaveDays;
+                $isUnlimited = is_null($total) || $total <= 0;
+                $remaining = $isUnlimited ? null : max(0, $total - $taken);
+            }
+
+            return [
+            'type' => $type,
+            'taken' => $taken,
+            'remaining' => $remaining,
+            'total' => $total,
+            'isUnlimited' => $isUnlimited,
+            ];
+        });
+
+        $counts = [
+            'approved' => $leaveRequests->where('RequestStatus', 'Approved')->count(),
+            'rejected' => $leaveRequests->whereIn('RequestStatus', ['Rejected', 'Rejected by Admin'])->count(),
+            'pending' => $leaveRequests->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification'])->count(),
+        ];
 
         return view('dashboards.employee', [
-            'totalLeaveDays' => $this->calculateRemainingLeaveDays(),
-            'totalLeaveRequests' => $employee->leaveRequests()->count(),
-            'leaveRequests' => $employee->leaveRequests()
-            ->with('leaveType')
-            ->latest()
-            ->paginate(10)
+            'dashboardData' => $dashboardData,
+            'counts' => $counts,
+            'leaveRequests' => $leaveRequests->sortByDesc('created_at')->take(10),
+            'employee' => $employee
         ]);
     }
 
@@ -458,12 +489,14 @@ class LeaveRequestController extends Controller
         }
 
         DB::transaction(function () use ($validated, $leaveRequest) {
+            $extensionDays = (int)$validated['ExtensionDays'];
+
             LeaveExtension::create([
                 'leave_request_id' => $leaveRequest->LeaveRequestID,
                 'employee_number' => auth()->user()->EmployeeNumber,
                 'original_end_date' => $leaveRequest->EndDate,
-                'requested_end_date' => Carbon::parse($leaveRequest->EndDate)->addDays($validated['ExtensionDays']),
-                'extension_days' => $validated['ExtensionDays'],
+                'requested_end_date' => Carbon::parse($leaveRequest->EndDate)->addDays($extensionDays),
+                'extension_days' => $extensionDays,
                 'reason' => $validated['Reason'],
                 'status' => 'Pending',
             ]);

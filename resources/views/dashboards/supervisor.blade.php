@@ -89,261 +89,227 @@
 <div class="dashboard-container">
 
     <!-- Welcome Section -->
-    <div class="card card-custom mb-4 text-center" style="background-color: #2E3A87; color: white;">
-        <h4 class="fw-bold mb-1">Welcome, {{ auth()->user()->FirstName ?? 'Supervisor' }}!</h4>
-        <p class="mb-2">Here’s an overview of your team’s leave activity.</p>
-    </div>
-
-    <!-- My Personal Leave Section (Supervisor as Employee) -->
-    <div class="card-custom mb-4">
-        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-            <h5 class="mb-0 text-primary"><i class="fas fa-user-circle"></i> My Personal Leave</h5>
-            <a href="{{ route('leave_requests.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Apply for Leave</a>
-        </div>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="p-3 rounded bg-light border text-center">
-                    <h6 class="text-muted small text-uppercase fw-bold">My Leave Balance</h6>
-                    <h2 class="fw-bold text-primary mb-0">{{ $personalLeaveBalance }} <small class="fs-6 text-muted">days</small></h2>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <h6 class="text-muted small text-uppercase fw-bold mb-2">My Recent Requests</h6>
-                @if($personalRecentRequests->isNotEmpty())
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Dates</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($personalRecentRequests as $req)
-                                    <tr>
-                                        <td>{{ $req->leaveType->LeaveTypeName }}</td>
-                                        <td>
-                                            {{ \Carbon\Carbon::parse($req->StartDate)->format('M d') }} - 
-                                            {{ \Carbon\Carbon::parse($req->EndDate)->format('M d') }}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-{{ match($req->RequestStatus) { 'Approved' => 'success', 'Rejected' => 'danger', default => 'warning' } }}">
-                                                {{ $req->RequestStatus }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <p class="text-muted small fst-italic">No recent personal requests.</p>
-                @endif
-            </div>
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+        <div class="card-body p-4 text-center text-white">
+            <h3 class="fw-bold mb-1">Welcome back, {{ auth()->user()->FirstName ?? 'Supervisor' }}!</h3>
+            <p class="mb-0 text-white-50">You have {{ $pendingSupervisorRequests }} pending requests that need your attention.</p>
         </div>
     </div>
 
     <!-- Management Actions -->
-    <div class="row text-center g-2 mb-4">
+    <div class="row g-4 mb-5">
         <div class="col-md-4">
             <a href="{{ route('leave-appeals.index') }}" class="text-decoration-none">
-                <div class="card card-custom h-100 border-warning border-2">
-                    <h5 class="text-warning"><i class="fas fa-gavel"></i> Manage Appeals</h5>
-                    <p class="text-muted small">Review rejected leave appeals</p>
+                <div class="card h-100 border-0 shadow-sm hover-up border-start border-4 border-warning">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 me-3">
+                                <i class="fas fa-gavel fa-lg"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-0">Manage Appeals</h5>
+                        </div>
+                        <p class="text-muted small mb-0">Review and verify rejected leave appeals from your team.</p>
+                    </div>
                 </div>
             </a>
         </div>
         <div class="col-md-4">
             <a href="{{ route('leave-extensions.index') }}" class="text-decoration-none">
-                <div class="card card-custom h-100 border-info border-2">
-                    <h5 class="text-info"><i class="fas fa-clock"></i> Manage Extensions</h5>
-                    <p class="text-muted small">Review leave extension requests</p>
+                <div class="card h-100 border-0 shadow-sm hover-up border-start border-4 border-info">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-info bg-opacity-10 text-info p-3 me-3">
+                                <i class="fas fa-clock fa-lg"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-0">Manage Extensions</h5>
+                        </div>
+                        <p class="text-muted small mb-0">Approve or reject requests to extend existing leaves.</p>
+                    </div>
                 </div>
             </a>
         </div>
         <div class="col-md-4">
             <a href="{{ route('leave-cancellations.index') }}" class="text-decoration-none">
-                <div class="card card-custom h-100 border-danger border-2">
-                    <h5 class="text-danger"><i class="fas fa-ban"></i> Manage Cancellations</h5>
-                    <p class="text-muted small">Review leave cancellation requests</p>
+                <div class="card h-100 border-0 shadow-sm hover-up border-start border-4 border-danger">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 me-3">
+                                <i class="fas fa-ban fa-lg"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-0">Cancellations</h5>
+                        </div>
+                        <p class="text-muted small mb-0">Review and process leave cancellation requests.</p>
+                    </div>
                 </div>
             </a>
         </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="row g-3 mb-4 animate__animated animate__fadeInUp">
-        <div class="col-6 col-md-2">
-            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);">
-                <div class="card-body p-3 text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <i class="fas fa-users fa-lg opacity-50"></i>
-                        <span class="badge bg-white bg-opacity-20 rounded-pill small">Team</span>
-                    </div>
-                    <h6 class="text-white text-opacity-75 small mb-1">Supervised</h6>
-                    <h3 class="mb-0 fw-bold">{{ $totalEmployees }}</h3>
+    <!-- Summary Stats -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 bg-primary bg-opacity-10">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-muted small text-uppercase fw-bold mb-2">Team Members</h6>
+                    <h2 class="fw-bold text-primary mb-0">{{ $totalEmployees }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2">
-            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                <div class="card-body p-3 text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <i class="fas fa-user-clock fa-lg opacity-50"></i>
-                        <span class="badge bg-white bg-opacity-20 rounded-pill small">Now</span>
-                    </div>
-                    <h6 class="text-white text-opacity-75 small mb-1">On Leave</h6>
-                    <h3 class="mb-0 fw-bold">{{ $employeesOnLeave->count() }}</h3>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 bg-warning bg-opacity-10">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-muted small text-uppercase fw-bold mb-2">Currently on Leave</h6>
+                    <h2 class="fw-bold text-warning mb-0">{{ $employeesOnLeave->count() }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2">
-            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="background: linear-gradient(135deg, #4b5563 0%, #1f2937 100%);">
-                <div class="card-body p-3 text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <i class="fas fa-list fa-lg opacity-50"></i>
-                        <span class="badge bg-white bg-opacity-20 rounded-pill small">History</span>
-                    </div>
-                    <h6 class="text-white text-opacity-75 small mb-1">Team Total</h6>
-                    <h3 class="mb-0 fw-bold">{{ $totalTeamRequests }}</h3>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 bg-success bg-opacity-10">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-muted small text-uppercase fw-bold mb-2">My Balance</h6>
+                    <h2 class="fw-bold text-success mb-0">{{ $personalLeaveBalance }} <small class="text-muted fw-normal fs-6">days</small></h2>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2">
-            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                <div class="card-body p-3 text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <i class="fas fa-check-circle fa-lg opacity-50"></i>
-                        <span class="badge bg-white bg-opacity-20 rounded-pill small">Done</span>
-                    </div>
-                    <h6 class="text-white text-opacity-75 small mb-1">Approved</h6>
-                    <h3 class="mb-0 fw-bold">{{ $approvedTeamRequests }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-2">
-            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-                <div class="card-body p-3 text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <i class="fas fa-times-circle fa-lg opacity-50"></i>
-                        <span class="badge bg-white bg-opacity-20 rounded-pill small">Rejected</span>
-                        </div>
-                    <h6 class="text-white text-opacity-75 small mb-1">Rejected</h6>
-                    <h3 class="mb-0 fw-bold">{{ $rejectedTeamRequests }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-2">
-            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
-                <div class="card-body p-3 text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <i class="fas fa-hourglass-half fa-lg opacity-50"></i>
-                        <span class="badge bg-white bg-opacity-20 rounded-pill small">Action</span>
-                    </div>
-                    <h6 class="text-white text-opacity-75 small mb-1">Supervisor Pending</h6>
-                    <h3 class="mb-0 fw-bold">{{ $pendingSupervisorRequests }}</h3>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">
+                <div class="card-body p-4 text-center text-white">
+                    <h6 class="text-white text-opacity-75 small text-uppercase fw-bold mb-2">Pending Action</h6>
+                    <h2 class="fw-bold text-white mb-0">{{ $pendingSupervisorRequests }}</h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Team Members Currently on Leave -->
-    <div class="card-custom mb-4">
-        <div id="table-header" class="bg-warning text-dark p-3 rounded-top">
-            <h5 class="mb-0"><i class="fas fa-plane-departure"></i> Team Members Currently on Leave</h5>
+    <!-- Live Team Activity -->
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-transparent py-3 d-flex align-items-center">
+            <i class="fas fa-users text-primary me-2"></i>
+            <h5 class="mb-0 fw-bold">Team Leave Status</h5>
         </div>
-        <div class="table-responsive p-3">
+        <div class="table-responsive">
             @if(isset($employeesOnLeave) && $employeesOnLeave->isNotEmpty())
-                <table class="table table-bordered table-hover">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
                         <tr>
-                            <th>Employee</th>
+                            <th class="ps-4">Employee</th>
                             <th>Leave Type</th>
                             <th>Due Back</th>
-                            <th>Remaining Balance</th>
+                            <th class="pe-4 text-center">Action History</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($employeesOnLeave as $onLeave)
                             <tr>
-                                <td>
-                                    <div class="fw-bold">{{ $onLeave->employee->FirstName }} {{ $onLeave->employee->LastName }}</div>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ $onLeave->employee->FirstName }} {{ $onLeave->employee->LastName }}</div>
                                     <small class="text-muted">{{ $onLeave->EmployeeNumber }}</small>
                                 </td>
-                                <td><span class="badge bg-secondary">{{ $onLeave->leaveType->LeaveTypeName }}</span></td>
+                                <td><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">{{ $onLeave->leaveType->LeaveTypeName }}</span></td>
                                 <td>
-                                    <span class="fw-bold text-danger">
+                                    <div class="text-danger fw-bold small">
                                         {{ \Carbon\Carbon::parse($onLeave->EndDate)->addDay()->format('M d, Y') }}
-                                    </span>
-                                    <small class="d-block text-muted">Ends: {{ \Carbon\Carbon::parse($onLeave->EndDate)->format('M d') }}</small>
+                                    </div>
+                                    <small class="text-muted">Ends: {{ \Carbon\Carbon::parse($onLeave->EndDate)->format('M d') }}</small>
                                 </td>
-                                <td class="fw-bold text-center">{{ $onLeave->employee->RemainingAnnualLeaveDays }} days</td>
+                                <td class="pe-4 text-center">
+                                    <a href="#" class="btn btn-sm btn-link text-decoration-none">View Record</a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             @else
-                <div class="alert alert-light text-center border m-0">
-                    <i class="fas fa-check-circle text-success me-2"></i> No team members are currently on leave.
+                <div class="p-5 text-center bg-white">
+                    <i class="fas fa-check-circle text-success fs-2 mb-3 d-block"></i>
+                    <p class="text-muted mb-0">All team members are present and accounted for.</p>
                 </div>
             @endif
         </div>
     </div>
 
-   <!-- Leave Requests Table -->
-<div class="card card-custom mb-4">
-    <h5 class="fw-bold text-center mt-3">Leave Requests</h5>
-    <div class="table-responsive p-3">
-        <table class="table table-bordered align-middle" id="leaveRequestsTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Employee</th>
-                    <th>Leave Type</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Days</th>
-                    <th>Reason</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($leaveRequests as $index => $request)
-                    <tr class="hover-up {{ $index >= 5 ? 'hidden-row' : '' }}">
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</td>
-                        <td>{{ $request->leaveType->LeaveTypeName }}</td>
-                        <td>{{ $request->StartDate }}</td>
-                        <td>{{ $request->EndDate }}</td>
-                        <td>{{ $request->TotalDays }}</td>
-                        <td>{{ $request->Reason }}</td>
-                        <td>
-                            <span class="badge text-dark bg-light border">{{ ucfirst($request->RequestStatus) }}</span>
-                        </td>
-                        <td>
-                            @if ($request->RequestStatus === 'Pending Supervisor Approval')
-                                <div class="d-flex gap-2 justify-content-center">
-                                    <form action="{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                                    </form>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
-                                </div>
-                                <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none;" class="mt-2">
-                                    <form action="{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}" method="POST">
-                                        @csrf
-                                        <textarea name="SupervisorRejectionReason" class="form-control form-control-sm mb-1" placeholder="Enter reason" required></textarea>
-                                        <button type="submit" class="btn btn-danger btn-sm w-100">Confirm Rejection</button>
-                                    </form>
-                                </div>
-                            @endif
-                        </td>
+    <!-- Active Leave Requests -->
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold d-flex align-items-center">
+                <i class="fas fa-clipboard-list text-primary me-2"></i> Pending Team Requests
+            </h5>
+            <div>
+                <a href="{{ route('leave.report.pdf') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="leaveRequestsTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Employee</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th class="pe-4 text-center">Actions</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach ($leaveRequests as $index => $request)
+                        @php
+                            $isActionNeeded = $request->RequestStatus === 'Pending Supervisor Approval';
+                        @endphp
+                        <tr class="{{ $index >= 5 ? 'hidden-row' : '' }}">
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</div>
+                                <small class="text-muted">{{ $request->created_at->diffForHumans() }}</small>
+                            </td>
+                            <td><span class="small">{{ $request->leaveType->LeaveTypeName }}</span></td>
+                            <td>
+                                <div class="small fw-bold">{{ $request->StartDate }} to {{ $request->EndDate }}</div>
+                                <div class="text-primary small">({{ $request->TotalDays }} days)</div>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill px-3 {{ $isActionNeeded ? 'bg-warning text-dark' : 'bg-light text-muted border' }}">
+                                    {{ $request->RequestStatus }}
+                                </span>
+                            </td>
+                            <td class="pe-4 text-center">
+                                @if ($isActionNeeded)
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <form action="{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">Approve</button>
+                                        </form>
+                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
+                                    </div>
+                                    <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none;" class="mt-3 text-start">
+                                        <form action="{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}" method="POST" class="bg-light p-3 rounded-3 border">
+                                            @csrf
+                                            <label class="small fw-bold mb-1">Rejection Reason</label>
+                                            <textarea name="SupervisorRejectionReason" class="form-control form-control-sm mb-2" rows="2" placeholder="Explain why..." required></textarea>
+                                            <div class="d-flex gap-2">
+                                                <button type="submit" class="btn btn-danger btn-sm px-3">Confirm</button>
+                                                <button type="button" class="btn btn-light btn-sm px-3" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                @else
+                                    <i class="fas fa-info-circle text-muted opacity-50" title="{{ $request->Reason }}"></i>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @if($leaveRequests->count() > 5)
+                <div class="p-3 text-center border-top bg-light bg-opacity-50">
+                    <button class="btn btn-sm btn-link text-decoration-none fw-bold" onclick="toggleLeaveTable()" id="leaveToggleButton">Show All Requests</button>
+                    <button class="btn btn-sm btn-link text-decoration-none fw-bold" onclick="toggleLeaveTable()" id="leaveLessButton" style="display: none;">Show Less</button>
+                </div>
+            @endif
+        </div>
+    </div>
+
+</div>
+@endsection
 
         <!-- PDF Report Button -->
         <div class="text-center mt-3">

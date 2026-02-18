@@ -23,22 +23,23 @@
   <style>
     :root {
       --font-primary: 'Inter', sans-serif;
-      --color-bg: #f8f9fa; /* Softer light gray */
+      --color-bg: #f8fafc;
       --color-surface: #ffffff;
       --color-primary: #4f46e5; 
-      --color-primary-dark: #4338ca;
+      --color-primary-dark: #3730a3;
       --color-secondary: #64748b;
-      --color-text-main: #1e293b; /* Darker slate */
+      --color-text-main: #0f172a;
       --color-text-muted: #64748b;
       --sidebar-width: 280px;
-      --header-height: 60px;
+      --header-height: 70px;
       
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
       
-      --radius-md: 0.75rem;
-      --radius-lg: 1rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
     }
 
     body {
@@ -46,27 +47,37 @@
       background-color: var(--color-bg);
       color: var(--color-text-main);
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
     
     /* Layout Logic */
+    .wrapper {
+        display: flex;
+        width: 100%;
+        min-height: calc(100vh - var(--header-height));
+    }
+
     @media (min-width: 992px) {
-        /* Force Sidebar Visible & Fixed */
         #mainSidebar {
+            width: var(--sidebar-width) !important;
+            height: calc(100vh - var(--header-height)) !important;
+            position: fixed !important;
+            top: var(--header-height) !important;
+            left: 0 !important;
+            z-index: 1000 !important;
             transform: none !important;
             visibility: visible !important;
-            top: var(--header-height) !important;
-            height: calc(100vh - var(--header-height)) !important;
-            box-shadow: none !important; /* Remove offcanvas shadow */
+            border-right: 1px solid rgba(0,0,0,0.05);
+            background: #1e293b; /* Dark sidebar */
         }
         
-        /* Shift Main Content */
         main {
             margin-left: var(--sidebar-width);
             width: calc(100% - var(--sidebar-width));
-            padding: 2rem !important; /* Proper padding for desktop */
+            padding: 2.5rem !important;
+            min-height: calc(100vh - var(--header-height));
         }
         
-        /* Hide backdrop if it appears */
         .offcanvas-backdrop {
             display: none !important;
         }
@@ -76,56 +87,52 @@
         main {
             margin-left: 0;
             width: 100%;
-            padding: 1rem;
+            padding: 1.5rem;
         }
     }
 
-    /* Beautification - Cards */
+    /* Modern Card Styles */
     .card {
       background: var(--color-surface);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      border-radius: var(--radius-lg);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: var(--radius-xl);
       box-shadow: var(--shadow-sm);
-      margin-bottom: 1.5rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-bottom: 2rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .card:hover {
       box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
+      transform: translateY(-4px);
     }
     
     .card-header {
-      background-color: #fff;
-      border-bottom: 1px solid #f1f5f9;
-      padding: 1.25rem 1.5rem;
+      background-color: transparent;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
       font-weight: 700;
       color: var(--color-text-main);
-      border-top-left-radius: var(--radius-lg) !important;
-      border-top-right-radius: var(--radius-lg) !important;
     }
 
-    /* Beautification - Buttons */
+    /* Modern Buttons */
     .btn {
-      border-radius: var(--radius-md);
-      padding: 0.6rem 1.2rem;
-      font-weight: 500;
-      letter-spacing: 0.01em;
+      border-radius: var(--radius-lg);
+      padding: 0.625rem 1.25rem;
+      font-weight: 600;
       transition: all 0.2s;
     }
     
     .btn-primary {
-        background-color: var(--color-primary);
-        border-color: var(--color-primary);
-        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
     }
     
     .btn-primary:hover {
-        background-color: var(--color-primary-dark);
-        border-color: var(--color-primary-dark);
-        transform: translateY(-1px);
-        box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
     }
+
 
     /* Beautification - Alerts */
     .alert {
@@ -139,10 +146,11 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
   @include('layouts.header')
-  <div class="d-flex flex-grow-1">
+  
+  <div class="wrapper">
       @include('layouts.sidebar')
       
-      <main class="flex-grow-1" style="margin-top: 0;">
+      <main class="flex-grow-1">
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show mb-4 d-flex align-items-center" role="alert">
                 <i class="fas fa-check-circle me-3 fs-5"></i>

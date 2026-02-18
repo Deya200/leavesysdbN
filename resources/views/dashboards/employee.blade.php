@@ -63,154 +63,99 @@
 
 @section('content')
 
+
+
+
+
 @php
-    $employee = auth()->user();
-
-    $leaveRequests = \App\Models\LeaveRequest::where('EmployeeNumber', $employee->EmployeeNumber)
-        ->orderBy('created_at', 'desc')
-        ->get();
-
     $normalizeStatus = fn($s) => trim(strtolower((string) ($s ?? '')));
-
-    $totalAssigned = optional($employee->grade)->AnnualLeaveDays ?? 0;
-    $approvedLeaveDays = $leaveRequests
-        ->filter(fn($r) => $normalizeStatus($r->RequestStatus) === 'approved')
-        ->sum('TotalDays');
-    $remainingDays = max(0, $totalAssigned - $approvedLeaveDays);
-
-    $counts = [
-        'approved' => $leaveRequests->filter(fn($r) => $normalizeStatus($r->RequestStatus) === 'approved')->count(),
-        'rejected' => $leaveRequests->filter(fn($r) => in_array($normalizeStatus($r->RequestStatus), ['rejected', 'rejected by admin']))->count(),
-        'pending_supervisor' => $leaveRequests->filter(fn($r) => $normalizeStatus($r->RequestStatus) === 'pending supervisor approval')->count(),
-        'pending_admin' => $leaveRequests->filter(fn($r) => $normalizeStatus($r->RequestStatus) === 'pending admin verification')->count(),
-    ];
-
-    $priorityMap = [
-        'pending supervisor approval' => 1,
-        'pending admin verification' => 2,
-        'rejected' => 3,
-        'rejected by admin' => 3,
-        'approved' => 4,
-    ];
-
-    $sortedLeaveRequests = $leaveRequests->sortBy(function ($request) use ($normalizeStatus, $priorityMap) {
-        $statusKey = $normalizeStatus($request->RequestStatus);
-        $priority = $priorityMap[$statusKey] ?? 5;
-        $timePriority = -strtotime($request->created_at ?? now());
-        return [$priority, $timePriority];
-    })->values();
 @endphp
-
-
 
 <div class="dashboard-container">
 
-    <div class="card card-custom mb-4 text-center" style="background-color: #2E3A87; color: white;">
-        <h4 class="fw-bold mb-1">Welcome, {{ $employee->FirstName ?? $employee->name ?? 'Employee' }}!</h4>
-        <p class="mb-2">Here’s your leave overview.</p>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <!-- Approved -->
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3 text-center">
-                    <div class="mb-2">
-                        <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 48px; height: 48px;">
-                            <i class="fas fa-check-circle fa-lg"></i>
-                        </span>
-                    </div>
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Approved</h6>
-                    <h3 class="fw-bold text-dark mb-0">{{ $counts['approved'] }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Rejected -->
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3 text-center">
-                    <div class="mb-2">
-                        <span class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 48px; height: 48px;">
-                            <i class="fas fa-times-circle fa-lg"></i>
-                        </span>
-                    </div>
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Rejected</h6>
-                    <h3 class="fw-bold text-dark mb-0">{{ $counts['rejected'] }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending Supervisor -->
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3 text-center">
-                    <div class="mb-2">
-                        <span class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle" style="width: 48px; height: 48px;">
-                            <i class="fas fa-user-clock fa-lg"></i>
-                        </span>
-                    </div>
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Supervisor</h6>
-                    <h3 class="fw-bold text-dark mb-0">{{ $counts['pending_supervisor'] }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending Admin -->
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3 text-center">
-                    <div class="mb-2">
-                        <span class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-circle" style="width: 48px; height: 48px;">
-                            <i class="fas fa-hourglass-half fa-lg"></i>
-                        </span>
-                    </div>
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Admin</h6>
-                    <h3 class="fw-bold text-dark mb-0">{{ $counts['pending_admin'] }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Annual Days -->
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3 text-center">
-                    <div class="mb-2">
-                        <span class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 48px; height: 48px;">
-                            <i class="fas fa-calendar-alt fa-lg"></i>
-                        </span>
-                    </div>
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Total Days</h6>
-                    <h3 class="fw-bold text-dark mb-0">{{ $totalAssigned }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Remaining -->
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: white;">
-                <div class="card-body p-3 text-center">
-                    <div class="mb-2">
-                        <span class="d-inline-flex align-items-center justify-content-center bg-white bg-opacity-25 text-white rounded-circle" style="width: 48px; height: 48px;">
-                            <i class="fas fa-calendar-check fa-lg"></i>
-                        </span>
-                    </div>
-                    <h6 class="text-white-50 small text-uppercase fw-bold mb-1">Remaining</h6>
-                    <h3 class="fw-bold text-white mb-0">{{ $remainingDays }}</h3>
-                </div>
-            </div>
+    <!-- Welcome Section -->
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+        <div class="card-body p-4 text-center text-white">
+            <h3 class="fw-bold mb-1">Hello, {{ $employee->FirstName ?? 'Employee' }}!</h3>
+            <p class="mb-0 text-white-50">Manage your leave requests and track your balances below.</p>
         </div>
     </div>
 
-    <div class="d-flex justify-content-end mb-3">
-        <a href="{{ route('leave.report.employee.pdf') }}" class="btn btn-outline-primary shadow-sm">
-            <i class="fas fa-file-pdf me-2"></i>Download My Leave Report
+    <!-- Usage Statistics Section -->
+    <h5 class="fw-bold mb-3 text-dark d-flex align-items-center">
+        <i class="fas fa-chart-pie me-2 text-primary"></i> Leave Balances & Usage
+    </h5>
+
+    <div class="row g-4 mb-5">
+        @foreach($dashboardData as $data)
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm hover-up overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="rounded-3 bg-primary bg-opacity-10 p-3 text-primary">
+                                <i class="fas fa-calendar-check fa-lg"></i>
+                            </div>
+                            <div class="text-end">
+                                <h6 class="text-muted small text-uppercase fw-bold mb-1">{{ $data['type']->LeaveTypeName }}</h6>
+                                @if($data['isUnlimited'])
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Unlimited</span>
+                                @else
+                                    <span class="h4 fw-bold text-dark mb-0">{{ $data['remaining'] }}</span>
+                                    <small class="text-muted fw-normal ms-1">days left</small>
+                                @endif
+                            </div>
+                        </div>
+
+                        <hr class="my-3 opacity-10">
+
+                        <div class="row g-0">
+                            <div class="col-6 border-end py-1">
+                                <div class="text-muted small mb-1">Leave Taken</div>
+                                <div class="fw-bold text-dark">{{ $data['taken'] }} <small class="text-muted fw-normal">days</small></div>
+                            </div>
+                            <div class="col-6 ps-3 py-1">
+                                <div class="text-muted small mb-1">Total Limit</div>
+                                <div class="fw-bold text-dark">
+                                    @if($data['isUnlimited'])
+                                        Unlimited
+                                    @else
+                                        {{ $data['total'] }} <small class="text-muted fw-normal">days</small>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if(!$data['isUnlimited'])
+                        @php
+                            $usagePercent = min(100, ($data['total'] > 0 ? ($data['taken'] / $data['total']) * 100 : 0));
+                            $barColor = $usagePercent > 80 ? 'bg-danger' : ($usagePercent > 50 ? 'bg-warning' : 'bg-success');
+                        @endphp
+                        <div class="progress rounded-0" style="height: 4px;">
+                            <div class="progress-bar {{ $barColor }}" role="progressbar" style="width: {{ $usagePercent }}%"></div>
+                        </div>
+                    @else
+                        <div class="bg-success" style="height: 4px; opacity: 0.1;"></div>
+                    @endif
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <!-- Request History Section -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
+            <i class="fas fa-history me-2 text-primary"></i> Recent Requests
+        </h5>
+        <a href="{{ route('leave.report.employee.pdf') }}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-file-pdf me-1"></i> Generate Report
         </a>
     </div>
 
+
     <div class="card card-custom">
         <div class="card-body table-responsive" style="background-color: #ffffff;">
-            @if ($sortedLeaveRequests->isNotEmpty())
+            @if ($leaveRequests->isNotEmpty())
                 <table class="table table-bordered align-middle">
                     <thead>
                         <tr>
@@ -222,7 +167,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($sortedLeaveRequests as $request)
+                        @foreach ($leaveRequests as $request)
                             @php
                                 $statusNormalized = $normalizeStatus($request->RequestStatus);
                                 $isRejected = in_array($statusNormalized, ['rejected', 'rejected by admin']);

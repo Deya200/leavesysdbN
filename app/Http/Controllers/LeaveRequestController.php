@@ -25,14 +25,45 @@ class LeaveRequestController extends Controller
     public function calculateRemainingLeaveDays()
     {
         $employee = Employee::where('EmployeeNumber', auth()->id())->firstOrFail();
-        $totalLeaveDays = optional($employee->grade)->AnnualLeaveDays ?? 0;
+        return $employee->leave_days_remaining;
+    }
 
-        $usedLeaveDays = LeaveRequest::where('EmployeeNumber', $employee->EmployeeNumber)
-            ->where('RequestStatus', 'Approved')
-            ->whereHas('leaveType', fn($q) => $q->where('LeaveTypeName', 'Annual Leave'))
-            ->sum('TotalDays');
+    // Helper: Validate leave balance against configurable limits
+    private function checkLeaveLimit($employee, $leaveType, $days, $ignoreRequestId = null)
+    {
+        // 1. Annual Leave (Grade-based Logic)
+        if ($leaveType->deductsFromAnnual()) {
+            $remaining = $employee->leave_days_remaining; // Uses getLeaveDaysRemainingAttribute
+            if ($days > $remaining) {
+                return "Requested days ({$days}) exceed your remaining annual leave balance ({$remaining}).";
+            }
+            return null;
+        }
 
-        return max(0, $totalLeaveDays - $usedLeaveDays);
+        // 2. Configurable Limits (MaxLeaveDays)
+        if (!is_null($leaveType->MaxLeaveDays)) {
+            $currentYear = now()->year;
+            $query = LeaveRequest::where('EmployeeNumber', $employee->EmployeeNumber)
+                ->where('LeaveTypeID', $leaveType->LeaveTypeID)
+                ->where('RequestStatus', '!=', 'Rejected')
+                ->where('RequestStatus', '!=', 'Rejected by Admin')
+                ->where('RequestStatus', '!=', 'Cancelled')
+                ->whereYear('StartDate', $currentYear);
+
+            if ($ignoreRequestId) {
+                $query->where('LeaveRequestID', '!=', $ignoreRequestId);
+            }
+
+            $usedDays = $query->sum('TotalDays');
+            $remaining = $leaveType->MaxLeaveDays - $usedDays;
+
+            if ($days > $remaining) {
+                return "Requested days ({$days}) exceed the {$leaveType->LeaveTypeName} annual limit of {$leaveType->MaxLeaveDays} days. ({$remaining} days remaining).";
+            }
+        }
+
+        // 3. Unlimited (MaxLeaveDays is null)
+        return null;
     }
 
     public function index(Request $request)
@@ -48,14 +79,16 @@ class LeaveRequestController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('EmployeeNumber', 'like', "%{$search}%")
-                  ->orWhere('RequestStatus', 'like', "%{$search}%")
-                  ->orWhereHas('employee', function ($q) use ($search) {
-                      $q->where('FirstName', 'like', "%{$search}%")
+                    ->orWhere('RequestStatus', 'like', "%{$search}%")
+                    ->orWhereHas('employee', function ($q) use ($search) {
+                    $q->where('FirstName', 'like', "%{$search}%")
                         ->orWhere('LastName', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('leaveType', function ($q) use ($search) {
-                      $q->where('LeaveTypeName', 'like', "%{$search}%");
-                  });
+                }
+                )
+                    ->orWhereHas('leaveType', function ($q) use ($search) {
+                    $q->where('LeaveTypeName', 'like', "%{$search}%");
+                }
+                );
             });
         }
 
@@ -111,8 +144,9 @@ class LeaveRequestController extends Controller
 
             $leaveType = LeaveType::findOrFail($validated['LeaveTypeID']);
 
-            if ($leaveType->deductsFromAnnual() && $totalDays > $this->calculateRemainingLeaveDays()) {
-                return redirect()->back()->with('error', 'Requested days exceed remaining annual leave.');
+            $error = $this->checkLeaveLimit($employee, $leaveType, $totalDays);
+            if ($error) {
+                return redirect()->back()->with('error', $error);
             }
 
             $leaveRequest = LeaveRequest::create([
@@ -144,19 +178,18 @@ class LeaveRequestController extends Controller
                 'date',
                 'after_or_equal:StartDate',
                 function ($attr, $value, $fail) use ($leaveRequest, $request) {
-                    $newDays = Carbon::parse($request->StartDate)
-                        ->diffInDays(Carbon::parse($value)) + 1;
+            $newDays = Carbon::parse($request->StartDate)
+                    ->diffInDays(Carbon::parse($value)) + 1;
 
-                    $leaveType = LeaveType::find($request->LeaveTypeID);
+            $leaveType = LeaveType::find($request->LeaveTypeID);
 
-                    if ($leaveType && $leaveType->deductsFromAnnual()) {
-                        $remaining = $this->calculateRemainingLeaveDays() + $leaveRequest->TotalDays;
-
-                        if ($newDays > $remaining) {
-                            $fail("Exceeds available days by " . ($newDays - $remaining));
-                        }
-                    }
+            if ($leaveType) {
+                $error = $this->checkLeaveLimit($leaveRequest->employee, $leaveType, $newDays, $leaveRequest->LeaveRequestID);
+                if ($error) {
+                    $fail($error);
                 }
+            }
+        }
             ],
             'Reason' => 'required|string|max:1000',
         ]);
@@ -185,8 +218,11 @@ class LeaveRequestController extends Controller
         $totalDays = Carbon::parse($validated['StartDate'])
             ->diffInDays(Carbon::parse($validated['EndDate'])) + 1;
 
-        if ($leaveType && $leaveType->deductsFromAnnual() && $totalDays > $this->calculateRemainingLeaveDays()) {
-            return redirect()->back()->with('error', 'Requested days exceed your remaining annual leave.');
+        $employee = Employee::where('EmployeeNumber', auth()->id())->firstOrFail();
+        $error = $this->checkLeaveLimit($employee, $leaveType, $totalDays);
+
+        if ($error) {
+            return redirect()->back()->with('error', $error);
         }
 
         return view('leave_requests.review', [
@@ -197,7 +233,7 @@ class LeaveRequestController extends Controller
         ]);
     }
 
-        public function destroy(LeaveRequest $leaveRequest)
+    public function destroy(LeaveRequest $leaveRequest)
     {
         $leaveRequest = LeaveRequest::where('EmployeeNumber', auth()->id())->firstOrFail();
         $leaveRequest->delete();
@@ -255,6 +291,8 @@ class LeaveRequestController extends Controller
             $leaveRequest->update([
                 'RequestStatus' => 'Rejected',
                 'SupervisorRejectionReason' => $validated['SupervisorRejectionReason'],
+                'can_be_appealed' => true,
+                'appeal_deadline' => now()->addDays(7),
             ]);
 
             if ($leaveRequest->wasChanged()) {
@@ -287,9 +325,9 @@ class LeaveRequestController extends Controller
                 $employee = $leaveRequest->employee;
                 $employee->update([
                     'RemainingAnnualLeaveDays' => max(
-                        0,
-                        $employee->RemainingAnnualLeaveDays - $leaveRequest->TotalDays
-                    )
+                    0,
+                    $employee->RemainingAnnualLeaveDays - $leaveRequest->TotalDays
+                )
                 ]);
             }
 
@@ -297,6 +335,7 @@ class LeaveRequestController extends Controller
                 'RequestStatus' => 'Approved',
                 'AdminApproval' => true,
                 'AdminApprovalNote' => $validated['AdminApprovalNote'] ?? null,
+                'is_active' => true,
             ]);
 
             if ($leaveRequest->wasChanged()) {
@@ -327,6 +366,8 @@ class LeaveRequestController extends Controller
                 'RequestStatus' => 'Rejected by Admin',
                 'AdminRejectionReason' => $validated['AdminRejectionReason'],
                 'AdminVerified' => false,
+                'can_be_appealed' => true,
+                'appeal_deadline' => now()->addDays(7),
             ]);
 
             if ($leaveRequest->wasChanged()) {
@@ -355,9 +396,9 @@ class LeaveRequestController extends Controller
             'totalLeaveDays' => $this->calculateRemainingLeaveDays(),
             'totalLeaveRequests' => $employee->leaveRequests()->count(),
             'leaveRequests' => $employee->leaveRequests()
-                ->with('leaveType')
-                ->latest()
-                ->paginate(10)
+            ->with('leaveType')
+            ->latest()
+            ->paginate(10)
         ]);
     }
 
@@ -374,7 +415,7 @@ class LeaveRequestController extends Controller
 
         DB::transaction(function () use ($validated, $leaveRequest) {
             LeaveAppeal::create([
-                'leave_request_id' => $leaveRequest->id,
+                'leave_request_id' => $leaveRequest->LeaveRequestID,
                 'employee_number' => auth()->user()->EmployeeNumber,
                 'appeal_reason' => $validated['Reason'],
                 'status' => 'Pending',
@@ -384,11 +425,11 @@ class LeaveRequestController extends Controller
 
             Notification::create([
                 'EmployeeNumber' => $leaveRequest->employee->SupervisorID, // Notify Supervisor
-                'Message' => "Appeal submitted for leave request #{$leaveRequest->id}",
+                'Message' => "Appeal submitted for leave request #{$leaveRequest->LeaveRequestID}",
                 'Status' => 'Unread',
             ]);
 
-             Log::info("Leave appeal submitted: {$leaveRequest->id}");
+            Log::info("Leave appeal submitted: {$leaveRequest->LeaveRequestID}");
         });
 
         return redirect()->back()->with('success', 'Appeal submitted successfully.');
@@ -407,30 +448,30 @@ class LeaveRequestController extends Controller
 
         // Check balance if needed
         if ($leaveRequest->leaveType->deductsFromAnnual()) {
-             $remaining = $this->calculateRemainingLeaveDays();
-             if ($validated['ExtensionDays'] > $remaining) {
-                 return redirect()->back()->with('error', 'Insufficient leave balance for extension.');
-             }
+            $remaining = $this->calculateRemainingLeaveDays();
+            if ($validated['ExtensionDays'] > $remaining) {
+                return redirect()->back()->with('error', 'Insufficient leave balance for extension.');
+            }
         }
 
         DB::transaction(function () use ($validated, $leaveRequest) {
             LeaveExtension::create([
-                'leave_request_id' => $leaveRequest->id,
+                'leave_request_id' => $leaveRequest->LeaveRequestID,
                 'employee_number' => auth()->user()->EmployeeNumber,
                 'extension_days' => $validated['ExtensionDays'],
                 'reason' => $validated['Reason'],
                 'status' => 'Pending',
                 'new_end_date' => Carbon::parse($leaveRequest->EndDate)->addDays($validated['ExtensionDays']),
             ]);
-            
+
             // We do NOT update leave request status/end date yet, only after approval
-             Notification::create([
-                'EmployeeNumber' => $leaveRequest->employee->SupervisorID, 
-                'Message' => "Extension requested for leave #{$leaveRequest->id}",
+            Notification::create([
+                'EmployeeNumber' => $leaveRequest->employee->SupervisorID,
+                'Message' => "Extension requested for leave #{$leaveRequest->LeaveRequestID}",
                 'Status' => 'Unread',
             ]);
 
-            Log::info("Leave extension requested: {$leaveRequest->id}");
+            Log::info("Leave extension requested: {$leaveRequest->LeaveRequestID}");
         });
 
         return redirect()->back()->with('success', 'Extension requested successfully.');
@@ -443,7 +484,7 @@ class LeaveRequestController extends Controller
         ]);
 
         if (!$leaveRequest->canBeCancelled()) {
-             return redirect()->back()->with('error', 'This request cannot be cancelled.');
+            return redirect()->back()->with('error', 'This request cannot be cancelled.');
         }
 
         DB::transaction(function () use ($validated, $leaveRequest) {
@@ -451,38 +492,34 @@ class LeaveRequestController extends Controller
             $refundDays = 0;
             $today = Carbon::today();
             $startDate = Carbon::parse($leaveRequest->StartDate);
-            
-            // Logic: entirely future leave = full refund. 
-            // In-progress leave = refund remaining days? 
-            // For now, let's assume cancellation is only for future or current leaves, 
-            // and business logic to calculate refund is handled in Admin approval or here.
-            
-            // Using logic from LeaveCancellation model if available, or simple logic here:
+
+            // Logic: entirely future leave = full refund. In-progress = refund remaining days.
             if ($today->lt($startDate)) {
                 $refundDays = $leaveRequest->TotalDays;
-            } else {
-                 // In progress
-                 $endDate = Carbon::parse($leaveRequest->EndDate);
-                 if ($today->lt($endDate)) {
-                     $refundDays = $today->diffInDays($endDate); 
-                 }
             }
-            
+            else {
+                // In progress
+                $endDate = Carbon::parse($leaveRequest->EndDate);
+                if ($today->lt($endDate)) {
+                    $refundDays = $today->diffInDays($endDate);
+                }
+            }
+
             LeaveCancellation::create([
-                'leave_request_id' => $leaveRequest->id,
+                'leave_request_id' => $leaveRequest->LeaveRequestID,
                 'employee_number' => auth()->user()->EmployeeNumber,
                 'cancellation_reason' => $validated['Reason'],
                 'status' => 'Pending',
                 'refundable_days' => $refundDays,
             ]);
 
-             Notification::create([
-                'EmployeeNumber' => $leaveRequest->employee->SupervisorID, 
-                'Message' => "Cancellation requested for leave #{$leaveRequest->id}",
+            Notification::create([
+                'EmployeeNumber' => $leaveRequest->employee->SupervisorID,
+                'Message' => "Cancellation requested for leave #{$leaveRequest->LeaveRequestID}",
                 'Status' => 'Unread',
             ]);
 
-            Log::info("Leave cancellation requested: {$leaveRequest->id}");
+            Log::info("Leave cancellation requested: {$leaveRequest->LeaveRequestID}");
         });
 
         return redirect()->back()->with('success', 'Cancellation requested successfully.');

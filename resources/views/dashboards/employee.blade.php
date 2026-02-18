@@ -202,6 +202,12 @@
         </div>
     </div>
 
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ route('leave.report.employee.pdf') }}" class="btn btn-outline-primary shadow-sm">
+            <i class="fas fa-file-pdf me-2"></i>Download My Leave Report
+        </a>
+    </div>
+
     <div class="card card-custom">
         <div class="card-body table-responsive" style="background-color: #ffffff;">
             @if ($sortedLeaveRequests->isNotEmpty())

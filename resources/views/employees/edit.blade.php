@@ -111,8 +111,11 @@
                         <div class="mb-3">
                             <label for="role_id" class="form-label">Role</label>
                             <select id="role_id" name="role_id" class="form-select @error('role_id') is-invalid @enderror" required>
-                                <option value="2" {{ old('role_id', $employee->role_id) == 2 ? 'selected' : '' }}>Employee</option>
-                                <option value="1" {{ old('role_id', $employee->role_id) == 1 ? 'selected' : '' }}>Admin</option>
+                                @foreach($roles as $role)
+                                    <option value="{{ $role->id }}" {{ old('role_id', $employee->role_id) == $role->id ? 'selected' : '' }}>
+                                        {{ $role->name }}
+                                    </option>
+                                @endforeach
                             </select>
                             @error('role_id')
                                 <div class="invalid-feedback">{{ $message }}</div>

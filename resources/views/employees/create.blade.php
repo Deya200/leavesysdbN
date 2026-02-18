@@ -108,6 +108,14 @@
                 </div>
 
                 <div class="form-group mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group mb-3">
                     <label for="DateOfBirth" class="form-label">Date of Birth</label>
                     <input type="date" id="DateOfBirth" name="DateOfBirth" class="form-control @error('DateOfBirth') is-invalid @enderror" value="{{ old('DateOfBirth') }}" required>
                     @error('DateOfBirth')
@@ -175,8 +183,12 @@
                 <div class="form-group mb-4">
                     <label for="role_id" class="form-label">Role</label>
                     <select id="role_id" name="role_id" class="form-select @error('role_id') is-invalid @enderror" required>
-                        <option value="2" selected>Employee</option>
-                        <option value="1">Admin</option>
+                        <option value="" disabled selected>Select Role</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                {{ $role->name }}
+                            </option>
+                        @endforeach
                     </select>
                     @error('role_id')
                         <div class="invalid-feedback">{{ $message }}</div>

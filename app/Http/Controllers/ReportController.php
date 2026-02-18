@@ -17,4 +17,17 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.leave_pdf', compact('leaveRequests'));
         return $pdf->download('leave_report.pdf');
     }
+
+    public function generateEmployeePDF()
+    {
+        $employee = auth()->user();
+
+        $leaveRequests = LeaveRequest::with(['employee.department', 'leaveType'])
+            ->where('EmployeeNumber', $employee->EmployeeNumber)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('reports.leave_pdf', compact('leaveRequests'));
+        return $pdf->download('my_leave_report_' . $employee->EmployeeNumber . '.pdf');
+    }
 }

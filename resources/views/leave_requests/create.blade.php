@@ -134,30 +134,19 @@
 
                         <!-- Choosing LeaveTypes -->
                         <div class="mb-4">
-    <label class="form-label fw-bold mb-3">Leave Type</label>
-    <div class="row g-3">
-        @foreach ($leaveTypes as $leaveType)
-        <div class="col-md-4">
-            <input type="radio" class="btn-check" name="LeaveTypeID"
-                   id="type-{{ $leaveType->LeaveTypeID }}"
-                   value="{{ $leaveType->LeaveTypeID }}"
-                   autocomplete="off" required
-                   @checked(old('LeaveTypeID') == $leaveType->LeaveTypeID)>
-            <label class="btn custom-leave-type-btn w-100 py-3 d-flex flex-column"
-                   for="type-{{ $leaveType->LeaveTypeID }}">
-                <i class="fas
-                   @if(str_contains($leaveType->LeaveTypeName, 'Sick')) fa-head-side-cough
-                   @elseif(str_contains($leaveType->LeaveTypeName, 'Vacation')) fa-umbrella-beach
-                   @elseif(str_contains($leaveType->LeaveTypeName, 'Maternity')) fa-baby
-                   @else fa-calendar-alt
-                   @endif
-                   mb-2"></i>
-                {{ $leaveType->LeaveTypeName }}
-            </label>
-        </div>
-        @endforeach
-    </div>
-</div>
+                            <label for="LeaveTypeID" class="form-label fw-bold mb-2">Leave Type</label>
+                            <select id="LeaveTypeID" name="LeaveTypeID" class="form-select form-select-lg" required>
+                                <option value="" disabled {{ old('LeaveTypeID') ? '' : 'selected' }}>-- Select Leave Type --</option>
+                                @foreach ($leaveTypes as $leaveType)
+                                    <option value="{{ $leaveType->LeaveTypeID }}" {{ old('LeaveTypeID') == $leaveType->LeaveTypeID ? 'selected' : '' }}>
+                                        {{ $leaveType->LeaveTypeName }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('LeaveTypeID')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">

@@ -69,7 +69,12 @@
     <!-- Welcome Section -->
     <div class="card-custom text-center mb-4" style="background-color: #2E3A87; color: white;">
         <h4 class="fw-bold mb-1">Welcome, {{ auth()->user()->FirstName ?? 'Administrator' }}!</h4>
-        <p class="mb-2">You can review, approve, or reject leave requests submitted by employees.</p>
+        <p class="mb-3">You can review, approve, or reject leave requests submitted by employees.</p>
+        <div>
+            <a href="{{ route('leave-types.index') }}" class="btn btn-light btn-sm fw-bold text-primary shadow-sm">
+                <i class="fas fa-cogs me-1"></i> Manage Leave Types
+            </a>
+        </div>
     </div>
 
 

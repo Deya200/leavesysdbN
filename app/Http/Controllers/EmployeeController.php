@@ -22,33 +22,34 @@ class EmployeeController extends Controller
      *
      * @return \Illuminate\View\View
      */
- 
+
     public function index(Request $request)
     {
         // Get the search query from the request
         $search = $request->input('search');
-        $sortColumn = $request->input('sort', 'FirstName');   // default sort column
-        $sortOrder = $request->input('order', 'asc'); 
+        $sortColumn = $request->input('sort', 'FirstName'); // default sort column
+        $sortOrder = $request->input('order', 'asc');
 
         // Fetch employees with optional search filtering
         $employees = Employee::with(['department', 'role'])
             ->when($search, function ($query, $search) {
-                $query->where('FirstName', 'like', "%{$search}%")
-                      ->orWhere('LastName', 'like', "%{$search}%")
-                      ->orWhereHas('department', function ($departmentQuery) use ($search) {
-                          $departmentQuery->where('DepartmentName', 'like', "%{$search}%");
-                      });
-            })
+            $query->where('FirstName', 'like', "%{$search}%")
+                ->orWhere('LastName', 'like', "%{$search}%")
+                ->orWhereHas('department', function ($departmentQuery) use ($search) {
+                $departmentQuery->where('DepartmentName', 'like', "%{$search}%");
+            }
+            );
+        })
             ->orderBy('FirstName', 'asc')
             ->paginate(10) //
             ->appends([
-                        'search' => $search,
-                        'sort' => $sortColumn,
-                        'order' => $sortOrder,
-                    ]); //
+            'search' => $search,
+            'sort' => $sortColumn,
+            'order' => $sortOrder,
+        ]); //
 
         // Return the view with the employees and search query
-        return view('employees.index', compact('employees', 'search','sortColumn', 'sortOrder'));
+        return view('employees.index', compact('employees', 'search', 'sortColumn', 'sortOrder'));
     }
 
 
@@ -62,8 +63,9 @@ class EmployeeController extends Controller
         $departments = Department::all();
         $grades = Grade::all();
         $positions = Position::all();
+        $roles = Role::all();
 
-        return view('employees.create', compact('departments', 'grades', 'positions'));
+        return view('employees.create', compact('departments', 'grades', 'positions', 'roles'));
     }
 
     /**
@@ -76,13 +78,14 @@ class EmployeeController extends Controller
     {
         $validatedData = $request->validate([
             'EmployeeNumber' => 'required|unique:employees,EmployeeNumber',
-            'FirstName'      => 'required|string|max:255',
-            'LastName'       => 'required|string|max:255',
-            'DateOfBirth'    => 'required|date',
-            'DepartmentID'   => 'required|exists:departments,DepartmentID',
-            'GradeID'        => 'required|exists:grades,GradeID',
-            'PositionID'     => 'required|exists:positions,PositionID',
-            'Gender'         => 'required|in:Male,Female,Other',
+            'FirstName' => 'required|string|max:255',
+            'LastName' => 'required|string|max:255',
+            'email' => 'required|email|unique:employees,email',
+            'DateOfBirth' => 'required|date',
+            'DepartmentID' => 'required|exists:departments,DepartmentID',
+            'GradeID' => 'required|exists:grades,GradeID',
+            'PositionID' => 'required|exists:positions,PositionID',
+            'Gender' => 'required|in:Male,Female,Other',
         ]);
 
         // Set a default role_id for a new employee.
@@ -98,14 +101,15 @@ class EmployeeController extends Controller
             try {
                 $token = \Illuminate\Support\Facades\Password::getRepository()->create($employee);
                 $employee->sendPasswordResetNotification($token);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 // Silently fail or log if mail fails, but don't break the redirect
                 \Illuminate\Support\Facades\Log::error("Failed to send invitation to new employee: " . $e->getMessage());
             }
         }
 
         return redirect()->route('employees.index')
-                         ->with('success', 'Employee successfully added! ' . ($employee->email ? 'An invitation has been sent.' : ''));
+            ->with('success', 'Employee successfully added! ' . ($employee->email ? 'An invitation has been sent.' : ''));
     }
 
     /**
@@ -135,23 +139,23 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $employee)
     {
         $validatedData = $request->validate([
-            'FirstName'      => 'required|string|max:255',
-            'LastName'       => 'required|string|max:255',
-            'DateOfBirth'    => 'required|date',
-            'DepartmentID'   => 'required|exists:departments,DepartmentID',
-            'GradeID'        => 'required|exists:grades,GradeID',
-            'PositionID'     => 'required|exists:positions,PositionID',
-            'Gender'         => 'required|in:Male,Female,Other',
-            'role_id'        => 'required|integer',
+            'FirstName' => 'required|string|max:255',
+            'LastName' => 'required|string|max:255',
+            'DateOfBirth' => 'required|date',
+            'DepartmentID' => 'required|exists:departments,DepartmentID',
+            'GradeID' => 'required|exists:grades,GradeID',
+            'PositionID' => 'required|exists:positions,PositionID',
+            'Gender' => 'required|in:Male,Female,Other',
+            'role_id' => 'required|integer',
         ]);
 
-         $employee->update($validatedData);
+        $employee->update($validatedData);
         // Since role_id is updated in the employee record, no further role syncing is required.
         // Optionally, you can verify the role exists:
         Role::findOrFail($validatedData['role_id']);
 
         return redirect()->route('employees.index')
-                         ->with('success', 'Employee successfully updated!');
+            ->with('success', 'Employee successfully updated!');
     }
 
     /**
@@ -166,7 +170,7 @@ class EmployeeController extends Controller
         $employee->delete();
 
         return redirect()->route('employees.index')
-                         ->with('success', 'Employee successfully deleted!');
+            ->with('success', 'Employee successfully deleted!');
     }
 
     /**
@@ -187,16 +191,20 @@ class EmployeeController extends Controller
         $department->SupervisorID = $employee->EmployeeNumber;
         $department->save();
 
+        // Update all employees in this department to have this supervisor
+        Employee::where('DepartmentID', $validatedData['DepartmentID'])
+            ->where('EmployeeNumber', '!=', $employee->EmployeeNumber)
+            ->update(['SupervisorID' => $employee->EmployeeNumber]);
+
         // Update the employee's role to Supervisor.
-        // Assuming the Supervisor role has an id of 3.
         $supervisorRole = Role::where('name', 'Supervisor')->first();
         if ($supervisorRole) {
-        $employee->role_id = $supervisorRole->id;
-        $employee->save();}
-               
+            $employee->role_id = $supervisorRole->id;
+            $employee->save();
+        }
 
         return redirect()->route('employees.index')
-                         ->with('success', 'Employee assigned as Supervisor successfully!');
+            ->with('success', 'Employee assigned as Supervisor successfully! All department employees updated.');
     }
 
     /**
@@ -219,8 +227,8 @@ class EmployeeController extends Controller
         // implement that logic here. For now, updating role_id is enough.
 
         return redirect()->route('employees.index')
-       
-        ->with('success', 'Employee role updated successfully!');
+
+            ->with('success', 'Employee role updated successfully!');
     }
 
     public function getGenderByEmployeeNumber($employeeNumber)
@@ -231,7 +239,7 @@ class EmployeeController extends Controller
         if ($employee) {
             return response()->json(['gender' => $employee->Gender]);
         }
-    
+
         return response()->json(['error' => 'Employee record not found.'], 404);
     }
 
@@ -264,10 +272,11 @@ class EmployeeController extends Controller
     public function bulkSendInvitations(Request $request)
     {
         $employeeNumbers = $request->input('employee_numbers', []);
-        
+
         if ($request->input('scope') === 'all') {
             $employees = Employee::whereNotNull('email')->get();
-        } else {
+        }
+        else {
             $employees = Employee::whereIn('EmployeeNumber', $employeeNumbers)->whereNotNull('email')->get();
         }
 

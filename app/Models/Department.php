@@ -26,9 +26,9 @@ class Department extends Model
      * Get the supervisor of the department.
      * A department belongs to one employee (supervisor).
      */
- public function supervisor()
+    public function supervisor()
     {
-        return $this->belongsTo(User::class, 'SupervisorID', 'EmployeeNumber');
+        return $this->belongsTo(Employee::class , 'SupervisorID', 'EmployeeNumber');
     }
 
     /**
@@ -37,6 +37,6 @@ class Department extends Model
      */
     public function employees()
     {
-        return $this->hasMany(Employee::class, 'DepartmentID', 'DepartmentID');
+        return $this->hasMany(Employee::class , 'DepartmentID', 'DepartmentID');
     }
 }

@@ -185,7 +185,7 @@
                 </div>
 
                 <!-- Search Bar -->
-                <div class="flex-grow-1" style="min-width: 250px;">
+                <form method="GET" action="{{ route('employees.index') }}" class="flex-grow-1" style="min-width: 250px;">
                     <div class="input-group">
                         <input 
                             type="text" 
@@ -193,12 +193,13 @@
                             id="employeeSearch" 
                             class="form-control" 
                             placeholder="Search employees..."
+                            value="{{ request('search') }}"
                         >
-                        <button class="btn btn-outline-secondary" type="button">
+                        <button class="btn btn-outline-secondary" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-                </div>
+                </form>
                 
                 <!-- Add New Employee Button -->
                 <a href="{{ route('employees.create') }}" 
@@ -331,20 +332,6 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Search/Filter Feature
-        const searchInput = document.getElementById('employeeSearch');
-        const employeeRows = document.querySelectorAll('.employee-row');
-
-        if (searchInput && employeeRows.length \u003e 0) {
-            searchInput.addEventListener('input', function () {
-                const searchTerm = this.value.trim().toLowerCase();
-                employeeRows.forEach(row =\u003e {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? 'table-row' : 'none';
-                });
-            });
-        }
-
         // Bulk Selection Logic
         const selectAll = document.getElementById('selectAll');
         const checkboxes = document.querySelectorAll('.employee-checkbox');
@@ -376,7 +363,7 @@
             const name = button.getAttribute('data-emp-name');
             
             document.getElementById('modalEmployeeName').textContent = name;
-            document.getElementById('passwordForm').action = '/admin/employees/' + empNum + '/manual-set-password';
+            document.getElementById('passwordForm').action = '/employees/' + empNum + '/manual-set-password';
         });
     }
 

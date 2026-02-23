@@ -141,6 +141,7 @@ class EmployeeController extends Controller
         $validatedData = $request->validate([
             'FirstName' => 'required|string|max:255',
             'LastName' => 'required|string|max:255',
+            'email' => 'required|email|unique:employees,email,' . $employee->EmployeeNumber . ',EmployeeNumber',
             'DateOfBirth' => 'required|date',
             'DepartmentID' => 'required|exists:departments,DepartmentID',
             'GradeID' => 'required|exists:grades,GradeID',
@@ -261,7 +262,8 @@ class EmployeeController extends Controller
         }
 
         $token = Password::getRepository()->create($employee);
-        $employee->sendPasswordResetNotification($token);
+        $admin = auth()->user();
+        $employee->sendPasswordResetNotification($token, $admin);
 
         return back()->with('success', "Invitation sent to {$employee->FirstName} ({$employee->email}).");
     }
@@ -284,9 +286,10 @@ class EmployeeController extends Controller
             return back()->with('error', "No employees with email addresses selected.");
         }
 
+        $admin = auth()->user();
         foreach ($employees as $employee) {
             $token = Password::getRepository()->create($employee);
-            $employee->sendPasswordResetNotification($token);
+            $employee->sendPasswordResetNotification($token, $admin);
         }
 
         return back()->with('success', "Invitations sent to " . $employees->count() . " employees.");

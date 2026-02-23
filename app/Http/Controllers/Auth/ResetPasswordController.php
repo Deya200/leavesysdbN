@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ResetPasswordController extends Controller
 {
@@ -26,4 +28,27 @@ class ResetPasswordController extends Controller
      * @var string
      */
     protected $redirectTo = '/login';
+
+    /**
+     * Override the redirect path to check user role after password reset.
+     *
+     * @return string
+     */
+    protected function redirectPath()
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->role) {
+            return route('login');
+        }
+
+        $roleName = strtolower(trim($user->role->name));
+
+        return match ($roleName) {
+            'admin' => route('dashboard'),
+            'supervisor' => route('supervisor.index'),
+            'employee' => route('dashboards.employee'),
+            default => route('login'),
+        };
+    }
 }

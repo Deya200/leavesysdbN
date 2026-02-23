@@ -69,10 +69,26 @@ class LeaveRequestController extends Controller
     public function index(Request $request)
     {
         $query = LeaveRequest::with([
-            'employee:EmployeeNumber,FirstName,LastName',
+            'employee:EmployeeNumber,FirstName,LastName,DepartmentID',
             'leaveType:LeaveTypeID,LeaveTypeName',
             'supervisor:EmployeeNumber,FirstName,LastName'
         ]);
+
+        // ✅ ROLE-BASED FILTERING
+        $user = auth()->user();
+        
+        if ($user->role_id === 2) {
+            // SUPERVISOR: Only see leave requests from employees in their department
+            $supervisorDepartment = $user->DepartmentID;
+            $query->whereHas('employee', function ($q) use ($supervisorDepartment) {
+                $q->where('DepartmentID', $supervisorDepartment);
+            });
+        } elseif ($user->role_id === 3) {
+            // EMPLOYEE: Only see their own leave requests and exclude archived ones
+            $query->where('EmployeeNumber', $user->EmployeeNumber);
+            $query->where('is_archived', false);
+        }
+        // Admin (role_id === 1): See all leave requests (no filter)
 
         // Apply Search
         if ($request->search) {
@@ -97,6 +113,16 @@ class LeaveRequestController extends Controller
             $query->where('RequestStatus', $request->status);
         }
 
+        // Apply Archived Filter (Admin Only)
+        if ($request->filled('archived')) {
+            $archived = $request->input('archived');
+            if ($archived === '0' || $archived === 0) {
+                $query->where('is_archived', false);
+            } elseif ($archived === '1' || $archived === 1) {
+                $query->where('is_archived', true);
+            }
+        }
+
         // Clone query for stats BEFORE pagination
         $statsQuery = clone $query;
         $totalCount = $statsQuery->count();
@@ -118,7 +144,14 @@ class LeaveRequestController extends Controller
 
     public function create()
     {
-        $leaveTypes = LeaveType::all();
+        $employee = Employee::where('EmployeeNumber', auth()->id())->firstOrFail();
+        
+        // Filter leave types based on employee's gender
+        $leaveTypes = LeaveType::where(function ($query) use ($employee) {
+            $query->where('GenderApplicable', 'Both')
+                  ->orWhere('GenderApplicable', $employee->Gender);
+        })->get();
+        
         return view('leave_requests.create', compact('leaveTypes'));
     }
 
@@ -214,11 +247,17 @@ class LeaveRequestController extends Controller
             'Reason' => 'required|string|max:1000',
         ]);
 
+        $employee = Employee::where('EmployeeNumber', auth()->id())->firstOrFail();
         $leaveType = LeaveType::find($validated['LeaveTypeID']);
+        
+        // Validate that the leave type is applicable to the employee's gender
+        if ($leaveType->GenderApplicable !== 'Both' && $leaveType->GenderApplicable !== $employee->Gender) {
+            return redirect()->back()->with('error', 'The selected leave type is not applicable to your gender.');
+        }
+        
         $totalDays = Carbon::parse($validated['StartDate'])
             ->diffInDays(Carbon::parse($validated['EndDate'])) + 1;
 
-        $employee = Employee::where('EmployeeNumber', auth()->id())->firstOrFail();
         $error = $this->checkLeaveLimit($employee, $leaveType, $totalDays);
 
         if ($error) {
@@ -231,6 +270,27 @@ class LeaveRequestController extends Controller
             'totalDays' => $totalDays,
             'remainingDays' => $this->calculateRemainingLeaveDays()
         ]);
+    }
+
+    public function showReview()
+    {
+        if (session()->has('leave_review_data')) {
+            $data = session('leave_review_data');
+            $leaveType = isset($data['LeaveTypeID']) ? LeaveType::find($data['LeaveTypeID']) : null;
+            $totalDays = null;
+            if (isset($data['StartDate']) && isset($data['EndDate'])) {
+                $totalDays = Carbon::parse($data['StartDate'])->diffInDays(Carbon::parse($data['EndDate'])) + 1;
+            }
+
+            return view('leave_requests.review', [
+                'data' => $data,
+                'leaveType' => $leaveType,
+                'totalDays' => $totalDays,
+                'remainingDays' => $this->calculateRemainingLeaveDays()
+            ]);
+        }
+
+        return view('leave_requests.review');
     }
 
     public function destroy(LeaveRequest $leaveRequest)
@@ -395,7 +455,7 @@ class LeaveRequestController extends Controller
     {
         $employee = auth()->user();
         $leaveTypes = LeaveType::all();
-        $leaveRequests = $employee->leaveRequests()->with('leaveType')->get();
+        $leaveRequests = $employee->leaveRequests()->where('is_archived', false)->with('leaveType')->get();
 
         $dashboardData = $leaveTypes->map(function ($type) use ($employee, $leaveRequests) {
             $taken = $leaveRequests->where('LeaveTypeID', $type->LeaveTypeID)
@@ -561,4 +621,265 @@ class LeaveRequestController extends Controller
 
         return redirect()->back()->with('success', 'Cancellation requested successfully.');
     }
+
+    /**
+     * Archive a leave request (admin only) - Returns days to employee if annual leave
+     */
+    public function archive(LeaveRequest $leaveRequest)
+    {
+        // Check if user is admin
+        if (auth()->user()->role_id !== 1) {
+            return redirect()->back()->with('error', 'You do not have permission to archive leave requests.');
+        }
+
+        // If archiving an APPROVED annual leave, return the days to employee
+        if ($leaveRequest->RequestStatus === 'Approved' && 
+            $leaveRequest->leaveType->deductsFromAnnual()) {
+            $employee = $leaveRequest->employee;
+            $employee->increment('RemainingAnnualLeaveDays', $leaveRequest->TotalDays);
+            Log::info("Returned {$leaveRequest->TotalDays} annual leave days to {$employee->EmployeeNumber} (Request: {$leaveRequest->LeaveRequestID})");
+        }
+
+        $leaveRequest->update([
+            'is_archived' => true,
+            'archived_at' => now(),
+        ]);
+
+        Log::info("Leave request archived: {$leaveRequest->LeaveRequestID} by " . auth()->user()->EmployeeNumber);
+
+        return redirect()->back()->with('success', 'Leave request archived successfully. Days returned to employee if applicable.');
+    }
+
+    /**
+     * Restore an archived leave request (admin only) - Deducts days from employee if annual leave
+     */
+    public function restore(LeaveRequest $leaveRequest)
+    {
+        // Check if user is admin
+        if (auth()->user()->role_id !== 1) {
+            return redirect()->back()->with('error', 'You do not have permission to restore leave requests.');
+        }
+
+        // If restoring an APPROVED annual leave, deduct the days from employee
+        if ($leaveRequest->RequestStatus === 'Approved' && 
+            $leaveRequest->leaveType->deductsFromAnnual()) {
+            $employee = $leaveRequest->employee;
+            $employee->decrement('RemainingAnnualLeaveDays', $leaveRequest->TotalDays);
+            Log::info("Deducted {$leaveRequest->TotalDays} annual leave days from {$employee->EmployeeNumber} (Request: {$leaveRequest->LeaveRequestID})");
+        }
+
+        $leaveRequest->update([
+            'is_archived' => false,
+            'archived_at' => null,
+        ]);
+
+        Log::info("Leave request restored: {$leaveRequest->LeaveRequestID} by " . auth()->user()->EmployeeNumber);
+
+        return redirect()->back()->with('success', 'Leave request restored successfully.');
+    }
+
+    /**
+     * Show archive management page (admin only)
+     */
+    public function showArchiveManager()
+    {
+        if (auth()->user()->role_id !== 1) {
+            return redirect()->back()->with('error', 'You do not have permission to access this page.');
+        }
+
+        $year = request('year', null); // Optional year filter
+        
+        // Get ALL completed leave requests that are not archived yet (not limited by year)
+        $query = LeaveRequest::with([
+            'employee:EmployeeNumber,FirstName,LastName,DepartmentID,RemainingAnnualLeaveDays',
+            'leaveType:LeaveTypeID,LeaveTypeName',
+        ])
+        ->where('is_archived', false)
+        ->whereIn('RequestStatus', ['Approved', 'Rejected', 'Rejected by Admin']);
+
+        // Apply year filter only if selected
+        if ($year) {
+            $query->whereYear('EndDate', $year);
+        }
+
+        $leaveRequests = $query->orderByDesc('EndDate')->paginate(20);
+
+        $years = range(now()->year - 5, now()->year);
+
+        return view('admin.archive_leaves', [
+            'leaveRequests' => $leaveRequests,
+            'selectedYear' => $year,
+            'years' => $years,
+        ]);
+    }
+
+    /**
+     * Bulk archive leave requests (admin only)
+     */
+    public function bulkArchive(Request $request)
+    {
+        if (auth()->user()->role_id !== 1) {
+            return redirect()->back()->with('error', 'You do not have permission to perform this action.');
+        }
+
+        $leaveRequestIds = $request->input('leave_request_ids', []);
+
+        if (empty($leaveRequestIds)) {
+            return redirect()->back()->with('error', 'No leave requests selected.');
+        }
+
+        $archivedCount = 0;
+        $daysReturned = 0;
+
+        foreach ($leaveRequestIds as $id) {
+            $leaveRequest = LeaveRequest::find($id);
+            
+            if ($leaveRequest && !$leaveRequest->is_archived) {
+                // Return days if applicable
+                if ($leaveRequest->RequestStatus === 'Approved' && 
+                    $leaveRequest->leaveType->deductsFromAnnual()) {
+                    $employee = $leaveRequest->employee;
+                    $employee->increment('RemainingAnnualLeaveDays', $leaveRequest->TotalDays);
+                    $daysReturned += $leaveRequest->TotalDays;
+                }
+
+                // Archive the request
+                $leaveRequest->update([
+                    'is_archived' => true,
+                    'archived_at' => now(),
+                ]);
+
+                $archivedCount++;
+            }
+        }
+
+        Log::info("Bulk archived {$archivedCount} leave requests, returned {$daysReturned} days by " . auth()->user()->EmployeeNumber);
+
+        return redirect()->back()->with('success', "Archived {$archivedCount} leave requests and returned {$daysReturned} annual leave days.");
+    }
+
+    /**
+     * View all archived leave requests with restore option
+     */
+    public function viewArchived()
+    {
+        if (auth()->user()->role_id !== 1) {
+            return redirect()->back()->with('error', 'You do not have permission to access this page.');
+        }
+
+        $year = request('year', null);
+        
+        // Get ALL archived leave requests
+        $query = LeaveRequest::with([
+            'employee:EmployeeNumber,FirstName,LastName,DepartmentID',
+            'leaveType:LeaveTypeID,LeaveTypeName',
+        ])
+        ->where('is_archived', true);
+
+        // Apply year filter only if selected
+        if ($year) {
+            $query->whereYear('archived_at', $year);
+        }
+
+        $archivedLeaves = $query->orderByDesc('archived_at')->paginate(20);
+
+        $years = range(now()->year - 5, now()->year);
+
+        return view('admin.view_archived_leaves', [
+            'archivedLeaves' => $archivedLeaves,
+            'selectedYear' => $year,
+            'years' => $years,
+        ]);
+    }
+
+    /**
+     * Employee: View full leave request history
+     */
+    public function employeeFullHistory()
+    {
+        $employee = auth()->user();
+        $search = request('search', '');
+        $status = request('status', '');
+        
+        $query = LeaveRequest::where('EmployeeNumber', $employee->EmployeeNumber)
+            ->where('is_archived', false)
+            ->with('leaveType');
+
+        // Search filter
+        if ($search) {
+            $query->whereHas('leaveType', function($q) use ($search) {
+                $q->where('LeaveTypeName', 'like', "%{$search}%");
+            })->orWhere('RequestStatus', 'like', "%{$search}%");
+        }
+
+        // Status filter
+        if ($status) {
+            $query->where('RequestStatus', $status);
+        }
+
+        $leaveRequests = $query->orderByDesc('created_at')->paginate(20);
+
+        return view('leave_requests.employee_history', [
+            'leaveRequests' => $leaveRequests,
+            'search' => $search,
+            'status' => $status,
+            'employee' => $employee
+        ]);
+    }
+
+    /**
+     * Admin: View all leave requests in the system
+     */
+    public function adminAllRequests()
+    {
+        if (auth()->user()->role_id !== 1) {
+            return redirect()->back()->with('error', 'You do not have permission to access this page.');
+        }
+
+        $search = request('search', '');
+        $status = request('status', '');
+        $archived = request('archived', 'active');
+        
+        $query = LeaveRequest::with('employee:EmployeeNumber,FirstName,LastName,DepartmentID', 'leaveType:LeaveTypeID,LeaveTypeName');
+
+        // Archived filter
+        if ($archived === 'active') {
+            $query->where('is_archived', false);
+        } elseif ($archived === 'archived') {
+            $query->where('is_archived', true);
+        }
+
+        // Search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->whereHas('employee', function($subq) use ($search) {
+                    $subq->where('FirstName', 'like', "%{$search}%")
+                         ->orWhere('LastName', 'like', "%{$search}%")
+                         ->orWhere('EmployeeNumber', 'like', "%{$search}%");
+                })
+                ->orWhereHas('leaveType', function($subq) use ($search) {
+                    $subq->where('LeaveTypeName', 'like', "%{$search}%");
+                })
+                ->orWhere('RequestStatus', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($status) {
+            $query->where('RequestStatus', $status);
+        }
+
+        $allRequests = $query->orderByDesc('created_at')->paginate(20);
+
+        $statuses = ['Pending Supervisor Approval', 'Pending Admin Verification', 'Approved', 'Rejected', 'Rejected by Admin'];
+
+        return view('admin.all_requests', [
+            'allRequests' => $allRequests,
+            'search' => $search,
+            'status' => $status,
+            'archived' => $archived,
+            'statuses' => $statuses
+        ]);
+    }
 }
+

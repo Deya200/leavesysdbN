@@ -45,7 +45,15 @@ class DepartmentController extends Controller
         ]);
 
         // Create the department record
-        Department::create($validated);
+        $department = Department::create($validated);
+
+        // If a SupervisorID was provided when creating the department,
+        // set that SupervisorID for all current employees in the department.
+        if (!empty($validated['SupervisorID'])) {
+            Employee::where('DepartmentID', $department->DepartmentID)
+                ->where('EmployeeNumber', '!=', $validated['SupervisorID'])
+                ->update(['SupervisorID' => $validated['SupervisorID']]);
+        }
 
         session()->flash('success', 'Department created successfully!');
         return redirect()->route('departments.index');
@@ -82,7 +90,21 @@ class DepartmentController extends Controller
 
         // Find the department and update details
         $department = Department::findOrFail($DepartmentID);
+        $oldSupervisor = $department->SupervisorID;
         $department->update($validated);
+
+        // If SupervisorID was changed (or newly set), propagate to employees
+        if (array_key_exists('SupervisorID', $validated) && $validated['SupervisorID'] !== $oldSupervisor) {
+            if (!empty($validated['SupervisorID'])) {
+                Employee::where('DepartmentID', $DepartmentID)
+                    ->where('EmployeeNumber', '!=', $validated['SupervisorID'])
+                    ->update(['SupervisorID' => $validated['SupervisorID']]);
+            } else {
+                // Supervisor was cleared; remove supervisor assignment from department employees
+                Employee::where('DepartmentID', $DepartmentID)
+                    ->update(['SupervisorID' => null]);
+            }
+        }
 
         session()->flash('success', 'Department updated successfully!');
         return redirect()->route('departments.index');

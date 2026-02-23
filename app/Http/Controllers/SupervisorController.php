@@ -8,6 +8,9 @@ use App\Models\Employee;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\LeaveRejectedBySupervisor; // Optional: create this notification
+use App\Models\LeaveAppeal;
+use App\Models\LeaveExtension;
+use App\Models\LeaveCancellation;
 
 class SupervisorController extends Controller
 {
@@ -22,15 +25,21 @@ class SupervisorController extends Controller
         // --- Personal Leave Stats (Supervisor as Employee) ---
         $personalLeaveBalance = $supervisor->leave_days_remaining;
         $personalRecentRequests = LeaveRequest::where('EmployeeNumber', $supervisor->EmployeeNumber)
+            ->where('is_archived', false)
             ->with('leaveType')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
         // --- Team Stats & Lists ---
-        $employeesUnderSupervisor = Employee::where('SupervisorID', $supervisor->EmployeeNumber)->get();
+        // Get all employees in the same department (not just direct reports)
+        $departmentID = $supervisor->DepartmentID;
+        $employeesUnderSupervisor = Employee::where('DepartmentID', $departmentID)
+            ->where('EmployeeNumber', '!=', $supervisor->EmployeeNumber) // Exclude self
+            ->get();
 
         $leaveRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('is_archived', false)
             ->with('employee', 'leaveType')
             ->orderByRaw("CASE \"RequestStatus\" 
                 WHEN 'Pending Supervisor Approval' THEN 1 
@@ -42,24 +51,44 @@ class SupervisorController extends Controller
             ->get();
 
         $pendingSupervisorRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('is_archived', false)
             ->where('RequestStatus', 'Pending Supervisor Approval')
             ->count();
 
         $approvedTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('is_archived', false)
             ->where('RequestStatus', 'Approved')
             ->count();
 
         $rejectedTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('is_archived', false)
             ->where('RequestStatus', 'Rejected')
             ->count();
 
         $totalTeamRequests = LeaveRequest::whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('is_archived', false)
+            ->count();
+
+        // Pending counts for other items supervisors may handle
+        $pendingAppeals = LeaveAppeal::whereIn('employee_number', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('status', 'Pending')
+            ->count();
+
+        $pendingExtensions = LeaveExtension::whereHas('leaveRequest', function ($q) use ($employeesUnderSupervisor) {
+                $q->whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'));
+            })->where('status', 'Pending')
+            ->count();
+
+        $pendingCancellations = LeaveCancellation::whereHas('leaveRequest', function ($q) use ($employeesUnderSupervisor) {
+                $q->whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'));
+            })->where('status', 'Pending')
             ->count();
 
         // Employees Currently on Leave (Team only)
         $today = now()->format('Y-m-d');
         $employeesOnLeave = LeaveRequest::with(['employee', 'employee.department', 'leaveType'])
             ->whereIn('EmployeeNumber', $employeesUnderSupervisor->pluck('EmployeeNumber'))
+            ->where('is_archived', false)
             ->where('RequestStatus', 'Approved')
             ->where('StartDate', '<=', $today)
             ->where('EndDate', '>=', $today)
@@ -72,6 +101,9 @@ class SupervisorController extends Controller
         return view('dashboards.supervisor', compact(
             'leaveRequests',
             'pendingSupervisorRequests',
+            'pendingAppeals',
+            'pendingExtensions',
+            'pendingCancellations',
             'approvedTeamRequests',
             'rejectedTeamRequests',
             'totalTeamRequests',

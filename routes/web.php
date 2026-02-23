@@ -160,6 +160,7 @@ Route::get('/users/{user}/delete', [UserController::class , 'destroy'])->name('u
 
 //Leave routes
 Route::get('/leave-requests', [LeaveRequestController::class , 'index'])->name('leave_requests.index');
+Route::get('/leave-requests/employee/history', [LeaveRequestController::class , 'employeeFullHistory'])->name('leave_requests.employee_history');
 Route::get('/leave-requests/create', [LeaveRequestController::class , 'create'])->name('leave_requests.create');
 Route::post('/leave-requests/store', [LeaveRequestController::class , 'store'])->name('leave_requests.store');
 
@@ -178,6 +179,14 @@ Route::get('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::cl
 Route::get('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class , 'reject'])->name('leave_requests.reject');
 Route::post('/leave-requests/{leaveRequest}/supervisor-approve', [LeaveRequestController::class , 'supervisorApprove'])->name('leave_requests.supervisor.approve');
 Route::post('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestController::class , 'supervisorReject'])->name('leave_requests.supervisor.reject');
+
+// Leave Request Archive (Admin Only)
+Route::post('/leave-requests/{leaveRequest}/archive', [LeaveRequestController::class , 'archive'])->name('leave_requests.archive');
+Route::post('/leave-requests/{leaveRequest}/restore', [LeaveRequestController::class , 'restore'])->name('leave_requests.restore');
+Route::get('/admin/archive-leaves', [LeaveRequestController::class , 'showArchiveManager'])->name('leave_requests.archive_manager');
+Route::get('/admin/view-archived-leaves', [LeaveRequestController::class , 'viewArchived'])->name('leave_requests.view_archived');
+Route::get('/admin/all-requests', [LeaveRequestController::class , 'adminAllRequests'])->name('leave_requests.admin_all');
+Route::post('/admin/archive-leaves/bulk', [LeaveRequestController::class , 'bulkArchive'])->name('leave_requests.bulk_archive');
 
 // Leave Appeals
 Route::post('/leave-requests/{leaveRequest}/appeal', [LeaveRequestController::class , 'appeal'])->name('leave_requests.appeal');

@@ -17,7 +17,7 @@
                 <li class="nav-item px-3 mb-2 small text-uppercase text-white-50 fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Menu</li>
 
                 <!-- Main Navigation -->
-                @if(auth()->user()->role_id === 1)
+                @if(auth()->check() && auth()->user()->role_id === 1)
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all" href="{{ route('dashboard') }}">
                         <i class="fas fa-home fs-5 " style="width: 24px;"></i> 
@@ -26,7 +26,7 @@
                 </li>
                 @endif
 
-                @if(auth()->user()->role_id === 1)
+                @if(auth()->check() && auth()->user()->role_id === 1)
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all {{ request()->routeIs('admin.verification') ? 'bg-white bg-opacity-10 text-white' : '' }}" href="{{ route('admin.verification') }}">
                             <i class="fas fa-shield-alt fs-5" style="width: 24px;"></i>
@@ -94,9 +94,31 @@
                         </div>
                     </li>
 
+                    <!-- Archive Leaves (Direct Link for Admin) -->
+                    @if(auth()->check() && auth()->user()->role_id === 1)
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all {{ request()->routeIs('leave_requests.admin_all') ? 'bg-white bg-opacity-10 text-white' : '' }}" href="{{ route('leave_requests.admin_all') }}">
+                            <i class="fas fa-list fs-5" style="width: 24px;"></i> 
+                            <span>All Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all {{ request()->routeIs('leave_requests.archive_manager') ? 'bg-white bg-opacity-10 text-white' : '' }}" href="{{ route('leave_requests.archive_manager') }}">
+                            <i class="fas fa-plus-circle fs-5" style="width: 24px;"></i> 
+                            <span>Archive Leaves</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all {{ request()->routeIs('leave_requests.view_archived') ? 'bg-white bg-opacity-10 text-white' : '' }}" href="{{ route('leave_requests.view_archived') }}">
+                            <i class="fas fa-history fs-5" style="width: 24px;"></i> 
+                            <span>View Archived</span>
+                        </a>
+                    </li>
+                    @endif
+
                      <!-- Leave Types Dropdown -->
                      <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all collapsed {{ request()->routeIs('leave_types.*') || (request()->routeIs('leave_requests.create') && auth()->user()->role_id === 1) ? 'bg-white bg-opacity-10 text-white' : '' }}" 
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all collapsed {{ request()->routeIs('leave_types.*') || (request()->routeIs('leave_requests.create') && auth()->check() && auth()->user()->role_id === 1) ? 'bg-white bg-opacity-10 text-white' : '' }}" 
                            data-bs-toggle="collapse" 
                            href="#offcanvasLeaveTypes" 
                            role="button" 
@@ -117,7 +139,7 @@
                                         
                 @endif
 
-                @if(auth()->user()->role_id === 2)
+                @if(auth()->check() && auth()->user()->role_id === 2)
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all {{ request()->routeIs('supervisor.index') ? 'bg-white bg-opacity-10 text-white' : '' }}" href="{{ route('supervisor.index') }}">
                             <i class="fas fa-tachometer-alt fs-5" style="width: 24px;"></i> 
@@ -143,7 +165,7 @@
                     </li>
                 @endif
 
-                @if(auth()->user()->role_id === 3)
+                @if(auth()->check() && auth()->user()->role_id === 3)
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center gap-3 rounded-2 px-3 py-2 text-white-75 hover-bg-white-10 transition-all {{ request()->routeIs('dashboards.employee') ? 'bg-white bg-opacity-10 text-white' : '' }}" href="{{ route('dashboards.employee') }}">
                             <i class="fas fa-tachometer-alt fs-5" style="width: 24px;"></i>
@@ -170,10 +192,10 @@
         <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-10">
             <div class="d-flex align-items-center gap-3">
                  <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px;">
-                    {{ substr(Auth::user()->FirstName ?? 'U', 0, 1) }}
+                    {{ substr(auth()->check() ? (auth()->user()->FirstName ?? 'U') : 'U', 0, 1) }}
                  </div>
                  <div class="d-flex flex-column" style="font-size: 0.8rem; line-height: 1.2;">
-                    <span class="fw-bold text-white">{{ auth()->user()->FirstName ?? 'User' }}</span>
+                    <span class="fw-bold text-white">{{ auth()->check() ? (auth()->user()->FirstName ?? 'User') : 'User' }}</span>
                     <small class="text-white-50">Log out</small>
                  </div>
                  <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="ms-auto text-white-50 hover-text-white transition-all">

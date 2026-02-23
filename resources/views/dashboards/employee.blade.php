@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     .dashboard-container {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: auto;
         padding: 20px;
     }
@@ -19,6 +19,165 @@
     .card-custom:hover {
         transform: scale(1.01);
     }
+    
+    /* Leave Type Cards Styling */
+    .leave-type-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+        margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 1200px) {
+        .leave-type-grid {
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .leave-type-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .leave-type-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .leave-type-card {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 16px;
+        background: #ffffff;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .leave-type-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border-color: #1e3c72;
+    }
+    
+    .leave-type-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+    
+    .leave-type-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    
+    .leave-type-title {
+        flex-grow: 1;
+        margin-left: 12px;
+    }
+    
+    .leave-type-title h6 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0;
+        color: #1a1a1a;
+        word-break: break-word;
+    }
+    
+    .leave-type-badge {
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+        display: inline-block;
+        margin-top: 2px;
+    }
+    
+    .leave-type-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 12px 0;
+        padding: 10px 0;
+        border-top: 1px solid #e9ecef;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-label {
+        font-size: 11px;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
+    .stat-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e3c72;
+    }
+    
+    .stat-unit {
+        font-size: 10px;
+        color: #6c757d;
+        font-weight: normal;
+    }
+    
+    .progress-container {
+        margin-top: 12px;
+    }
+    
+    .progress-label {
+        font-size: 11px;
+        color: #6c757d;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .progress-bar-custom {
+        height: 6px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    
+    .progress-bar-custom .bar {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+    
+    .bar-success {
+        background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .bar-warning {
+        background: linear-gradient(90deg, #ffc107 0%, #ff6c00 100%);
+    }
+    
+    .bar-danger {
+        background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+    }
+    
+    .bar-unlimited {
+        background: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
+    }
+    
     .status-badge {
         font-size: 13px;
         padding: 4px 10px;
@@ -58,6 +217,15 @@
         transform: translateY(-3px);
         transition: transform 0.3s ease;
     }
+    
+    /* Icon colors for different leave types */
+    .icon-annual { background-color: #cfe9ff; color: #0c63e4; }
+    .icon-sick { background-color: #f8d7da; color: #dc3545; }
+    .icon-paternity { background-color: #d1ecf1; color: #0c5460; }
+    .icon-maternity { background-color: #f8cecc; color: #d5176b; }
+    .icon-study { background-color: #fff3cd; color: #856404; }
+    .icon-unpaid { background-color: #e2e3e5; color: #383d41; }
+    .icon-default { background-color: #d6d8db; color: #383d41; }
 </style>
 @endsection
 
@@ -86,58 +254,113 @@
         <i class="fas fa-chart-pie me-2 text-primary"></i> Leave Balances & Usage
     </h5>
 
-    <div class="row g-4 mb-5">
+    <div class="leave-type-grid">
         @foreach($dashboardData as $data)
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm hover-up overflow-hidden">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="rounded-3 bg-primary bg-opacity-10 p-3 text-primary">
-                                <i class="fas fa-calendar-check fa-lg"></i>
-                            </div>
-                            <div class="text-end">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-1">{{ $data['type']->LeaveTypeName }}</h6>
-                                @if($data['isUnlimited'])
-                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Unlimited</span>
-                                @else
-                                    <span class="h4 fw-bold text-dark mb-0">{{ $data['remaining'] }}</span>
-                                    <small class="text-muted fw-normal ms-1">days left</small>
-                                @endif
-                            </div>
+            @php
+                // Determine icon and color based on leave type
+                $leaveTypeName = strtolower($data['type']->LeaveTypeName);
+                if (str_contains($leaveTypeName, 'annual')) {
+                    $iconClass = 'icon-annual';
+                    $icon = 'fas fa-calendar-alt';
+                } elseif (str_contains($leaveTypeName, 'sick')) {
+                    $iconClass = 'icon-sick';
+                    $icon = 'fas fa-pills';
+                } elseif (str_contains($leaveTypeName, 'paternity')) {
+                    $iconClass = 'icon-paternity';
+                    $icon = 'fas fa-baby';
+                } elseif (str_contains($leaveTypeName, 'maternity')) {
+                    $iconClass = 'icon-maternity';
+                    $icon = 'fas fa-heart';
+                } elseif (str_contains($leaveTypeName, 'study')) {
+                    $iconClass = 'icon-study';
+                    $icon = 'fas fa-book';
+                } elseif (str_contains($leaveTypeName, 'unpaid')) {
+                    $iconClass = 'icon-unpaid';
+                    $icon = 'fas fa-ban';
+                } else {
+                    $iconClass = 'icon-default';
+                    $icon = 'fas fa-calendar-check';
+                }
+                
+                // Calculate usage percentage
+                $usagePercent = 0;
+                $barClass = 'bar-success';
+                if (!$data['isUnlimited'] && $data['total'] > 0) {
+                    $usagePercent = min(100, ($data['taken'] / $data['total']) * 100);
+                    if ($usagePercent > 80) {
+                        $barClass = 'bar-danger';
+                    } elseif ($usagePercent > 50) {
+                        $barClass = 'bar-warning';
+                    }
+                } else {
+                    $barClass = 'bar-unlimited';
+                    $usagePercent = 100;
+                }
+            @endphp
+            
+            <div class="leave-type-card">
+                <!-- Header with Icon and Badge -->
+                <div class="leave-type-header">
+                    <div class="leave-type-icon {{ $iconClass }}">
+                        <i class="{{ $icon }}"></i>
+                    </div>
+                    <div class="leave-type-title">
+                        <h6>{{ $data['type']->LeaveTypeName }}</h6>
+                        @if($data['isUnlimited'])
+                            <span class="leave-type-badge bg-success bg-opacity-10 text-success">Unlimited</span>
+                        @else
+                            @if($data['type']->IsPaidLeave)
+                                <span class="leave-type-badge bg-info bg-opacity-10 text-info">Paid</span>
+                            @else
+                                <span class="leave-type-badge bg-secondary bg-opacity-10 text-secondary">Unpaid</span>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="leave-type-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Remaining</div>
+                        <div class="stat-value">
+                            @if($data['isUnlimited'])
+                                <span class="text-success">∞</span>
+                            @else
+                                {{ $data['remaining'] }}
+                            @endif
                         </div>
-
-                        <hr class="my-3 opacity-10">
-
-                        <div class="row g-0">
-                            <div class="col-6 border-end py-1">
-                                <div class="text-muted small mb-1">Leave Taken</div>
-                                <div class="fw-bold text-dark">{{ $data['taken'] }} <small class="text-muted fw-normal">days</small></div>
-                            </div>
-                            <div class="col-6 ps-3 py-1">
-                                <div class="text-muted small mb-1">Total Limit</div>
-                                <div class="fw-bold text-dark">
-                                    @if($data['isUnlimited'])
-                                        Unlimited
-                                    @else
-                                        {{ $data['total'] }} <small class="text-muted fw-normal">days</small>
-                                    @endif
-                                </div>
-                            </div>
+                        @if(!$data['isUnlimited'])
+                            <span class="stat-unit">days</span>
+                        @endif
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Taken</div>
+                        <div class="stat-value">{{ $data['taken'] }}</div>
+                        <span class="stat-unit">days</span>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                @if(!$data['isUnlimited'])
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Usage</span>
+                            <span>{{ round($usagePercent, 0) }}%</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="bar {{ $barClass }}" style="width: {{ $usagePercent }}%"></div>
                         </div>
                     </div>
-                    
-                    @if(!$data['isUnlimited'])
-                        @php
-                            $usagePercent = min(100, ($data['total'] > 0 ? ($data['taken'] / $data['total']) * 100 : 0));
-                            $barColor = $usagePercent > 80 ? 'bg-danger' : ($usagePercent > 50 ? 'bg-warning' : 'bg-success');
-                        @endphp
-                        <div class="progress rounded-0" style="height: 4px;">
-                            <div class="progress-bar {{ $barColor }}" role="progressbar" style="width: {{ $usagePercent }}%"></div>
+                @else
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Status</span>
                         </div>
-                    @else
-                        <div class="bg-success" style="height: 4px; opacity: 0.1;"></div>
-                    @endif
-                </div>
+                        <div class="progress-bar-custom">
+                            <div class="bar bar-unlimited" style="width: 100%"></div>
+                        </div>
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>
@@ -147,9 +370,14 @@
         <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
             <i class="fas fa-history me-2 text-primary"></i> Recent Requests
         </h5>
-        <a href="{{ route('leave.report.employee.pdf') }}" class="btn btn-sm btn-outline-primary">
-            <i class="fas fa-file-pdf me-1"></i> Generate Report
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('leave_requests.employee_history') }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                <i class="fas fa-list me-1"></i> View Full History
+            </a>
+            <a href="{{ route('leave.report.employee.pdf') }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                <i class="fas fa-file-pdf me-1"></i> Generate Report
+            </a>
+        </div>
     </div>
 
 

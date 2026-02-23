@@ -40,12 +40,18 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout'); // Restrict login page to guests only
     }
 
+
+
     /**
-     * Get the login credentials from the request.
+     * Get the login username to be used by the controller.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return string
      */
+    public function username()
+    {
+        return 'EmployeeNumber'; // Use EmployeeNumber instead of email
+    }
+
     /**
      * Get the login credentials from the request.
      *

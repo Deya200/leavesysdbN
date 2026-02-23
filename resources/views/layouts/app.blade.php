@@ -215,6 +215,44 @@
     });
   </script>
 
+  <script>
+    // When offcanvas (sidebar) opens on medium+ screens, push main content
+    document.addEventListener('DOMContentLoaded', function () {
+      var sidebarEl = document.getElementById('mainSidebar');
+      var mainEl = document.querySelector('main');
+      if (!sidebarEl || !mainEl) return;
+
+      function applySidebarPush() {
+        var sidebarWidth = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') || '280px';
+        sidebarWidth = sidebarWidth.trim();
+        if (window.innerWidth >= 768) {
+          mainEl.style.transition = 'margin-left 200ms ease, width 200ms ease';
+          mainEl.style.marginLeft = sidebarWidth;
+          mainEl.style.width = 'calc(100% - ' + sidebarWidth + ')';
+        }
+      }
+
+      function removeSidebarPush() {
+        mainEl.style.marginLeft = '';
+        mainEl.style.width = '';
+      }
+
+      sidebarEl.addEventListener('show.bs.offcanvas', function () {
+        applySidebarPush();
+      });
+      sidebarEl.addEventListener('hidden.bs.offcanvas', function () {
+        removeSidebarPush();
+      });
+
+      // If user resizes while open/closed, reset
+      window.addEventListener('resize', function () {
+        if (window.innerWidth < 768) {
+          removeSidebarPush();
+        }
+      });
+    });
+  </script>
+
   @yield('scripts')
 </body>
 </html>

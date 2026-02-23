@@ -13,8 +13,8 @@
     .card-custom {
         background-color: #ffffff;
         border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        padding: 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        padding: 14px;
     }
 
     .table {
@@ -48,6 +48,16 @@
         padding: 6px 10px;
         border-radius: 12px;
     }
+
+    /* Compact stat cards */
+    .stat-card { padding: 12px; border-radius: 12px; }
+    .stat-icon { width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; background: rgba(255,255,255,0.12); }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-label { font-size: 0.75rem; letter-spacing: 0.04em; }
+
+    /* Compact action buttons */
+    .small-action-btn { padding: 4px 8px; font-size: 0.78rem; border-radius: 6px; }
+    .table td .actions-inline { display:flex; gap:6px; align-items:center; }
 
     .form-control {
         font-size: 0.9rem;

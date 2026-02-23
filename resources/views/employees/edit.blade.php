@@ -22,6 +22,15 @@
                             <input type="text" name="EmployeeNumber" id="EmployeeNumber" class="form-control" value="{{ $employee->EmployeeNumber }}" readonly>
                         </div>
 
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $employee->email) }}" required>
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <!-- First Name -->
                         <div class="mb-3">
                             <label for="FirstName" class="form-label">First Name</label>

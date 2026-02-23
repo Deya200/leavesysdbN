@@ -4,8 +4,24 @@
 
 @section('styles')
 <style>
+    /* Use layout's main padding — remove manual left offset to match other pages */
     .dashboard-container {
-        /* Layout handled globally */
+        margin: 0; /* let <main> provide outer spacing */
+        padding: 0; /* main already applies page padding */
+        min-height: 100vh;
+        width: 100%;
+        background-color: transparent;
+    }
+
+    /* Keep document body as-is (global layout handles overflow/padding) */
+    body { overflow-x: hidden; }
+
+    /* Ensure inner content sections don't add unexpected left offsets */
+    .main-content, #main-content, .content-wrapper { padding-left: 0; margin-left: 0; }
+
+    /* Responsive: spacing provided by main; add small inner padding for very small screens */
+    @media (max-width: 576px) {
+        .dashboard-container { padding: 0.75rem; }
     }
 
     .card-custom {
@@ -57,6 +73,11 @@
         border-radius: 12px;
     }
 
+    /* Management card compact styles */
+    .management-card .card-body { padding: 12px; }
+    .management-icon { width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; }
+    .count-badge { font-size: 0.75rem; padding: 4px 7px; border-radius: 999px; }
+    .small-action-btn { padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; }
     .badge-approved {
         background-color: #28a745;
         color: white;
@@ -82,12 +103,50 @@
     .hidden-row {
         display: none;
     }
+
+    /* Employees table styling */
+    #employeeTable thead th {
+        white-space: nowrap;
+        padding: 12px 10px;
+        font-weight: 600;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    #employeeTable tbody td {
+        padding: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    #employeeTable_wrapper {
+        overflow-x: auto;
+    }
+
+    /* Ensure employee table section is visible */
+    .employee-table-container {
+        width: 100%;
+        overflow-x: auto;
+        margin-left: -12px;
+        margin-right: -12px;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .employee-table-container table {
+        min-width: 800px;
+    }
+
+    /* Remove any potential gaps from the first card */
+    .dashboard-container > .card:first-child {
+        margin-top: 0;
+    }
+
 </style>
 @endsection
 
 @section('content')
 <div class="dashboard-container">
-
+    <!-- Your existing content remains exactly the same -->
     <!-- Welcome Section -->
     <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
         <div class="card-body p-4 text-center text-white">
@@ -100,45 +159,66 @@
     <div class="row g-4 mb-5">
         <div class="col-md-4">
             <a href="{{ route('leave-appeals.index') }}" class="text-decoration-none">
-                <div class="card h-100 border-0 shadow-sm hover-up border-start border-4 border-warning">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 me-3">
-                                <i class="fas fa-gavel fa-lg"></i>
+                <div class="card management-card h-100 border-0 shadow-sm hover-up border-start border-4 border-warning">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="management-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-gavel"></i>
                             </div>
-                            <h5 class="fw-bold text-dark mb-0">Manage Appeals</h5>
                         </div>
-                        <p class="text-muted small mb-0">Review and verify rejected leave appeals from your team.</p>
+                        <div class="flex-fill">
+                            <div class="d-flex align-items-center">
+                                <h6 class="fw-bold text-dark mb-0">Manage Appeals</h6>
+                                @if(isset($pendingAppeals) && $pendingAppeals > 0)
+                                    <span class="badge bg-warning text-dark ms-auto count-badge">{{ $pendingAppeals }}</span>
+                                @endif
+                            </div>
+                            <p class="text-muted small mb-0">Review and verify rejected leave appeals from your team.</p>
+                        </div>
                     </div>
                 </div>
             </a>
         </div>
         <div class="col-md-4">
             <a href="{{ route('leave-extensions.index') }}" class="text-decoration-none">
-                <div class="card h-100 border-0 shadow-sm hover-up border-start border-4 border-info">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="rounded-circle bg-info bg-opacity-10 text-info p-3 me-3">
-                                <i class="fas fa-clock fa-lg"></i>
+                <div class="card management-card h-100 border-0 shadow-sm hover-up border-start border-4 border-info">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="management-icon bg-info bg-opacity-10 text-info">
+                                <i class="fas fa-clock"></i>
                             </div>
-                            <h5 class="fw-bold text-dark mb-0">Manage Extensions</h5>
                         </div>
-                        <p class="text-muted small mb-0">Approve or reject requests to extend existing leaves.</p>
+                        <div class="flex-fill">
+                            <div class="d-flex align-items-center">
+                                <h6 class="fw-bold text-dark mb-0">Manage Extensions</h6>
+                                @if(isset($pendingExtensions) && $pendingExtensions > 0)
+                                    <span class="badge bg-info text-dark ms-auto count-badge">{{ $pendingExtensions }}</span>
+                                @endif
+                            </div>
+                            <p class="text-muted small mb-0">Approve or reject requests to extend existing leaves.</p>
+                        </div>
                     </div>
                 </div>
             </a>
         </div>
         <div class="col-md-4">
             <a href="{{ route('leave-cancellations.index') }}" class="text-decoration-none">
-                <div class="card h-100 border-0 shadow-sm hover-up border-start border-4 border-danger">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 me-3">
-                                <i class="fas fa-ban fa-lg"></i>
+                <div class="card management-card h-100 border-0 shadow-sm hover-up border-start border-4 border-danger">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="management-icon bg-danger bg-opacity-10 text-danger">
+                                <i class="fas fa-ban"></i>
                             </div>
-                            <h5 class="fw-bold text-dark mb-0">Cancellations</h5>
                         </div>
-                        <p class="text-muted small mb-0">Review and process leave cancellation requests.</p>
+                        <div class="flex-fill">
+                            <div class="d-flex align-items-center">
+                                <h6 class="fw-bold text-dark mb-0">Cancellations</h6>
+                                @if(isset($pendingCancellations) && $pendingCancellations > 0)
+                                    <span class="badge bg-danger text-white ms-auto count-badge">{{ $pendingCancellations }}</span>
+                                @endif
+                            </div>
+                            <p class="text-muted small mb-0">Review and process leave cancellation requests.</p>
+                        </div>
                     </div>
                 </div>
             </a>
@@ -240,6 +320,25 @@
                 </a>
             </div>
         </div>
+        
+        <!-- Search Bar for Leave Requests -->
+        <div class="card-body border-bottom">
+            <form method="GET" action="{{ route('leave_requests.index') }}" class="d-flex gap-2">
+                <div class="flex-grow-1">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        class="form-control form-control-sm" 
+                        placeholder="Search by employee name, status, or leave type..."
+                        value="{{ request('search') }}"
+                    >
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </form>
+        </div>
+        
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" id="leaveRequestsTable">
                 <thead class="bg-light">
@@ -267,7 +366,7 @@
                                 <div class="text-primary small">({{ $request->TotalDays }} days)</div>
                             </td>
                             <td>
-                                <span class="badge rounded-pill px-3 {{ $isActionNeeded ? 'bg-warning text-dark' : 'bg-light text-muted border' }}">
+                                <span class="badge rounded-pill px-2 py-1 {{ $isActionNeeded ? 'bg-warning text-dark' : 'bg-light text-muted border' }}" style="font-size:0.8rem;">
                                     {{ $request->RequestStatus }}
                                 </span>
                             </td>
@@ -308,60 +407,54 @@
         </div>
     </div>
 
-</div>
-@endsection
-
-        <!-- PDF Report Button -->
-        <div class="text-center mt-3">
-            <a href="{{ route('leave.report.pdf') }}" class="btn btn-outline-secondary shadow-sm btn-sm">
-                📄 Download Leave Report (PDF)
-            </a>
-        </div>
-
-        <div class="text-center mt-3">
-            <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveToggleButton">See More</button>
-            <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveLessButton" style="display: none;">See Less</button>
-        </div>
+    <!-- PDF Report Button -->
+    <div class="text-center mt-3">
+        <a href="{{ route('leave.report.pdf') }}" class="btn btn-outline-secondary shadow-sm btn-sm">
+            📄 Download Leave Report (PDF)
+        </a>
     </div>
-</div>
 
-<!-- Employees Under Supervision -->
-<div class="card card-custom">
-    <h5 class="fw-bold text-center mt-3">Employees You Supervise</h5>
-    @if ($employeesUnderSupervisor->count() > 0)
-        <div class="table-responsive p-3">
-            <table class="table table-bordered align-middle text-dark bg-white" id="employeeTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Employee No.</th>
-                        <th>Name</th>
-                        <th>Department</th>
-                        <th>Position</th>
-                        <th>Annual Leave</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($employeesUnderSupervisor as $index => $employee)
-                        <tr class="hover-up {{ $index >= 5 ? 'hidden-row' : '' }}">
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $employee->EmployeeNumber }}</td>
-                            <td>{{ $employee->FirstName }} {{ $employee->LastName }}</td>
-                            <td>{{ $employee->department->DepartmentName ?? 'N/A' }}</td>
-                            <td>{{ $employee->position->PositionName ?? 'N/A' }}</td>
-                            <td>{{ optional($employee->grade)->AnnualLeaveDays ?? 'N/A' }}</td>
+    <div class="text-center mt-3">
+        <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveToggleButton">See More</button>
+        <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleLeaveTable()" id="leaveLessButton" style="display: none;">See Less</button>
+    </div>
+
+    <!-- Employees Under Supervision -->
+    <div class="card card-custom">
+        <h5 class="fw-bold text-center mt-3">Employees You Supervise</h5>
+        @if ($employeesUnderSupervisor->count() > 0)
+            <div class="employee-table-container">
+                <table class="table table-bordered align-middle text-dark bg-white" id="employeeTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th style="width: 140px;">Employee No.</th>
+                            <th style="width: 150px;">Name</th>
+                            <th style="width: 140px;">Department</th>
+                            <th style="width: 180px;">Position</th>
+                            <th style="width: 100px;">Annual Leave</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <div class="text-center mt-3">
-                <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleButton">See More</button>
-                <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleLessButton" style="display: none;">See Less</button>
+                    </thead>
+                    <tbody>
+                        @foreach ($employeesUnderSupervisor as $index => $employee)
+                            <tr class="hover-up {{ $index >= 5 ? 'hidden-row' : '' }}">
+                                <td>{{ $index + 1 }}</td>
+                                <td class="fw-bold text-primary">{{ $employee->EmployeeNumber }}</td>
+                                <td>{{ $employee->FirstName }} {{ $employee->LastName }}</td>
+                                <td>{{ $employee->department->DepartmentName ?? 'N/A' }}</td>
+                                <td>{{ $employee->position->PositionName ?? 'N/A' }}</td>
+                                <td class="text-center">{{ optional($employee->grade)->AnnualLeaveDays ?? 'N/A' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <div class="text-center mt-3">
+                    <button class="btn btn-outline-primary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleButton">See More</button>
+                    <button class="btn btn-outline-secondary shadow-sm btn-sm" onclick="toggleEmployeeTable()" id="toggleLessButton" style="display: none;">See Less</button>
+                </div>
             </div>
-        </div>
-    @endif
-</div>
-
+        @endif
+    </div>
 </div>
 @endsection
 

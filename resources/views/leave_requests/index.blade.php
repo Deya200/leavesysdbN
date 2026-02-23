@@ -11,6 +11,29 @@
 
 @section('content')
 <div class="container mt-3 animate__animated animate__fadeInDown">
+   
+   <!-- Archived Requests Notice (for employees) -->
+   @if(auth()->check() && auth()->user()->role_id === 3)
+   <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Archived Requests:</strong> Previous years' leave requests have been archived for record-keeping. Only current year requests are displayed here.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+   @elseif(auth()->check() && auth()->user()->role_id === 1)
+   <div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-archive me-2"></i>
+                <strong>Admin View:</strong> You are viewing all leave requests including archived ones.
+            </div>
+            <a href="{{ route('leave_requests.archive_manager') }}" class="btn btn-sm btn-success">
+                <i class="fas fa-archive me-1"></i> Manage Archive
+            </a>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="position: absolute; right: 20px; top: 15px;"></button>
+    </div>
+   @endif
+
    <div class="row text-center">
     <!-- Welcome Section -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
@@ -137,6 +160,16 @@
                 </select>
             </div>
 
+            @if(auth()->check() && auth()->user()->role_id === 1)
+            <div class="col-md-4">
+                <select name="archived" class="form-select">
+                    <option value="">All Requests</option>
+                    <option value="0" {{ request('archived') === '0' ? 'selected' : '' }}>Active Only</option>
+                    <option value="1" {{ request('archived') === '1' ? 'selected' : '' }}>Archived Only</option>
+                </select>
+            </div>
+            @endif
+
             <div class="col-md-4">
                 <button type="submit" class="btn" style="background-color:rgb(2, 43, 114);"data-bs-toggle="tooltip" data-bs-placement="bottom" title="Apply Filter">
                     <i class="fas fa-filter" style="color:white" ></i>
@@ -165,9 +198,18 @@
             </thead>
             <tbody>
                 @foreach ($leaveRequests as $request)
-                    <tr>
+                    <tr style="{{ $request->is_archived ? 'opacity: 0.7; background-color: #f5f5f5;' : '' }}">
                         <td style="border: none;">{{ $loop->iteration }}</td>
-                        <td style="border: none;">{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</td>
+                        <td style="border: none;">
+                            <div>
+                                {{ $request->employee->FirstName }} {{ $request->employee->LastName }}
+                                @if($request->is_archived)
+                                    <br><small class="badge bg-secondary">
+                                        <i class="fas fa-archive me-1"></i> Archived
+                                    </small>
+                                @endif
+                            </div>
+                        </td>
                         <td style="border: none;">{{ $request->leaveType->LeaveTypeName }}</td>
                         <td style="border: none;">{{ $request->StartDate }}</td>
                         <td style="border: none;">{{ $request->EndDate }}</td>
@@ -216,6 +258,26 @@
                                     </div>
                                 @else
                                     <span class="text-muted small">No actions available</span>
+                                @endif
+
+                                <!-- Archive/Restore Button (Admin Only) -->
+                                @if (auth()->user()->role_id === 1)
+                                    <hr class="my-2">
+                                    @if ($request->is_archived)
+                                        <form action="{{ route('leave_requests.restore', $request->LeaveRequestID) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Restore this archived request?')">
+                                                <i class="fas fa-undo"></i> Restore
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('leave_requests.archive', $request->LeaveRequestID) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('Archive this request?')">
+                                                <i class="fas fa-archive"></i> Archive
+                                            </button>
+                                        </form>
+                                    @endif
                                 @endif
 
                         </td>

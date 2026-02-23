@@ -32,15 +32,27 @@ class AppServiceProvider extends ServiceProvider
         // ✅ Share pending leaves with all views for authenticated users (for sidebar badges)
         View::composer('*', function ($view) {
             if (Auth::check()) {
-                // Fetch all pending requests regardless of role (sidebar logic handles filtering)
-                $globalPendingLeaves = LeaveRequest::whereIn('RequestStatus', [
+                $user = Auth::user();
+                $query = LeaveRequest::whereIn('RequestStatus', [
                         'Pending',
                         'Pending Supervisor Approval',
                         'Pending Admin Verification',
                         'Pending Admin Approval'
-                    ])
-                    ->get();
+                    ]);
 
+                // Role-based filtering for notification badge
+                if ($user->role_id === 2) {
+                    // SUPERVISOR: Only pending requests from employees in their department
+                    $query->whereHas('employee', function ($q) use ($user) {
+                        $q->where('DepartmentID', $user->DepartmentID);
+                    });
+                } elseif ($user->role_id === 3) {
+                    // EMPLOYEE: Only their own pending requests
+                    $query->where('EmployeeNumber', $user->EmployeeNumber);
+                }
+                // ADMIN (role_id = 1): See all pending requests (no filter)
+
+                $globalPendingLeaves = $query->get();
                 $view->with('globalPendingLeaves', $globalPendingLeaves);
             }
         });

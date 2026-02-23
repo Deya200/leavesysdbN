@@ -30,6 +30,7 @@ class DashboardController extends Controller
         $user = auth()->user();
         $personalLeaveBalance = $user ? $user->leave_days_remaining : 0;
         $personalRecentRequests = LeaveRequest::where('EmployeeNumber', $user->EmployeeNumber)
+            ->where('is_archived', false)
             ->with('leaveType')
             ->orderBy('created_at', 'desc')
             ->take(5)
@@ -78,7 +79,7 @@ class DashboardController extends Controller
     public function admin()
     {
         // dashboard.admin is the verification page in the admin function
-        $leaveRequests = \App\Models\LeaveRequest::latest()->get();
+        $leaveRequests = \App\Models\LeaveRequest::where('is_archived', false)->latest()->get();
         return view('dashboards.admin', compact('leaveRequests'));
     }
 }

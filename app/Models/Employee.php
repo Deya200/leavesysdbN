@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\PasswordResetNotification;
 
 class Employee extends Authenticatable
 {
@@ -19,6 +21,16 @@ class Employee extends Authenticatable
     public $timestamps = true;
 
     public function getRouteKeyName()
+    {
+        return 'EmployeeNumber';
+    }
+
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName()
     {
         return 'EmployeeNumber';
     }
@@ -153,6 +165,7 @@ class Employee extends Authenticatable
     /**
      * Get the Employee's computed leave days remaining.
      * (This is a computed accessor if you want to show the theoretical remaining days based on the grade.)
+     * Excludes archived leave requests from the calculation.
      * @return int
      */
     public function getLeaveDaysRemainingAttribute(): int
@@ -160,6 +173,7 @@ class Employee extends Authenticatable
         $totalLeaveDays = optional($this->grade)->AnnualLeaveDays ?? 0;
         $usedLeaveDays = $this->leaveRequests()
             ->where('RequestStatus', 'Approved')
+            ->where('is_archived', false)
             ->whereHas('leaveType', fn($q) => $q->where('LeaveTypeName', 'Annual Leave'))
             ->sum('TotalDays');
 
@@ -237,5 +251,20 @@ class Employee extends Authenticatable
     //{
     //    return $this->hasRole('admin');
     //}
+
+    /**
+     * Send password reset notification to employee.
+     * @param string $token
+     * @param Employee|null $admin
+     * @return void
+     */
+    public function sendPasswordResetNotification($token, $admin = null)
+    {
+        // Use custom notification with admin info
+        if ($admin === null) {
+            $admin = auth()->user(); // Get current authenticated user (admin)
+        }
+        $this->notify(new PasswordResetNotification($token, $admin));
+    }
 
 }

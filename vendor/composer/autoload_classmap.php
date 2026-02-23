@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Console\\Commands\\ResetPgSequences' => $baseDir . '/app/Console/Commands/ResetPgSequences.php',
     'App\\Console\\Commands\\SendRealInvite' => $baseDir . '/app/Console/Commands/SendRealInvite.php',
     'App\\Http\\Controllers\\AdminController' => $baseDir . '/app/Http/Controllers/AdminController.php',
     'App\\Http\\Controllers\\Auth\\ConfirmPasswordController' => $baseDir . '/app/Http/Controllers/Auth/ConfirmPasswordController.php',
@@ -190,6 +191,7 @@ return array(
     'Database\\Seeders\\LeaveSysSeeder' => $baseDir . '/database/seeders/LeaveSysSeeder.php',
     'Database\\Seeders\\ProductionDataSeeder' => $baseDir . '/database/seeders/ProductionDataSeeder.php',
     'Database\\Seeders\\RoleSeeder' => $baseDir . '/database/seeders/RoleSeeder.php',
+    'Database\\Seeders\\WorkflowTestSeeder' => $baseDir . '/database/seeders/WorkflowTestSeeder.php',
     'DateError' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
     'DateException' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateException.php',
     'DateInvalidOperationException' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateInvalidOperationException.php',

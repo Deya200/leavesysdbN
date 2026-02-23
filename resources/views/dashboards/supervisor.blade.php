@@ -309,7 +309,6 @@
     </div>
 
 </div>
-@endsection
 
         <!-- PDF Report Button -->
         <div class="text-center mt-3">

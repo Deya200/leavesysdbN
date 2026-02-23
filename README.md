@@ -50,10 +50,10 @@ Edit `.env` and set your database credentials:
 ```ini
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=5432
 DB_DATABASE=leavesysdb
-DB_USERNAME=root
-DB_PASSWORD=
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
 ```
 
 ### **5. Generate App Key**

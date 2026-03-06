@@ -235,6 +235,10 @@
                                 @if ($canSupAction)
                                     <!-- Supervisor Actions -->
                                     <div class="d-flex flex-column gap-2">
+                                        <button type="button" class="btn btn-sm btn-info text-white" 
+                                            onclick="fetchAndShowLeaveModal('{{ route('leave_requests.show', $request->LeaveRequestID) }}')">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
                                         <button type="button" class="btn btn-sm btn-success" 
                                             onclick="openConfirmModal('approve', '{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}', 'Supervisor Approval', 'SupervisorApprovalNote')">
                                             <i class="fas fa-check-circle"></i> Sup. Approve
@@ -247,6 +251,10 @@
                                 @elseif ($canAdminAction)
                                     <!-- Admin Actions -->
                                     <div class="d-flex flex-column gap-2">
+                                        <button type="button" class="btn btn-sm btn-info text-white" 
+                                            onclick="fetchAndShowLeaveModal('{{ route('leave_requests.show', $request->LeaveRequestID) }}')">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
                                         <button type="button" class="btn btn-sm btn-success" 
                                             onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval', 'AdminApprovalNote')">
                                             <i class="fas fa-check-circle"></i> Admin Approve
@@ -257,7 +265,13 @@
                                         </button>
                                     </div>
                                 @else
-                                    <span class="text-muted small">No actions available</span>
+                                    <div class="d-flex flex-column gap-2">
+                                        <button type="button" class="btn btn-sm btn-info text-white" 
+                                            onclick="fetchAndShowLeaveModal('{{ route('leave_requests.show', $request->LeaveRequestID) }}')">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                        <span class="text-muted small">No actions available</span>
+                                    </div>
                                 @endif
 
                                 <!-- Archive/Restore Button (Admin Only) -->
@@ -289,6 +303,9 @@
         </table>
     </div>
 </div>
+
+<!-- Include View Leave Modal -->
+@include('leave_requests._view_modal')
 
 @endsection
 

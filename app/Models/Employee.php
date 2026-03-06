@@ -37,6 +37,7 @@ class Employee extends Authenticatable
 
     protected $fillable = [
         'EmployeeNumber',
+        'national_id',
         'FirstName',
         'LastName',
         'DateOfBirth',
@@ -62,6 +63,7 @@ class Employee extends Authenticatable
 
     protected $casts = [
         'EmployeeNumber' => 'string',
+        'national_id' => 'string',
         'SupervisorID' => 'string',
         'RemainingAnnualLeaveDays' => 'integer', // Cast to integer
         'email_notifications_enabled' => 'boolean',
@@ -179,7 +181,7 @@ class Employee extends Authenticatable
 
         // Include carried over days from previous year
         $totalAvailable = $totalLeaveDays + ($this->carried_over_leave_days ?? 0);
-        
+
         return max(0, $totalAvailable - $usedLeaveDays);
     }
 
@@ -211,7 +213,7 @@ class Employee extends Authenticatable
     {
         return $this->hasRole('Admin'); // Uses Spatie's role-checking method
     }
-    
+
     /**
      * Ensure that the employee has at least one role.
      * If no role is assigned, assign the default 'Employee' role.
@@ -224,7 +226,7 @@ class Employee extends Authenticatable
             $this->assignRole('Employee');
         }
     }
-    
+
     /**
      * Accessor to get a comma-separated list of roles assigned to the employee.
      *
@@ -235,7 +237,7 @@ class Employee extends Authenticatable
         return $this->roles->pluck('name')->implode(', ');
     }
 
-        public function role(): BelongsTo
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
@@ -247,7 +249,7 @@ class Employee extends Authenticatable
     }
 
     // ✅ Check if employee is admin
-   // public function isAdmin(): bool
+    // public function isAdmin(): bool
     //{
     //    return $this->hasRole('admin');
     //}

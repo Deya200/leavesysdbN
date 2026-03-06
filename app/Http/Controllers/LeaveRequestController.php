@@ -76,7 +76,7 @@ class LeaveRequestController extends Controller
 
         // ✅ ROLE-BASED FILTERING
         $user = auth()->user();
-        
+
         if ($user->role_id === 2) {
             // SUPERVISOR: Only see leave requests from employees in their department
             $supervisorDepartment = $user->DepartmentID;
@@ -96,15 +96,19 @@ class LeaveRequestController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('EmployeeNumber', 'like', "%{$search}%")
                     ->orWhere('RequestStatus', 'like', "%{$search}%")
-                    ->orWhereHas('employee', function ($q) use ($search) {
-                    $q->where('FirstName', 'like', "%{$search}%")
-                        ->orWhere('LastName', 'like', "%{$search}%");
-                }
-                )
-                    ->orWhereHas('leaveType', function ($q) use ($search) {
-                    $q->where('LeaveTypeName', 'like', "%{$search}%");
-                }
-                );
+                    ->orWhereHas(
+                        'employee',
+                        function ($q) use ($search) {
+                            $q->where('FirstName', 'like', "%{$search}%")
+                                ->orWhere('LastName', 'like', "%{$search}%");
+                        }
+                    )
+                    ->orWhereHas(
+                        'leaveType',
+                        function ($q) use ($search) {
+                            $q->where('LeaveTypeName', 'like', "%{$search}%");
+                        }
+                    );
             });
         }
 
@@ -145,13 +149,13 @@ class LeaveRequestController extends Controller
     public function create()
     {
         $employee = Employee::where('EmployeeNumber', auth()->id())->firstOrFail();
-        
+
         // Filter leave types based on employee's gender
         $leaveTypes = LeaveType::where(function ($query) use ($employee) {
             $query->where('GenderApplicable', 'Both')
-                  ->orWhere('GenderApplicable', $employee->Gender);
+                ->orWhere('GenderApplicable', $employee->Gender);
         })->get();
-        
+
         return view('leave_requests.create', compact('leaveTypes'));
     }
 
@@ -211,18 +215,18 @@ class LeaveRequestController extends Controller
                 'date',
                 'after_or_equal:StartDate',
                 function ($attr, $value, $fail) use ($leaveRequest, $request) {
-            $newDays = Carbon::parse($request->StartDate)
-                    ->diffInDays(Carbon::parse($value)) + 1;
+                    $newDays = Carbon::parse($request->StartDate)
+                        ->diffInDays(Carbon::parse($value)) + 1;
 
-            $leaveType = LeaveType::find($request->LeaveTypeID);
+                    $leaveType = LeaveType::find($request->LeaveTypeID);
 
-            if ($leaveType) {
-                $error = $this->checkLeaveLimit($leaveRequest->employee, $leaveType, $newDays, $leaveRequest->LeaveRequestID);
-                if ($error) {
-                    $fail($error);
+                    if ($leaveType) {
+                        $error = $this->checkLeaveLimit($leaveRequest->employee, $leaveType, $newDays, $leaveRequest->LeaveRequestID);
+                        if ($error) {
+                            $fail($error);
+                        }
+                    }
                 }
-            }
-        }
             ],
             'Reason' => 'required|string|max:1000',
         ]);
@@ -249,12 +253,12 @@ class LeaveRequestController extends Controller
 
         $employee = Employee::where('EmployeeNumber', auth()->id())->firstOrFail();
         $leaveType = LeaveType::find($validated['LeaveTypeID']);
-        
+
         // Validate that the leave type is applicable to the employee's gender
         if ($leaveType->GenderApplicable !== 'Both' && $leaveType->GenderApplicable !== $employee->Gender) {
             return redirect()->back()->with('error', 'The selected leave type is not applicable to your gender.');
         }
-        
+
         $totalDays = Carbon::parse($validated['StartDate'])
             ->diffInDays(Carbon::parse($validated['EndDate'])) + 1;
 
@@ -291,6 +295,26 @@ class LeaveRequestController extends Controller
         }
 
         return view('leave_requests.review');
+    }
+
+    public function show(Request $request, LeaveRequest $leaveRequest)
+    {
+        $leaveRequest->load(['employee', 'leaveType']);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'employee' => $leaveRequest->employee->FirstName . ' ' . $leaveRequest->employee->LastName,
+                'leaveType' => $leaveRequest->leaveType->LeaveTypeName,
+                'startDate' => $leaveRequest->StartDate->format('M d, Y'),
+                'endDate' => $leaveRequest->EndDate->format('M d, Y'),
+                'totalDays' => $leaveRequest->TotalDays,
+                'status' => $leaveRequest->RequestStatus,
+                'reason' => $leaveRequest->Reason,
+                'rejectionReason' => $leaveRequest->RejectionReason ?? $leaveRequest->AdminRejectionReason ?? $leaveRequest->SupervisorRejectionReason,
+            ]);
+        }
+
+        return view('leave_requests.show', compact('leaveRequest'));
     }
 
     public function destroy(LeaveRequest $leaveRequest)
@@ -389,8 +413,7 @@ class LeaveRequestController extends Controller
                 $employee->update(['RemainingAnnualLeaveDays' => $newBalance]);
 
                 Log::info("Admin Approval: Deducted {$leaveRequest->TotalDays} days from Employee {$employee->EmployeeNumber}. (Old: {$oldBalance}, New: {$newBalance})");
-            }
-            else {
+            } else {
                 Log::info("Admin Approval: No annual leave deduction for type '{$leaveRequest->leaveType->LeaveTypeName}'");
             }
 
@@ -466,19 +489,18 @@ class LeaveRequestController extends Controller
                 $total = $employee->getTotalAvailableLeaveDays();
                 $remaining = $employee->leave_days_remaining;
                 $isUnlimited = false;
-            }
-            else {
+            } else {
                 $total = $type->MaxLeaveDays;
                 $isUnlimited = is_null($total) || $total <= 0;
                 $remaining = $isUnlimited ? null : max(0, $total - $taken);
             }
 
             return [
-            'type' => $type,
-            'taken' => $taken,
-            'remaining' => $remaining,
-            'total' => $total,
-            'isUnlimited' => $isUnlimited,
+                'type' => $type,
+                'taken' => $taken,
+                'remaining' => $remaining,
+                'total' => $total,
+                'isUnlimited' => $isUnlimited,
             ];
         });
 
@@ -549,7 +571,7 @@ class LeaveRequestController extends Controller
         }
 
         DB::transaction(function () use ($validated, $leaveRequest) {
-            $extensionDays = (int)$validated['ExtensionDays'];
+            $extensionDays = (int) $validated['ExtensionDays'];
 
             LeaveExtension::create([
                 'leave_request_id' => $leaveRequest->LeaveRequestID,
@@ -593,8 +615,7 @@ class LeaveRequestController extends Controller
             // Logic: entirely future leave = full refund. In-progress = refund remaining days.
             if ($today->lt($startDate)) {
                 $refundDays = $leaveRequest->TotalDays;
-            }
-            else {
+            } else {
                 // In progress
                 $endDate = Carbon::parse($leaveRequest->EndDate);
                 if ($today->lt($endDate)) {
@@ -633,8 +654,10 @@ class LeaveRequestController extends Controller
         }
 
         // If archiving an APPROVED annual leave, return the days to employee
-        if ($leaveRequest->RequestStatus === 'Approved' && 
-            $leaveRequest->leaveType->deductsFromAnnual()) {
+        if (
+            $leaveRequest->RequestStatus === 'Approved' &&
+            $leaveRequest->leaveType->deductsFromAnnual()
+        ) {
             $employee = $leaveRequest->employee;
             $employee->increment('RemainingAnnualLeaveDays', $leaveRequest->TotalDays);
             Log::info("Returned {$leaveRequest->TotalDays} annual leave days to {$employee->EmployeeNumber} (Request: {$leaveRequest->LeaveRequestID})");
@@ -661,8 +684,10 @@ class LeaveRequestController extends Controller
         }
 
         // If restoring an APPROVED annual leave, deduct the days from employee
-        if ($leaveRequest->RequestStatus === 'Approved' && 
-            $leaveRequest->leaveType->deductsFromAnnual()) {
+        if (
+            $leaveRequest->RequestStatus === 'Approved' &&
+            $leaveRequest->leaveType->deductsFromAnnual()
+        ) {
             $employee = $leaveRequest->employee;
             $employee->decrement('RemainingAnnualLeaveDays', $leaveRequest->TotalDays);
             Log::info("Deducted {$leaveRequest->TotalDays} annual leave days from {$employee->EmployeeNumber} (Request: {$leaveRequest->LeaveRequestID})");
@@ -688,14 +713,14 @@ class LeaveRequestController extends Controller
         }
 
         $year = request('year', null); // Optional year filter
-        
+
         // Get ALL completed leave requests that are not archived yet (not limited by year)
         $query = LeaveRequest::with([
             'employee:EmployeeNumber,FirstName,LastName,DepartmentID,RemainingAnnualLeaveDays',
             'leaveType:LeaveTypeID,LeaveTypeName',
         ])
-        ->where('is_archived', false)
-        ->whereIn('RequestStatus', ['Approved', 'Rejected', 'Rejected by Admin']);
+            ->where('is_archived', false)
+            ->whereIn('RequestStatus', ['Approved', 'Rejected', 'Rejected by Admin']);
 
         // Apply year filter only if selected
         if ($year) {
@@ -733,11 +758,13 @@ class LeaveRequestController extends Controller
 
         foreach ($leaveRequestIds as $id) {
             $leaveRequest = LeaveRequest::find($id);
-            
+
             if ($leaveRequest && !$leaveRequest->is_archived) {
                 // Return days if applicable
-                if ($leaveRequest->RequestStatus === 'Approved' && 
-                    $leaveRequest->leaveType->deductsFromAnnual()) {
+                if (
+                    $leaveRequest->RequestStatus === 'Approved' &&
+                    $leaveRequest->leaveType->deductsFromAnnual()
+                ) {
                     $employee = $leaveRequest->employee;
                     $employee->increment('RemainingAnnualLeaveDays', $leaveRequest->TotalDays);
                     $daysReturned += $leaveRequest->TotalDays;
@@ -768,13 +795,13 @@ class LeaveRequestController extends Controller
         }
 
         $year = request('year', null);
-        
+
         // Get ALL archived leave requests
         $query = LeaveRequest::with([
             'employee:EmployeeNumber,FirstName,LastName,DepartmentID',
             'leaveType:LeaveTypeID,LeaveTypeName',
         ])
-        ->where('is_archived', true);
+            ->where('is_archived', true);
 
         // Apply year filter only if selected
         if ($year) {
@@ -800,14 +827,14 @@ class LeaveRequestController extends Controller
         $employee = auth()->user();
         $search = request('search', '');
         $status = request('status', '');
-        
+
         $query = LeaveRequest::where('EmployeeNumber', $employee->EmployeeNumber)
             ->where('is_archived', false)
             ->with('leaveType');
 
         // Search filter
         if ($search) {
-            $query->whereHas('leaveType', function($q) use ($search) {
+            $query->whereHas('leaveType', function ($q) use ($search) {
                 $q->where('LeaveTypeName', 'like', "%{$search}%");
             })->orWhere('RequestStatus', 'like', "%{$search}%");
         }
@@ -839,7 +866,7 @@ class LeaveRequestController extends Controller
         $search = request('search', '');
         $status = request('status', '');
         $archived = request('archived', 'active');
-        
+
         $query = LeaveRequest::with('employee:EmployeeNumber,FirstName,LastName,DepartmentID', 'leaveType:LeaveTypeID,LeaveTypeName');
 
         // Archived filter
@@ -851,16 +878,16 @@ class LeaveRequestController extends Controller
 
         // Search filter
         if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->whereHas('employee', function($subq) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('employee', function ($subq) use ($search) {
                     $subq->where('FirstName', 'like', "%{$search}%")
-                         ->orWhere('LastName', 'like', "%{$search}%")
-                         ->orWhere('EmployeeNumber', 'like', "%{$search}%");
+                        ->orWhere('LastName', 'like', "%{$search}%")
+                        ->orWhere('EmployeeNumber', 'like', "%{$search}%");
                 })
-                ->orWhereHas('leaveType', function($subq) use ($search) {
-                    $subq->where('LeaveTypeName', 'like', "%{$search}%");
-                })
-                ->orWhere('RequestStatus', 'like', "%{$search}%");
+                    ->orWhereHas('leaveType', function ($subq) use ($search) {
+                        $subq->where('LeaveTypeName', 'like', "%{$search}%");
+                    })
+                    ->orWhere('RequestStatus', 'like', "%{$search}%");
             });
         }
 

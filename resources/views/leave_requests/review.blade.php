@@ -1,11 +1,3 @@
-@extends('layouts.app')
-
-@section('title', 'Review Leave Request')
-
-@section('styles')
-<style>
-    .steps {
-        display: flex;
         justify-content: center;
         align-items: center;
         margin-bottom: 2rem;
@@ -122,9 +114,9 @@
 @endsection
 
 @section('content')
-<div class="container py-5" style="background: url('https://www.transparenttextures.com/patterns/clean-gray-paper.png');">
+<div class="container">
     <div class="row justify-content-center">
-        <div class="col-lg-10">
+        <div class="col-lg-12">
             <div class="card shadow-lg overflow-hidden">
                 <div class="card-header text-white" style="background:  #1e3c72;">
                     <div class="d-flex align-items-center">

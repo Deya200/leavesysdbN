@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('page_title', 'Leave Requests')
 @section('title', 'Supervisor Dashboard')
 
 @section('styles')

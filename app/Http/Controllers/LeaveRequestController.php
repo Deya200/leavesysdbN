@@ -305,8 +305,8 @@ class LeaveRequestController extends Controller
             return response()->json([
                 'employee' => $leaveRequest->employee->FirstName . ' ' . $leaveRequest->employee->LastName,
                 'leaveType' => $leaveRequest->leaveType->LeaveTypeName,
-                'startDate' => $leaveRequest->StartDate->format('M d, Y'),
-                'endDate' => $leaveRequest->EndDate->format('M d, Y'),
+                'startDate' => \Carbon\Carbon::parse($leaveRequest->StartDate)->format('M d, Y'),
+                'endDate' => \Carbon\Carbon::parse($leaveRequest->EndDate)->format('M d, Y'),
                 'totalDays' => $leaveRequest->TotalDays,
                 'status' => $leaveRequest->RequestStatus,
                 'reason' => $leaveRequest->Reason,
@@ -477,8 +477,16 @@ class LeaveRequestController extends Controller
     public function employeeDashboard()
     {
         $employee = auth()->user();
+        if (!$employee) {
+            return redirect()->route('login');
+        }
+
         $leaveTypes = LeaveType::all();
-        $leaveRequests = $employee->leaveRequests()->where('is_archived', false)->with('leaveType')->get();
+        $leaveRequests = $employee->leaveRequests()
+            ->where('is_archived', false)
+            ->with(['leaveType'])
+            ->orderByDesc('created_at')
+            ->get();
 
         $dashboardData = $leaveTypes->map(function ($type) use ($employee, $leaveRequests) {
             $taken = $leaveRequests->where('LeaveTypeID', $type->LeaveTypeID)
@@ -508,13 +516,20 @@ class LeaveRequestController extends Controller
             'approved' => $leaveRequests->where('RequestStatus', 'Approved')->count(),
             'rejected' => $leaveRequests->whereIn('RequestStatus', ['Rejected', 'Rejected by Admin'])->count(),
             'pending' => $leaveRequests->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification'])->count(),
+            'remaining' => $employee->leave_days_remaining,
         ];
+
+        // Fetch recent tasks and notifications
+        $activeTasks = $employee->tasks()->where('status', '!=', 'Completed')->orderBy('due_date')->take(5)->get();
+        $recentNotifications = $employee->notifications()->orderByDesc('created_at')->take(5)->get();
 
         return view('dashboards.employee', [
             'dashboardData' => $dashboardData,
             'counts' => $counts,
-            'leaveRequests' => $leaveRequests->sortByDesc('created_at')->take(10),
-            'employee' => $employee
+            'leaveRequests' => $leaveRequests->take(10),
+            'employee' => $employee,
+            'activeTasks' => $activeTasks,
+            'recentNotifications' => $recentNotifications
         ]);
     }
 

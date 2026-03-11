@@ -131,13 +131,23 @@
                     <div class="col-lg-8">
                         <!-- Employees Currently on Leave -->
                         <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-header bg-transparent py-3 d-flex align-items-center">
-                                <i class="fas fa-plane-departure text-warning me-2"></i>
-                                <h5 class="mb-0 fw-bold">Live Leave Status</h5>
+                            <div
+                                class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <h5 class="mb-0 fw-bold d-flex align-items-center">
+                                    <i class="fas fa-plane-departure text-warning me-2"></i> Live Leave Status
+                                </h5>
+                                <div class="search-input-wrapper position-relative" style="min-width: 250px;">
+                                    <i class="fas fa-search position-absolute text-muted"
+                                        style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
+                                    <input type="text" id="liveLeaveSearch"
+                                        class="form-control form-control-sm border bg-light rounded-pill ps-5 py-2"
+                                        placeholder="Search employees..."
+                                        onkeyup="searchTable('liveLeaveSearch', 'liveLeaveTable')">
+                                </div>
                             </div>
                             <div class="table-responsive">
                                 @if(isset($employeesOnLeave) && $employeesOnLeave->isNotEmpty())
-                                    <table class="table table-hover align-middle mb-0">
+                                    <table class="table table-hover align-middle mb-0" id="liveLeaveTable">
                                         <thead class="bg-light">
                                             <tr>
                                                 <th class="ps-4">Employee</th>
@@ -158,7 +168,8 @@
                                                             </div>
                                                             <div>
                                                                 <div class="fw-bold text-dark">{{ $onLeave->employee->FirstName }}
-                                                                    {{ $onLeave->employee->LastName }}</div>
+                                                                    {{ $onLeave->employee->LastName }}
+                                                                </div>
                                                                 <small
                                                                     class="text-muted">{{ $onLeave->employee->department->DepartmentName ?? 'Global' }}</small>
                                                             </div>
@@ -198,17 +209,28 @@
 
                         <!-- Recent Activity -->
                         <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+                            <div
+                                class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-history text-primary me-2"></i>
                                     <h5 class="mb-0 fw-bold">Recent Leave Activity</h5>
                                 </div>
-                                <a href="{{ route('leave_requests.index') }}"
-                                    class="btn btn-sm btn-link text-decoration-none">View Full History</a>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="search-input-wrapper position-relative" style="min-width: 200px;">
+                                        <i class="fas fa-search position-absolute text-muted"
+                                            style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
+                                        <input type="text" id="recentActivitySearch"
+                                            class="form-control form-control-sm border bg-light rounded-pill ps-5 py-2"
+                                            placeholder="Search activity..."
+                                            onkeyup="searchTable('recentActivitySearch', 'recentLeaveTable')">
+                                    </div>
+                                    <a href="{{ route('leave_requests.index') }}"
+                                        class="btn btn-sm btn-link text-decoration-none">View Full History</a>
+                                </div>
                             </div>
                             <div class="table-responsive">
                                 @if ($recentLeaveRequests->isNotEmpty())
-                                    <table class="table table-hover align-middle mb-0">
+                                    <table class="table table-hover align-middle mb-0" id="recentLeaveTable">
                                         <thead class="bg-light">
                                             <tr>
                                                 <th class="ps-4">Employee</th>
@@ -222,7 +244,8 @@
                                                 <tr>
                                                     <td class="ps-4">
                                                         <div class="fw-bold text-dark">{{ $request->employee->FirstName }}
-                                                            {{ $request->employee->LastName }}</div>
+                                                            {{ $request->employee->LastName }}
+                                                        </div>
                                                         <small
                                                             class="text-muted">{{ $request->created_at->diffForHumans() }}</small>
                                                     </td>
@@ -360,5 +383,55 @@
                 });
             });
         });
+
+        function searchTable(inputId, tableId) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const rows = table.querySelectorAll('tbody tr:not(.empty-state-row)');
+            let visibleCount = 0;
+
+            rows.forEach((row) => {
+                const text = row.textContent || row.innerText;
+
+                if (filter === '') {
+                    row.style.display = row.classList.contains('hidden-row') ? 'none' : '';
+                    if (!row.classList.contains('hidden-row')) visibleCount++;
+                } else {
+                    if (text.toLowerCase().indexOf(filter) > -1) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            // Handle empty state
+            let emptyRow = table.querySelector('.empty-state-row');
+            if (visibleCount === 0) {
+                if (!emptyRow) {
+                    const tbody = table.querySelector('tbody');
+                    const colCount = table.querySelectorAll('thead th').length;
+                    emptyRow = document.createElement('tr');
+                    emptyRow.className = 'empty-state-row';
+                    emptyRow.innerHTML = `
+                            <td colspan="${colCount}" class="text-center py-5 text-muted">
+                                <div class="py-3">
+                                    <i class="fas fa-search fa-2x mb-2 text-light"></i>
+                                    <p class="mb-0">No matches found for "${filter}"</p>
+                                </div>
+                            </td>
+                        `;
+                    tbody.appendChild(emptyRow);
+                } else {
+                    emptyRow.querySelector('p').innerText = `No matches found for "${filter}"`;
+                    emptyRow.style.display = '';
+                }
+            } else if (emptyRow) {
+                emptyRow.style.display = 'none';
+            }
+        }
     </script>
 @endsection

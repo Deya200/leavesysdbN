@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('page_title', request()->routeIs('admin.verification') ? 'Verification' : 'Admin Dashboard')
 @section('title', 'Admin Leave Verification')
 
 @section('styles')
@@ -225,10 +225,10 @@
                                     <td>{{ $request->Reason ?? 'N/A' }}</td> <!-- ✅ New cell -->
                                     <td>
                                         <span class="badge
-                                                    @if($request->RequestStatus === 'Approved') bg-success
-                                                    @elseif($request->RequestStatus === 'Rejected by Admin' || $request->RequestStatus === 'Rejected') bg-danger
-                                                    @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
-                                                    @else bg-warning text-dark @endif">
+                                                                            @if($request->RequestStatus === 'Approved') bg-success
+                                                                            @elseif($request->RequestStatus === 'Rejected by Admin' || $request->RequestStatus === 'Rejected') bg-danger
+                                                                            @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
+                                                                            @else bg-warning text-dark @endif">
                                             {{ ucfirst($request->RequestStatus) }}
                                         </span>
                                     </td>

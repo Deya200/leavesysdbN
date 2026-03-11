@@ -226,7 +226,7 @@
                 <div class="col-lg-6 mb-5 mb-lg-0">
                     <div class="brand-section">
                         <img src="{{ asset('logo3.png') }}" alt="Logo" class="brand-icon">
-                        <h1 class="brand-title">XYZ Leave Management System</h1>
+                        <h1 class="brand-title">ABC MISSION HOSPITAL Leave Management System</h1>
                         <p class="brand-text">
                             Welcome to your centralized employee portal. A simpler, faster, and more transparent way to
                             manage time off.

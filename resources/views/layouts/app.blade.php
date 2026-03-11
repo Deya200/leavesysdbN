@@ -467,9 +467,9 @@
         @yield('content')
       </main>
 
-      <footer class="text-end mt-auto bg-white border-top d-flex align-items-center" style="height: var(--footer-height); min-height: var(--footer-height);">
+      <footer class="text-center mt-auto bg-white border-top d-flex align-items-center justify-content-center" style="height: var(--footer-height); min-height: var(--footer-height);">
         <div class="container">
-          <p class="mb-0 text-muted small">&copy; {{ date('Y') }} ABC leave Management system. All rights reserved.</p>
+          <p class="mb-0 text-muted small text-center">&copy; {{ date('Y') }} ABC leave Management system. All rights reserved.</p>
         </div>
       </footer>
     </div>

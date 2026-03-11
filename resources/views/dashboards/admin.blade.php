@@ -123,11 +123,7 @@
                         </a>
                     </div>
                 </div>
-                <!-- Decorative circle -->
-                <div class="position-absolute top-50 end-0 translate-middle-y opacity-10"
-                    style="margin-right: -5%; pointer-events: none;">
-                    <i class="fas fa-shield-alt" style="font-size: 15rem;"></i>
-                </div>
+
             </div>
         </div>
 
@@ -137,8 +133,8 @@
                 <div class="card border-0 shadow-sm h-100 p-3"
                     style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white;">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-white bg-opacity-20 p-3 me-3">
-                            <i class="fas fa-users fs-4"></i>
+                        <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
+                            <i class="fas fa-users fs-5"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Total
@@ -152,8 +148,8 @@
                 <div class="card border-0 shadow-sm h-100 p-3"
                     style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-white bg-opacity-20 p-3 me-3">
-                            <i class="fas fa-calendar-check fs-4"></i>
+                        <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
+                            <i class="fas fa-calendar-check fs-5"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Active
@@ -169,8 +165,8 @@
                 <div class="card border-0 shadow-sm h-100 p-3"
                     style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-white bg-opacity-20 p-3 me-3">
-                            <i class="fas fa-clock fs-4"></i>
+                        <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
+                            <i class="fas fa-clock fs-5"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending
@@ -184,8 +180,8 @@
                 <div class="card border-0 shadow-sm h-100 p-3"
                     style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white;">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-white bg-opacity-20 p-3 me-3">
-                            <i class="fas fa-building fs-4"></i>
+                        <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
+                            <i class="fas fa-building fs-5"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Departments</small>

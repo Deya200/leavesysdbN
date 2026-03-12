@@ -1,10 +1,11 @@
 <!-- Modern Offcanvas Sidebar -->
-<div class="offcanvas offcanvas-start border-0 shadow-lg" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel" style="width: 280px; top: 60px; height: calc(100vh - 60px); background: #1e1b4b; color: white;" data-bs-scroll="true" data-bs-backdrop="false">
+<div class="offcanvas offcanvas-start border-0 shadow-lg amused-sidebar" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel" style="width: 280px; top: 60px; height: calc(100vh - 60px); background: #1e1b4b; color: white;" data-bs-scroll="true" data-bs-backdrop="false">
     
     <!-- Sidebar Header -->
     <div class="offcanvas-header border-bottom border-light border-opacity-10 py-4 d-flex flex-column align-items-center">
 
         <h5 class="offcanvas-title mt-2 fw-bold text-white small text-uppercase tracking-wider text-center">ABC Leave Management System</h5>
+        <small class="text-white-50 text-center">Mission control for your leave flow</small>
         <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 d-md-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
 
@@ -14,7 +15,7 @@
             <ul class="nav flex-column px-3 gap-1">
                 
                 <!-- Section Header -->
-                <li class="nav-item px-3 mb-2 small text-uppercase text-white-50 fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Menu</li>
+                <li class="nav-item px-3 mb-2 small text-uppercase text-white-50 fw-bold sidebar-section-title" style="font-size: 0.7rem; letter-spacing: 1px;">Menu Radar</li>
 
                 <!-- Main Navigation -->
                 @if(auth()->user()->role_id === 1)
@@ -132,7 +133,7 @@
                                     $pendingRequests = $globalPendingLeaves->whereIn('RequestStatus', ['Pending', 'Pending Supervisor Approval', 'Pending Admin Verification', 'Pending Admin Approval'])->count();
                                 @endphp
                                 @if($pendingRequests > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="width: 8px; height: 8px;"></span>
+                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle menu-alert-dot" style="width: 8px; height: 8px;"></span>
                                 @endif
                             </div>
                             <span class="flex-grow-1">Leave Requests</span>
@@ -174,7 +175,7 @@
                  </div>
                  <div class="d-flex flex-column" style="font-size: 0.8rem; line-height: 1.2;">
                     <span class="fw-bold text-white">{{ auth()->user()->FirstName ?? 'User' }}</span>
-                    <small class="text-white-50">Log out</small>
+                    <small class="text-white-50">Exit hatch</small>
                  </div>
                  <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="ms-auto text-white-50 hover-text-white transition-all">
                     <i class="fas fa-sign-out-alt"></i>
@@ -186,6 +187,53 @@
 
 <style>
     /* Sidebar Custom Styles */
+    .amused-sidebar {
+        background: linear-gradient(180deg, #1f2f63 0%, #1a2551 50%, #151e40 100%) !important;
+    }
+
+    .sidebar-section-title {
+        position: relative;
+        padding-left: 1.5rem !important;
+    }
+
+    .sidebar-section-title::before {
+        content: '';
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #60a5fa;
+        transform: translateY(-50%);
+        box-shadow: 0 0 0 6px rgba(96, 165, 250, 0.18);
+    }
+
+    .offcanvas .nav-link {
+        border: 1px solid transparent;
+    }
+
+    .offcanvas .nav-link:hover {
+        transform: translateX(3px);
+        border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .offcanvas .nav-link.bg-white,
+    .offcanvas .nav-link.bg-white.bg-opacity-10 {
+        border-color: rgba(255, 255, 255, 0.22);
+        box-shadow: inset 2px 0 0 #93c5fd;
+    }
+
+    .menu-alert-dot {
+        animation: softPing 1.8s infinite;
+    }
+
+    @keyframes softPing {
+        0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        70% { transform: translate(-50%, -50%) scale(1.45); opacity: 0.4; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
     .hover-bg-white-10:hover {
         background-color: rgba(255, 255, 255, 0.1) !important;
         color: white !important;

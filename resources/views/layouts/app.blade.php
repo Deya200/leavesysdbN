@@ -11,6 +11,7 @@
   <!-- Fonts & Styles -->
  @vite(['resources/sass/app.scss', 'resources/js/app.js'])
  
+  <link rel="stylesheet" href="{{ asset('fontawesome-free-6.7.2-web/css/all.min.css') }}">
   <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
   <link rel="stylesheet" href="{{ asset('css/header.css') }}">
   <link rel="stylesheet" href="{{ asset('css/darkmode.css') }}">
@@ -18,13 +19,13 @@
   <!-- Custom Styles -->
   <style>
     :root {
-<<<<<<< HEAD
       --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
       --color-bg: #f9fafb;
       --color-surface: #ffffff;
-      --color-primary: #3b82f6; /* Mitra Blue */
-      --color-primary-light: #60a5fa;
-      --color-primary-dark: #2563eb;
+      --color-primary: #3b4c9b;
+      --color-primary-light: #5266c2;
+      --color-primary-dark: #2d3a7a;
+      --color-secondary: #64748b;
       --color-slate-50: #f8fafc;
       --color-slate-100: #f1f5f9;
       --color-slate-200: #e2e8f0;
@@ -41,6 +42,7 @@
 
       --sidebar-width: 260px;
       --header-height: 64px;
+      --footer-height: 64px;
 
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -51,31 +53,10 @@
       --radius-lg: 0.5rem;
       --radius-xl: 0.75rem;
       --radius-2xl: 1rem;
-      --footer-height: 64px;
 
       --glass-bg: rgba(255, 255, 255, 0.9);
       --glass-border: rgba(255, 255, 255, 0.5);
       --glass-blur: blur(12px);
-=======
-      --font-primary: 'Inter', sans-serif;
-      --color-bg: #f8fafc;
-      --color-surface: #ffffff;
-      --color-primary: #4f46e5;
-      --color-primary-dark: #3730a3;
-      --color-secondary: #64748b;
-      --color-text-main: #0f172a;
-      --color-text-muted: #64748b;
-      --sidebar-width: 280px;
-      --header-height: 70px;
-
-      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-      --radius-md: 0.5rem;
-      --radius-lg: 0.75rem;
-      --radius-xl: 1rem;
->>>>>>> f5f5d8d51819440a33e09306187146bcf25c4f5d
     }
 
     body {
@@ -86,32 +67,35 @@
       overflow-x: hidden;
     }
 
-<<<<<<< HEAD
     /* Global Transition */
     .transition-all {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-=======
+    }
+
     /* Layout Logic */
     .wrapper {
       display: flex;
       width: 100%;
       min-height: calc(100vh - var(--header-height));
->>>>>>> f5f5d8d51819440a33e09306187146bcf25c4f5d
     }
 
     @media (min-width: 992px) {
       #mainSidebar {
         width: var(--sidebar-width) !important;
-        height: calc(100vh - var(--header-height)) !important;
+        height: 100vh !important;
         position: fixed !important;
-        top: var(--header-height) !important;
+        top: 0 !important;
         left: 0 !important;
-        z-index: 1000 !important;
+        z-index: 1050 !important;
         transform: none !important;
         visibility: visible !important;
         border-right: 1px solid rgba(0, 0, 0, 0.05);
         background: #1e293b;
-        /* Dark sidebar */
+      }
+
+      header {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
       }
 
       main {
@@ -146,16 +130,13 @@
 
     .card:hover {
       box-shadow: var(--shadow-md);
-<<<<<<< HEAD
+      transform: translateY(-2px);
     }
 
     .card-glass {
       background: var(--glass-bg);
       backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
-=======
-      transform: translateY(-4px);
->>>>>>> f5f5d8d51819440a33e09306187146bcf25c4f5d
     }
 
     .card-header {
@@ -175,7 +156,6 @@
     }
 
     .btn-primary {
-<<<<<<< HEAD
       background-color: var(--color-primary);
       border-color: var(--color-primary);
       box-shadow: var(--shadow-indigo);
@@ -482,16 +462,8 @@
     }
 
     .hover-up:hover {
-=======
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-      border: none;
-      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
-    }
-
-    .btn-primary:hover {
->>>>>>> f5f5d8d51819440a33e09306187146bcf25c4f5d
       transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+      box-shadow: var(--shadow-md);
     }
 
 
@@ -540,7 +512,7 @@
   </footer>
 
   <!-- Scripts -->
-  <!-- Scripts are handled via @vite in the head -->
+  <!-- Scripts are handled in the head -->
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -613,6 +585,32 @@
         }
       });
     });
+  </script>
+
+  @include('layouts.profile-offcanvas')
+
+  <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+    @csrf
+  </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function confirmLogout() {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You will be logged out of the system!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, logout!',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          document.getElementById('logout-form').submit();
+        }
+      })
+    }
   </script>
 
   @yield('scripts')

@@ -5,19 +5,19 @@
     data-bs-scroll="true" data-bs-backdrop="false">
 
     <!-- Sidebar Header -->
-    <div class="offcanvas-header p-0">
-        <div class="p-4 d-flex align-items-center gap-3 w-100">
-            <div class="bg-white rounded-3 border d-flex align-items-center justify-content-center"
-                style="width: 40px; height: 40px; min-width: 40px; overflow: hidden;">
+    <div class="offcanvas-header p-0" style="background-color: var(--color-primary) !important;">
+        <div class="p-4 d-flex align-items-center gap-3 w-100 border-bottom border-white border-opacity-10">
+            <div class="bg-white rounded-3 shadow-sm d-flex align-items-center justify-content-center"
+                style="width: 42px; height: 42px; min-width: 42px; overflow: hidden;">
                 <img src="{{ asset('logo3.png') }}" alt="ABC Logo"
-                    style="width: 100%; height: 100%; object-fit: contain; padding: 2px;">
+                    style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
             </div>
             <div class="d-flex flex-column overflow-hidden">
-                <h6 class="text-slate-900 fw-bold mb-0 text-nowrap" style="letter-spacing: -0.5px; font-size: 1rem;">ABC Leave</h6>
-                <small class="text-slate-500 text-nowrap" style="font-size: 0.7rem;">Management System</small>
+                <h6 class="text-white fw-bold mb-0 text-nowrap" style="letter-spacing: -0.5px; font-size: 1.1rem;">ABC Leave</h6>
+                <small class="text-white text-opacity-75 text-nowrap" style="font-size: 0.75rem;">Management System</small>
             </div>
         </div>
-        <button type="button" class="btn-close position-absolute top-0 end-0 m-3 d-md-none"
+        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 d-md-none"
             data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
 

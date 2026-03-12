@@ -252,8 +252,11 @@ class Employee extends Authenticatable
     }
 
     // ✅ Check if employee has any role
-    public function hasRole(string $roleName): bool
+    public function hasRole(?string $roleName = null): bool
     {
+        if (!$roleName) {
+            return (bool)$this->role;
+        }
         return $this->role && strtolower($this->role->name) === strtolower($roleName);
     }
 

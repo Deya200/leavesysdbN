@@ -10,7 +10,7 @@
 </head>
 <body>
     <h2 style="text-align: center; font-weight: bold; letter-spacing: 1px;">
-  ABC MISSION HOSPITAL LEAVE REPORT SUMMARY
+  ABC Mission Hospital LEAVE REPORT SUMMARY
 </h2>
 
 

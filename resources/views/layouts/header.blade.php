@@ -110,7 +110,7 @@
                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-3"
                         style="border-radius: var(--radius-lg); min-width: 220px;" aria-labelledby="profileDropdown">
                         <li class="px-3 py-2 border-bottom bg-slate-50 mb-1">
-                            <div class="fw-bold text-slate-900 small">{{ Auth::user()->name }}</div>
+                            <div class="fw-bold text-slate-900 small">{{ Auth::user()->FirstName . ' ' . Auth::user()->LastName }}</div>
                             <div class="text-slate-500 smaller">{{ Auth::user()->email }}</div>
                         </li>
                         <li>

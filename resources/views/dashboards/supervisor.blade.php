@@ -384,103 +384,88 @@
             </div>
         </div>
 
-        <!-- Active Leave Requests -->
-        <div class="card border-0 shadow-sm mb-5">
-            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h5 class="mb-0 fw-bold d-flex align-items-center">
-                    <i class="fas fa-clipboard-list text-primary me-2"></i> Pending Team Requests
-                </h5>
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <div class="search-input-wrapper position-relative" style="min-width: 250px;">
-                        <i class="fas fa-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
-                        <input type="text" id="requestsSearchInput" class="form-control form-control-sm border bg-light rounded-pill ps-5 py-2" placeholder="Search requests..." onkeyup="searchTable('requestsSearchInput', 'leaveRequestsTable')">
-                    </div>
-                    <a href="{{ route('leave.report.pdf') }}" class="btn btn-sm btn-outline-primary d-none d-sm-inline-block">
-                        <i class="fas fa-file-pdf me-1"></i> Export
-                    </a>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="leaveRequestsTable">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Employee</th>
-                            <th>Type</th>
-                            <th>Duration</th>
-                            <th>Status</th>
-                            <th class="pe-4 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($leaveRequests as $index => $request)
-                            @php
-                                $isActionNeeded = $request->RequestStatus === 'Pending Supervisor Approval';
-                            @endphp
-                            <tr class="{{ $index >= 5 ? 'hidden-row' : '' }}">
-                                <td class="ps-4">
-                                    <div class="fw-bold text-dark">{{ $request->employee->FirstName }}
-                                        {{ $request->employee->LastName }}</div>
-                                    <small class="text-muted">{{ $request->created_at->diffForHumans() }}</small>
-                                </td>
-                                <td><span class="small">{{ $request->leaveType->LeaveTypeName }}</span></td>
-                                <td>
-                                    <div class="small fw-bold">{{ $request->StartDate }} to {{ $request->EndDate }}</div>
-                                    <div class="text-primary small">({{ $request->TotalDays }} days)</div>
-                                </td>
-                                <td>
-                                    <span
-                                        class="badge rounded-pill px-2 py-1 {{ $isActionNeeded ? 'bg-warning text-dark' : 'bg-light text-muted border' }}"
-                                        style="font-size:0.8rem;">
-                                        {{ $request->RequestStatus }}
-                                    </span>
-                                </td>
-                                <td class="pe-4 text-center">
-                                    @if ($isActionNeeded)
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <form
-                                                action="{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}"
-                                                method="POST">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="btn btn-success btn-sm rounded-pill px-3">Approve</button>
-                                            </form>
-                                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3"
-                                                onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
-                                        </div>
-                                        <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none;"
-                                            class="mt-3 text-start">
-                                            <form action="{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}"
-                                                method="POST" class="bg-light p-3 rounded-3 border">
-                                                @csrf
-                                                <label class="small fw-bold mb-1">Rejection Reason</label>
-                                                <textarea name="SupervisorRejectionReason" class="form-control form-control-sm mb-2"
-                                                    rows="2" placeholder="Explain why..." required></textarea>
-                                                <div class="d-flex gap-2">
-                                                    <button type="submit" class="btn btn-danger btn-sm px-3">Confirm</button>
-                                                    <button type="button" class="btn btn-light btn-sm px-3"
-                                                        onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Cancel</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    @else
-                                        <i class="fas fa-info-circle text-muted opacity-50" title="{{ $request->Reason }}"></i>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                @if($leaveRequests->count() > 5)
-                    <div class="p-3 text-center border-top bg-light bg-opacity-50">
-                        <button class="btn btn-sm btn-link text-decoration-none fw-bold" onclick="toggleLeaveTable()"
-                            id="leaveToggleButton">Show All Requests</button>
-                        <button class="btn btn-sm btn-link text-decoration-none fw-bold" onclick="toggleLeaveTable()"
-                            id="leaveLessButton" style="display: none;">Show Less</button>
-                    </div>
-                @endif
+    <!-- Active Leave Requests -->
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold d-flex align-items-center">
+                <i class="fas fa-clipboard-list text-primary me-2"></i> Pending Team Requests
+            </h5>
+            <div>
+                <a href="{{ route('leave.report.pdf') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
             </div>
         </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="leaveRequestsTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Employee</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th class="pe-4 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($leaveRequests as $index => $request)
+                        @php
+                            $isActionNeeded = $request->RequestStatus === 'Pending Supervisor Approval';
+                        @endphp
+                        <tr class="{{ $index >= 5 ? 'hidden-row' : '' }}">
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</div>
+                                <small class="text-muted">{{ $request->created_at->diffForHumans() }}</small>
+                            </td>
+                            <td><span class="small">{{ $request->leaveType->LeaveTypeName }}</span></td>
+                            <td>
+                                <div class="small fw-bold">{{ $request->StartDate }} to {{ $request->EndDate }}</div>
+                                <div class="text-primary small">({{ $request->TotalDays }} days)</div>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill px-3 {{ $isActionNeeded ? 'bg-warning text-dark' : 'bg-light text-muted border' }}">
+                                    {{ $request->RequestStatus }}
+                                </span>
+                            </td>
+                            <td class="pe-4 text-center">
+                                @if ($isActionNeeded)
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <form action="{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">Approve</button>
+                                        </form>
+                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
+                                    </div>
+                                    <div id="rejectForm-{{ $request->LeaveRequestID }}" style="display:none;" class="mt-3 text-start">
+                                        <form action="{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}" method="POST" class="bg-light p-3 rounded-3 border">
+                                            @csrf
+                                            <label class="small fw-bold mb-1">Rejection Reason</label>
+                                            <textarea name="SupervisorRejectionReason" class="form-control form-control-sm mb-2" rows="2" placeholder="Explain why..." required></textarea>
+                                            <div class="d-flex gap-2">
+                                                <button type="submit" class="btn btn-danger btn-sm px-3">Confirm</button>
+                                                <button type="button" class="btn btn-light btn-sm px-3" onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                @else
+                                    <i class="fas fa-info-circle text-muted opacity-50" title="{{ $request->Reason }}"></i>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @if($leaveRequests->count() > 5)
+                <div class="p-3 text-center border-top bg-light bg-opacity-50">
+                    <button class="btn btn-sm btn-link text-decoration-none fw-bold" onclick="toggleLeaveTable()" id="leaveToggleButton">Show All Requests</button>
+                    <button class="btn btn-sm btn-link text-decoration-none fw-bold" onclick="toggleLeaveTable()" id="leaveLessButton" style="display: none;">Show Less</button>
+                </div>
+            @endif
+        </div>
+    </div>
+
+</div>
+@endsection
 
         <!-- PDF Report Button -->
         <div class="text-center mt-3">

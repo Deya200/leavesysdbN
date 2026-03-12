@@ -1,12 +1,20 @@
 {
   "resources/js/app.js": {
+<<<<<<< HEAD
+    "file": "assets/app-CkoOC6fC.js",
+=======
     "file": "assets/app-BPTp5K2u.js",
+>>>>>>> dbb18b2c20d3f27999de42da0021f1e1122b805f
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
   },
   "resources/sass/app.scss": {
+<<<<<<< HEAD
+    "file": "assets/app-DZUsWXEA.css",
+=======
     "file": "assets/app-CknAU-fp.css",
+>>>>>>> dbb18b2c20d3f27999de42da0021f1e1122b805f
     "src": "resources/sass/app.scss",
     "isEntry": true
   }

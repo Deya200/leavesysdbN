@@ -203,9 +203,12 @@ return array(
     'Database\\Seeders\\PositionSeeder' => $baseDir . '/database/seeders/PositionSeeder.php',
     'Database\\Seeders\\ProductionDataSeeder' => $baseDir . '/database/seeders/ProductionDataSeeder.php',
     'Database\\Seeders\\RoleSeeder' => $baseDir . '/database/seeders/RoleSeeder.php',
+<<<<<<< HEAD
+=======
     'Database\\Seeders\\TasksSeeder' => $baseDir . '/database/seeders/TasksSeeder.php',
     'Database\\Seeders\\TrainingSeeder' => $baseDir . '/database/seeders/TrainingSeeder.php',
     'Database\\Seeders\\UserSeeder' => $baseDir . '/database/seeders/UserSeeder.php',
+>>>>>>> dbb18b2c20d3f27999de42da0021f1e1122b805f
     'Database\\Seeders\\WorkflowTestSeeder' => $baseDir . '/database/seeders/WorkflowTestSeeder.php',
     'DateError' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
     'DateException' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateException.php',

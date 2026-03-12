@@ -1,5 +1,13 @@
+<style>
+    @media (min-width: 992px) {
+        #viewLeaveModal .modal-dialog {
+            position: relative;
+            left: 100px; /* Shift right to compensate for the left sidebar so it appears centered in the content area */
+        }
+    }
+</style>
 <div class="modal fade" id="viewLeaveModal" tabindex="-1" aria-labelledby="viewLeaveModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header text-white" style="background: linear-gradient(135deg, #1e3c72, #2a5298);">
                 <h5 class="modal-title" id="viewLeaveModalLabel"><i class="fas fa-file-alt me-2"></i>Leave Request
@@ -55,7 +63,7 @@
 <script>
     function fetchAndShowLeaveModal(url) {
         const modalElement = document.getElementById('viewLeaveModal');
-        const modal = new bootstrap.Modal(modalElement);
+        const modal = window.bootstrap.Modal.getOrCreateInstance(modalElement);
 
         // UI elements
         const loader = document.getElementById('viewLeaveLoader');

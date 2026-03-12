@@ -302,6 +302,37 @@
             </div>
         </div>
 
+        <!-- Team Analytics Section -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 1rem;">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-chart-area text-primary me-2"></i> Team Leave Trends</h5>
+                    <div style="height: 250px;">
+                        <canvas id="teamTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 1rem;">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-chart-pie text-warning me-2"></i> Team Approvals</h5>
+                    <div style="height: 250px; display: flex; justify-content: center;">
+                        <canvas id="teamStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-4" style="border-radius: 1rem;">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-users text-info me-2"></i> Team Member Leave Balances</h5>
+                    <div style="height: 200px;">
+                        <canvas id="teamBalanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Live Team Activity -->
         <div class="card border-0 shadow-sm mb-5">
             <div class="card-header bg-transparent py-3 d-flex align-items-center">
@@ -513,7 +544,87 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ── Team Trend Chart ──
+            const ctxTeamTrend = document.getElementById('teamTrendChart').getContext('2d');
+            new Chart(ctxTeamTrend, {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode($teamMonthlyLabels) !!},
+                    datasets: [
+                        {
+                            label: 'Approved',
+                            data: {!! json_encode($teamMonthlyApproved) !!},
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Rejected',
+                            data: {!! json_encode($teamMonthlyRejected) !!},
+                            borderColor: '#ef4444',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+
+            // ── Team Status Doughnut ──
+            const ctxTeamStatus = document.getElementById('teamStatusChart').getContext('2d');
+            new Chart(ctxTeamStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Approved', 'Rejected', 'Pending'],
+                    datasets: [{
+                        data: [
+                            {{ $teamStatusBreakdown['Approved'] }},
+                            {{ $teamStatusBreakdown['Rejected'] }},
+                            {{ $teamStatusBreakdown['Pending'] }}
+                        ],
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // ── Team Balance Bar Chart ──
+            const ctxTeamBalance = document.getElementById('teamBalanceChart').getContext('2d');
+            new Chart(ctxTeamBalance, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($teamBalanceLabels) !!},
+                    datasets: [{
+                        label: 'Remaining Days',
+                        data: {!! json_encode($teamBalanceData) !!},
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        });
+
         function toggleRejectForm(id) {
             const form = document.getElementById('rejectForm-' + id);
             if (form) {

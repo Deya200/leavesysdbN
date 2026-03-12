@@ -40,21 +40,12 @@ class DashboardController extends Controller
         $totalEmployees = Employee::count();
         $maleEmployees = Employee::where('Gender', 'Male')->count();
         $femaleEmployees = Employee::where('Gender', 'Female')->count();
-
-        // Positions and Grades statistics
         $totalPositions = Position::count();
         $totalGrades = Grade::count();
-
-        // Departments with employee counts
         $departments = Department::withCount('employees')->with('supervisor')->get();
 
-        // Recent leave requests (Global)
-        $recentLeaveRequests = LeaveRequest::with(['employee', 'leaveType'])
-            ->latest()
-            ->take(5)
-            ->get();
+        $recentLeaveRequests = LeaveRequest::with(['employee', 'leaveType'])->latest()->take(5)->get();
 
-        // --- Employees Currently on Leave (Global) ---
         $today = now()->format('Y-m-d');
         $employeesOnLeave = LeaveRequest::with(['employee', 'employee.department', 'leaveType'])
             ->where('RequestStatus', 'Approved')
@@ -62,24 +53,118 @@ class DashboardController extends Controller
             ->where('EndDate', '>=', $today)
             ->get();
 
+        // ── Analytics: Monthly trends (last 12 months) ──────────────────────
+        $monthlyLabels   = [];
+        $monthlyApproved = [];
+        $monthlyRejected = [];
+        $monthlyPending  = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $d = now()->subMonths($i);
+            $monthlyLabels[]   = $d->format('M Y');
+            $monthlyApproved[] = LeaveRequest::whereYear('created_at', $d->year)
+                ->whereMonth('created_at', $d->month)
+                ->where('RequestStatus', 'Approved')->count();
+            $monthlyRejected[] = LeaveRequest::whereYear('created_at', $d->year)
+                ->whereMonth('created_at', $d->month)
+                ->where('RequestStatus', 'like', '%Rejected%')->count();
+            $monthlyPending[]  = LeaveRequest::whereYear('created_at', $d->year)
+                ->whereMonth('created_at', $d->month)
+                ->where('RequestStatus', 'like', '%Pending%')->count();
+        }
+
+        // ── Analytics: Leave type distribution ──────────────────────────────
+        $leaveTypeStats = LeaveRequest::with('leaveType')
+            ->selectRaw('"LeaveTypeID", COUNT(*) as total')
+            ->groupBy('LeaveTypeID')
+            ->get()
+            ->map(fn($r) => [
+                'name'  => optional($r->leaveType)->LeaveTypeName ?? 'Unknown',
+                'count' => $r->total,
+            ]);
+
+        // ── Analytics: Gender utilization ────────────────────────────────────
+        $maleRequests   = LeaveRequest::whereHas('employee', fn($q) => $q->where('Gender', 'Male'))->count();
+        $femaleRequests = LeaveRequest::whereHas('employee', fn($q) => $q->where('Gender', 'Female'))->count();
+
+        // ── Analytics: Department leave days ──────────────────────────────────
+        $deptLeaveStats = Department::all()->map(function ($dept) {
+            $days = LeaveRequest::whereHas('employee', fn($q) => $q->where('DepartmentID', $dept->DepartmentID))
+                ->where('RequestStatus', 'Approved')
+                ->sum('TotalDays');
+            return ['name' => $dept->DepartmentName, 'days' => (int) $days];
+        })->filter(fn($d) => $d['days'] > 0)->values();
+
+        // ── Analytics: KPIs ────────────────────────────────────────────────
+        $totalRequests = LeaveRequest::count();
+        $totalApproved = LeaveRequest::where('RequestStatus', 'Approved')->count();
+        $approvalRate  = $totalRequests > 0 ? round(($totalApproved / $totalRequests) * 100, 1) : 0;
+        $avgDuration   = round((float) LeaveRequest::where('RequestStatus', 'Approved')->avg('TotalDays'), 1);
+
+        $statusBreakdown = [
+            'Approved' => $totalApproved,
+            'Rejected' => LeaveRequest::where('RequestStatus', 'like', '%Rejected%')->count(),
+            'Pending'  => LeaveRequest::where('RequestStatus', 'like', '%Pending%')->count(),
+        ];
+
+        $deptBalanceStats = Department::all()->map(function ($dept) {
+            $employees = Employee::with('grade')->where('DepartmentID', $dept->DepartmentID)->get();
+            $avgRemaining = $employees->isNotEmpty()
+                ? round($employees->avg(fn($e) => $e->leave_days_remaining), 1)
+                : 0;
+            return ['name' => $dept->DepartmentName, 'avg' => $avgRemaining];
+        })->filter(fn($d) => $d['avg'] > 0)->values();
+
         return view('dashboards.index', compact(
-            'totalEmployees',
-            'maleEmployees',
-            'femaleEmployees',
-            'totalPositions',
-            'totalGrades',
-            'departments',
-            'recentLeaveRequests',
-            'personalLeaveBalance',
-            'personalRecentRequests',
-            'employeesOnLeave'
+            'totalEmployees', 'maleEmployees', 'femaleEmployees',
+            'totalPositions', 'totalGrades', 'departments',
+            'recentLeaveRequests', 'personalLeaveBalance', 'personalRecentRequests',
+            'employeesOnLeave',
+            'monthlyLabels', 'monthlyApproved', 'monthlyRejected', 'monthlyPending',
+            'leaveTypeStats', 'maleRequests', 'femaleRequests',
+            'deptLeaveStats', 'approvalRate', 'avgDuration',
+            'statusBreakdown', 'deptBalanceStats'
         ));
     }
 
     public function admin()
     {
-        // dashboard.admin is the verification page in the admin function
         $leaveRequests = \App\Models\LeaveRequest::where('is_archived', false)->latest()->get();
-        return view('dashboards.admin', compact('leaveRequests'));
+
+        $totalRequests = LeaveRequest::count();
+        $totalApproved = LeaveRequest::where('RequestStatus', 'Approved')->count();
+        $approvalRate  = $totalRequests > 0 ? round(($totalApproved / $totalRequests) * 100, 1) : 0;
+        $avgDuration   = round((float) LeaveRequest::where('RequestStatus', 'Approved')->avg('TotalDays'), 1);
+
+        $statusBreakdown = [
+            'Approved' => $totalApproved,
+            'Rejected' => LeaveRequest::where('RequestStatus', 'like', '%Rejected%')->count(),
+            'Pending'  => LeaveRequest::where('RequestStatus', 'like', '%Pending%')->count(),
+        ];
+
+        $monthlyVerified = [];
+        $monthlyLabels   = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $d = now()->subMonths($i);
+            $monthlyLabels[]   = $d->format('M Y');
+            $monthlyVerified[] = LeaveRequest::whereYear('updated_at', $d->year)
+                ->whereMonth('updated_at', $d->month)
+                ->whereIn('RequestStatus', ['Approved', 'Rejected by Admin'])
+                ->count();
+        }
+
+        $deptBalanceStats = Department::all()->map(function ($dept) {
+            $employees = Employee::with('grade')->where('DepartmentID', $dept->DepartmentID)->get();
+            $avgRemaining = $employees->isNotEmpty()
+                ? round($employees->avg(fn($e) => $e->leave_days_remaining), 1)
+                : 0;
+            return ['name' => $dept->DepartmentName, 'avg' => $avgRemaining];
+        })->filter(fn($d) => $d['avg'] > 0)->values();
+
+        return view('dashboards.admin', compact(
+            'leaveRequests',
+            'statusBreakdown', 'monthlyVerified', 'monthlyLabels',
+            'deptBalanceStats', 'approvalRate', 'avgDuration'
+        ));
     }
 }

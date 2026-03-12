@@ -36,7 +36,7 @@
 
         .table th,
         .table td {
-            padding: 12px;
+            padding: 8px 12px;
             vertical-align: middle;
         }
 
@@ -192,7 +192,58 @@
             </div>
         </div>
 
-        <div class="card-custom">
+        <!-- Analytics Section -->
+        <div class="row g-4 mb-4">
+            <!-- Left: Verification Activity Trend -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 1rem;">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-chart-line text-primary me-2"></i> Monthly Verification Activity</h5>
+                    <div style="height: 250px;">
+                        <canvas id="monthlyVerificationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Right: Status Breakdown Doughnut -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 1rem;">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-chart-pie text-warning me-2"></i> All-Time Approvals</h5>
+                    <div style="height: 250px; display: flex; justify-content: center;">
+                        <canvas id="statusBreakdownChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <div class="row">
+                            <div class="col-6 border-end">
+                                <small class="text-uppercase text-muted fw-bold">Approval Rate</small>
+                                <h4 class="mb-0 text-success fw-bold">{{ $approvalRate }}%</h4>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-uppercase text-muted fw-bold">Avg Duration</small>
+                                <h4 class="mb-0 text-info fw-bold">{{ $avgDuration }}<span class="fs-6 fw-normal text-muted"> d</span></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- Department Leave Balances -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-4" style="border-radius: 1rem;">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-building text-info me-2"></i> Average Remaining Leave Balance by Department</h5>
+                    <div style="height: 250px;">
+                        <canvas id="deptBalanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Requests Section -->
+        <div class="card p-0 border-0 shadow-sm mb-4" style="border-radius: 1rem; overflow: hidden;">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-list-alt text-primary me-2"></i> Processing Queue</h5>
+            </div>
+            <div class="card-body p-0">
             @if ($leaveRequests->isNotEmpty())
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle">
@@ -215,10 +266,14 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</td>
                                     <td>{{ $request->leaveType->LeaveTypeName }}</td>
-                                    <td>{{ $request->StartDate }}</td>
-                                    <td>{{ $request->EndDate }}</td>
-                                    <td>{{ $request->TotalDays }}</td>
-                                    <td>{{ $request->Reason ?? 'N/A' }}</td> <!-- ✅ New cell -->
+                                    <td class="text-nowrap">{{ \Carbon\Carbon::parse($request->StartDate)->format('M d, Y') }}</td>
+                                    <td class="text-nowrap">{{ \Carbon\Carbon::parse($request->EndDate)->format('M d, Y') }}</td>
+                                    <td>{{ $request->TotalDays }} <small class="text-muted">days</small></td>
+                                    <td style="max-width: 300px; min-width: 200px;">
+                                        <div class="text-truncate text-wrap" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="{{ $request->Reason }}">
+                                            {{ $request->Reason ?? 'N/A' }}
+                                        </div>
+                                    </td>
                                     <td>
                                         <span class="badge
                                                                             @if($request->RequestStatus === 'Approved') bg-success
@@ -234,39 +289,41 @@
                                             $canSupAction = strcasecmp($request->RequestStatus, 'Pending Supervisor Approval') === 0 && auth()->id() === $request->employee->SupervisorID;
                                         @endphp
 
-                                        @if ($canAdminAction)
-                                            <div class="d-flex flex-column gap-2">
-                                                <button type="button" class="btn btn-sm btn-info text-white"
-                                                    onclick="fetchAndShowLeaveModal('{{ route('leave_requests.show', $request->LeaveRequestID) }}')">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-success"
-                                                    onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval')">
-                                                    Approve
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="openConfirmModal('reject', '{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}', 'Admin Rejection')">
-                                                    Reject
-                                                </button>
-                                            </div>
-                                        @elseif ($canSupAction)
-                                            <div class="d-flex flex-column gap-2">
-                                                <button type="button" class="btn btn-sm btn-info text-white"
-                                                    onclick="fetchAndShowLeaveModal('{{ route('leave_requests.show', $request->LeaveRequestID) }}')">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-success"
-                                                    onclick="openConfirmModal('approve', '{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}', 'Supervisor Approval', 'SupervisorApprovalNote')">
-                                                    Sup. Approve
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="openConfirmModal('reject', '{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}', 'Supervisor Rejection', 'SupervisorRejectionReason')">
-                                                    Sup. Reject
-                                                </button>
-                                            </div>
-                                        @else
-                                            <em class="text-muted">No actions available</em>
-                                        @endif
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-secondary dropdown-toggle py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v me-1"></i> Actions
+                                            </button>
+                                            <ul class="dropdown-menu shadow-sm">
+                                                <li>
+                                                    <button class="dropdown-item" type="button" onclick="fetchAndShowLeaveModal('{{ route('leave_requests.show', $request->LeaveRequestID) }}')">
+                                                        <i class="fas fa-eye text-info me-2"></i> View Details
+                                                    </button>
+                                                </li>
+                                                @if ($canAdminAction)
+                                                    <li>
+                                                        <button class="dropdown-item text-success" type="button" onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval')">
+                                                            <i class="fas fa-check-circle me-2"></i> Approve
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button class="dropdown-item text-danger" type="button" onclick="openConfirmModal('reject', '{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}', 'Admin Rejection')">
+                                                            <i class="fas fa-times-circle me-2"></i> Reject
+                                                        </button>
+                                                    </li>
+                                                @elseif ($canSupAction)
+                                                    <li>
+                                                        <button class="dropdown-item text-success" type="button" onclick="openConfirmModal('approve', '{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}', 'Supervisor Approval', 'SupervisorApprovalNote')">
+                                                            <i class="fas fa-check-circle me-2"></i> Sup. Approve
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button class="dropdown-item text-danger" type="button" onclick="openConfirmModal('reject', '{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}', 'Supervisor Rejection', 'SupervisorRejectionReason')">
+                                                            <i class="fas fa-times-circle me-2"></i> Sup. Reject
+                                                        </button>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -278,11 +335,13 @@
                         📄 Download Leave Report (PDF)
                     </a>
                 </div>
-            @else
-                <div class="alert alert-info text-center m-0">
-                    <h5>No leave requests pending admin verification.</h5>
-                </div>
-            @endif
+                    <div class="alert alert-info border-0 rounded-0 text-center m-0 py-4">
+                        <i class="fas fa-check-circle fs-1 text-success mb-3"></i>
+                        <h5>No leave requests pending admin verification.</h5>
+                        <p class="text-muted mb-0">You're all caught up!</p>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -319,7 +378,76 @@
 </div>
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ── Monthly Verification Trend ──
+            const ctxMonthlyVerification = document.getElementById('monthlyVerificationChart').getContext('2d');
+            new Chart(ctxMonthlyVerification, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($monthlyLabels) !!},
+                    datasets: [{
+                        label: 'Processed Requests',
+                        data: {!! json_encode($monthlyVerified) !!},
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+
+            // ── Status Breakdown Doughnut ──
+            const ctxStatus = document.getElementById('statusBreakdownChart').getContext('2d');
+            new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Approved', 'Rejected', 'Pending'],
+                    datasets: [{
+                        data: [
+                            {{ $statusBreakdown['Approved'] }},
+                            {{ $statusBreakdown['Rejected'] }},
+                            {{ $statusBreakdown['Pending'] }}
+                        ],
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // ── Department Balance Bar Chart ──
+            const deptBalances = {!! json_encode($deptBalanceStats) !!};
+            const ctxDeptBalance = document.getElementById('deptBalanceChart').getContext('2d');
+            new Chart(ctxDeptBalance, {
+                type: 'bar',
+                data: {
+                    labels: deptBalances.map(d => d.name),
+                    datasets: [{
+                        label: 'Avg Remaining Days',
+                        data: deptBalances.map(d => d.avg),
+                        backgroundColor: '#0ea5e9',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        });
+
         function openConfirmModal(type, url, title, fieldName = null) {
             const form = document.getElementById('actionForm');
             const titleEl = document.getElementById('modalTitle');

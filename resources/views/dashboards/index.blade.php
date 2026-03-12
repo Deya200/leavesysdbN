@@ -126,6 +126,66 @@
                 </div>
 
                 <!-- Main Content Area -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-transparent py-3">
+                                <h5 class="mb-0 fw-bold d-flex align-items-center">
+                                    <i class="fas fa-chart-area text-primary me-2"></i> Leave Trends & Analytics
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <div class="p-3 bg-light rounded text-center">
+                                            <small class="text-uppercase text-muted fw-bold">Approval Rate</small>
+                                            <h3 class="mb-0 text-success fw-bold">{{ $approvalRate }}%</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-3 bg-light rounded text-center">
+                                            <small class="text-uppercase text-muted fw-bold">Avg Leave Duration</small>
+                                            <h3 class="mb-0 text-info fw-bold">{{ $avgDuration }} <small class="text-muted fw-normal fs-6">days</small></h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-3 bg-light rounded text-center">
+                                            <small class="text-uppercase text-muted fw-bold">Total Requests</small>
+                                            <h3 class="mb-0 text-primary fw-bold">{{ $statusBreakdown['Approved'] + $statusBreakdown['Rejected'] + $statusBreakdown['Pending'] }}</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-3 bg-light rounded text-center">
+                                            <small class="text-uppercase text-muted fw-bold">Pending Actions</small>
+                                            <h3 class="mb-0 text-warning fw-bold">{{ $statusBreakdown['Pending'] }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-4">
+                                    <div class="col-lg-8">
+                                        <h6 class="text-center text-muted mb-3">Monthly Leave Requests (Last 12 Months)</h6>
+                                        <canvas id="monthlyTrendChart" height="100"></canvas>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h6 class="text-center text-muted mb-3">Leave Type Distribution</h6>
+                                        <canvas id="leaveTypeChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="row g-4 mt-2">
+                                    <div class="col-lg-8">
+                                        <h6 class="text-center text-muted mb-3">Department Leave Usage (Total Days)</h6>
+                                        <canvas id="deptUsageChart" height="100"></canvas>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h6 class="text-center text-muted mb-3">Requests by Gender</h6>
+                                        <canvas id="genderPieChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row g-4">
                     <!-- Left Column: Reports & Activity -->
                     <div class="col-lg-8">
@@ -358,6 +418,98 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ── Monthly Trend Chart ──
+            const ctxMonthly = document.getElementById('monthlyTrendChart').getContext('2d');
+            new Chart(ctxMonthly, {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode($monthlyLabels) !!},
+                    datasets: [
+                        {
+                            label: 'Approved',
+                            data: {!! json_encode($monthlyApproved) !!},
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Rejected',
+                            data: {!! json_encode($monthlyRejected) !!},
+                            borderColor: '#ef4444',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+
+            // ── Leave Type Doughnut Chart ──
+            const leaveStats = {!! json_encode($leaveTypeStats) !!};
+            const ctxType = document.getElementById('leaveTypeChart').getContext('2d');
+            new Chart(ctxType, {
+                type: 'doughnut',
+                data: {
+                    labels: leaveStats.map(s => s.name),
+                    datasets: [{
+                        data: leaveStats.map(s => s.count),
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // ── Department Leave Usage Bar Chart ──
+            const deptStats = {!! json_encode($deptLeaveStats) !!};
+            const ctxDept = document.getElementById('deptUsageChart').getContext('2d');
+            new Chart(ctxDept, {
+                type: 'bar',
+                data: {
+                    labels: deptStats.map(s => s.name),
+                    datasets: [{
+                        label: 'Total Leave Days',
+                        data: deptStats.map(s => s.days),
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // ── Gender Pie Chart ──
+            const ctxGender = document.getElementById('genderPieChart').getContext('2d');
+            new Chart(ctxGender, {
+                type: 'pie',
+                data: {
+                    labels: ['Male', 'Female'],
+                    datasets: [{
+                        data: [{{ $maleRequests }}, {{ $femaleRequests }}],
+                        backgroundColor: ['#0ea5e9', '#ec4899']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        });
+    </script>
     <script>
         function toggleAdminRejectForm(id) {
             const row = document.getElementById('adminRejectFormRow-' + id);

@@ -272,9 +272,6 @@ class EmployeeController extends Controller
         return back()->with('success', "Invitation sent to {$employee->FirstName} ({$employee->email}).");
     }
 
-    /**
-     * Bulk send invitations.
-     */
     public function bulkSendInvitations(Request $request)
     {
         $employeeNumbers = $request->input('employee_numbers', []);
@@ -298,20 +295,5 @@ class EmployeeController extends Controller
         }
 
         return back()->with('success', "Invitations sent to " . $employees->count() . " employees.");
-    }
-
-    /**
-     * Manually set password for an employee.
-     */
-    public function manualSetPassword(Request $request, Employee $employee)
-    {
-        $request->validate([
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $employee->password = Hash::make($request->password);
-        $employee->save();
-
-        return back()->with('success', "Password manually set for {$employee->FirstName} {$employee->LastName}.");
     }
 }

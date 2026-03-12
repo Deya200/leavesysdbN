@@ -6,6 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title') - Leave Management System</title>
+  <link rel="icon" type="image/png" href="{{ asset('logo3.png') }}">
 
   <!-- Fonts & Styles -->
   @vite(['resources/sass/app.scss', 'resources/js/app.js'])
@@ -19,12 +20,11 @@
   <style>
     :root {
       --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
-      --color-bg: #fdfdfd;
+      --color-bg: #f9fafb;
       --color-surface: #ffffff;
-      --color-primary: #6366f1;
-      /* Worksy Indigo */
-      --color-primary-light: #818cf8;
-      --color-primary-dark: #4f46e5;
+      --color-primary: #3b82f6; /* Mitra Blue */
+      --color-primary-light: #60a5fa;
+      --color-primary-dark: #2563eb;
       --color-slate-50: #f8fafc;
       --color-slate-100: #f1f5f9;
       --color-slate-200: #e2e8f0;
@@ -34,28 +34,28 @@
       --color-slate-600: #475569;
       --color-slate-700: #334155;
       --color-slate-800: #1e293b;
-      --color-slate-900: #0f172a;
+      --color-slate-900: #111827;
 
-      --color-text-main: #1a1a1a;
-      --color-text-muted: #666666;
+      --color-text-main: #111827;
+      --color-text-muted: #6b7280;
 
       --sidebar-width: 260px;
       --header-height: 64px;
 
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 2px 8px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
-      --shadow-indigo: 0 8px 16px -4px rgba(99, 102, 241, 0.2);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-indigo: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
 
-      --radius-md: 0.5rem;
-      --radius-lg: 0.75rem;
-      --radius-xl: 1rem;
-      --radius-2xl: 1.25rem;
-      --footer-height: 72px;
+      --radius-md: 0.375rem;
+      --radius-lg: 0.5rem;
+      --radius-xl: 0.75rem;
+      --radius-2xl: 1rem;
+      --footer-height: 64px;
 
-      --glass-bg: rgba(255, 255, 255, 0.8);
-      --glass-border: rgba(255, 255, 255, 0.4);
-      --glass-blur: blur(8px);
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --glass-border: rgba(255, 255, 255, 0.5);
+      --glass-blur: blur(12px);
     }
 
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -70,7 +70,7 @@
 
     /* Global Transition */
     .transition-all {
-        transition: all 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .cursor-pointer {
@@ -80,16 +80,15 @@
     /* Modern Card Styles */
     .card {
       background: var(--color-surface);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow-sm);
       margin-bottom: 2rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s ease;
     }
 
     .card:hover {
       box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
     }
 
     .card-glass {
@@ -100,53 +99,51 @@
 
     .card-header {
       background-color: transparent;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      padding: 1.5rem;
-      font-weight: 700;
-      color: var(--color-text-main);
+      border-bottom: 1px solid var(--color-slate-100);
+      padding: 1.25rem 1.5rem;
+      font-weight: 600;
+      color: var(--color-slate-900);
     }
 
     /* Modern Buttons */
     .btn {
-      border-radius: var(--radius-lg);
-      padding: 0.625rem 1.25rem;
-      font-weight: 600;
+      border-radius: var(--radius-md);
+      padding: 0.5rem 1rem;
+      font-weight: 500;
       transition: all 0.2s;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-      border: none;
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
       box-shadow: var(--shadow-indigo);
-      padding: 0.75rem 1.5rem;
-      font-size: 0.875rem;
     }
 
     .btn-primary:hover {
+      background-color: var(--color-primary-dark);
+      border-color: var(--color-primary-dark);
       transform: translateY(-1px);
-      box-shadow: 0 12px 20px -5px rgba(79, 70, 229, 0.3);
-      filter: brightness(1.1);
     }
 
 
     /* Utility Classes */
     .btn-icon-glass {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
+      border-radius: var(--radius-md);
       border: 1px solid var(--color-slate-200);
-      background: transparent;
+      background: white;
       color: var(--color-slate-600);
       transition: all 0.2s;
     }
 
     .btn-icon-glass:hover {
-      background: var(--color-slate-100);
+      background: var(--color-slate-50);
       color: var(--color-primary);
-      border-color: var(--color-primary-light);
+      border-color: var(--color-slate-300);
     }
 
     .hover-bg-slate-100:hover {

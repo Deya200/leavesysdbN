@@ -78,6 +78,23 @@
             vertical-align: middle;
             text-align: center;
             border: none;
+            word-break: normal; /* Do not cut words */
+        }
+
+        /* Specific Cell Refinements */
+        .col-emp-num, .col-grade {
+            white-space: nowrap; /* Single line */
+        }
+
+        .col-position {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: normal;
+            line-height: 1.4;
+            min-width: 150px; /* Suggest more width for position */
+            max-width: 250px;
+            text-align: center;
+            margin: 0 auto;
         }
 
         /* Zebra Striping for Better Readability */
@@ -232,13 +249,17 @@
                                     <td><input type="checkbox" class="employee-checkbox" name="selected_employees[]"
                                             value="{{ $employee->EmployeeNumber }}"></td>
                                     <td>{{ ($employees->currentPage() - 1) * $employees->perPage() + $loop->iteration }}</td>
-                                    <td>{{ $employee->EmployeeNumber }}</td>
+                                    <td class="col-emp-num">{{ $employee->EmployeeNumber }}</td>
                                     <td>{{ $employee->FirstName }}</td>
                                     <td>{{ $employee->LastName }}</td>
                                     <td>{{ $employee->Gender }}</td>
                                     <td>{{ $employee->department->DepartmentName ?? 'N/A' }}</td>
-                                    <td>{{ $employee->grade->GradeName ?? 'N/A' }}</td>
-                                    <td>{{ $employee->position->PositionName ?? 'N/A' }}</td>
+                                    <td class="col-grade">{{ $employee->grade->GradeName ?? 'N/A' }}</td>
+                                    <td style="width: 200px;">
+                                        <div class="col-position">
+                                            {{ $employee->position->PositionName ?? 'N/A' }}
+                                        </div>
+                                    </td>
                                     <td>{{ $employee->role->name ?? 'N/A' }}</td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
@@ -254,13 +275,7 @@
                                                 </form>
                                             @endif
 
-                                            <!-- Manual Password -->
-                                            <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal"
-                                                data-bs-target="#passwordModal" data-emp-num="{{ $employee->EmployeeNumber }}"
-                                                data-emp-name="{{ $employee->FirstName }} {{ $employee->LastName }}"
-                                                title="Set Password Manually">
-                                                <i class="fas fa-key"></i>
-                                            </button>
+
 
                                             <a href="{{ route('employees.edit', $employee->EmployeeNumber) }}" class="btn btn-sm"
                                                 style="background-color: #2E3A87; color: white;" title="Edit">
@@ -294,39 +309,7 @@
         </div>
     </div>
 
-    <!-- Manual Password Modal (Moved outside to ensure visibility/z-index) -->
-    <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-        <div class="modal-dialog">
-            <form id="passwordForm" method="POST">
-                @csrf
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-primary fw-bold">Set Password for <span id="modalEmployeeName"></span>
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="password" class="form-label small fw-bold">New Password</label>
-                            <input type="password" class="form-control" name="password" required minlength="8"
-                                placeholder="Enter at least 8 characters">
-                        </div>
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label small fw-bold">Confirm Password</label>
-                            <input type="password" class="form-control" name="password_confirmation" required minlength="8"
-                                placeholder="Repeat password">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Save Password
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+
 @endsection
 
 @section('scripts')
@@ -354,18 +337,7 @@
             });
         });
 
-        // Handle Password Modal show event to populate data
-        const passwordModal = document.getElementById('passwordModal');
-        if (passwordModal) {
-            passwordModal.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget;
-                const empNum = button.getAttribute('data-emp-num');
-                const name = button.getAttribute('data-emp-name');
 
-                document.getElementById('modalEmployeeName').textContent = name;
-                document.getElementById('passwordForm').action = '/employees/' + empNum + '/manual-set-password';
-            });
-        }
 
         function submitBulkInvite() {
             const selected = Array.from(document.querySelectorAll('.employee-checkbox:checked')).map(cb =\u003e cb.value);

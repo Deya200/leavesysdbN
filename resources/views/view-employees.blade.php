@@ -47,19 +47,38 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
+                <style>
+                    .table td {
+                        word-break: normal; /* Do not cut words */
+                        vertical-align: middle;
+                    }
+                    .col-emp-num, .col-grade {
+                        white-space: nowrap; /* Single line */
+                    }
+                    .col-position {
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        word-break: normal;
+                        line-height: 1.4;
+                        max-width: 220px;
+                    }
+                </style>
                 <tbody>
                     @forelse ($employees as $employee)
                         <tr>
                             <td>
                                 <input type="checkbox" name="employee_numbers[]" value="{{ $employee->EmployeeNumber }}" class="employee-checkbox" form="bulkActionForm">
                             </td>
-                            <td>{{ $employee->EmployeeNumber }}</td>
+                            <td class="col-emp-num">{{ $employee->EmployeeNumber }}</td>
                             <td>{{ $employee->FirstName }} {{ $employee->LastName }}<br>
                                 <small class="text-muted">{{ $employee->email }}</small>
                             </td>
                             <td>{{ $employee->department->DepartmentName }}<br>
-                                <small class="text-muted">{{ $employee->position->PositionName }}</small>
+                                <div class="col-position">
+                                    <small class="text-muted">{{ $employee->position->PositionName }}</small>
+                                </div>
                             </td>
+                            <td class="col-grade">{{ $employee->grade->GradeName ?? 'N/A' }}</td>
                             <td>
                                 @if($employee->last_password_reset_at)
                                     <span class="badge bg-success">Invited</span>
@@ -78,9 +97,7 @@
                                         </form>
                                     @endif
 
-                                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#passwordModal{{ str_replace('-', '', $employee->EmployeeNumber) }}">
-                                        Pass
-                                    </button>
+
 
                                     <form action="{{ route('employees.destroy', $employee->EmployeeNumber) }}" method="POST" style="display: inline;">
                                         @csrf
@@ -89,34 +106,7 @@
                                     </form>
                                 </div>
 
-                                <!-- Manual Password Modal -->
-                                <div class="modal fade" id="passwordModal{{ str_replace('-', '', $employee->EmployeeNumber) }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <form action="{{ route('admin.employees.manualSetPassword', $employee->EmployeeNumber) }}" method="POST">
-                                                @csrf
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Set Password: {{ $employee->FirstName }}</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">New Password</label>
-                                                        <input type="password" name="password" class="form-control" required minlength="8">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Confirm Password</label>
-                                                        <input type="password" name="password_confirmation" class="form-control" required minlength="8">
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" class="btn btn-primary">Save Password</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
+
                             </td>
                         </tr>
                     @empty

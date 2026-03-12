@@ -98,6 +98,38 @@ class SupervisorController extends Controller
         $totalFemaleEmployees = $employeesUnderSupervisor->where('Gender', 'Female')->count();
         $totalMaleEmployees = $employeesUnderSupervisor->where('Gender', 'Male')->count();
 
+        // ── Team Analytics: Monthly trend (last 12 months) ──────────────────
+        $teamEmpNums = $employeesUnderSupervisor->pluck('EmployeeNumber');
+        $teamMonthlyLabels   = [];
+        $teamMonthlyApproved = [];
+        $teamMonthlyRejected = [];
+        $teamMonthlyPending  = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $d = now()->subMonths($i);
+            $teamMonthlyLabels[]   = $d->format('M Y');
+            $teamMonthlyApproved[] = LeaveRequest::whereIn('EmployeeNumber', $teamEmpNums)
+                ->whereYear('created_at', $d->year)->whereMonth('created_at', $d->month)
+                ->where('RequestStatus', 'Approved')->count();
+            $teamMonthlyRejected[] = LeaveRequest::whereIn('EmployeeNumber', $teamEmpNums)
+                ->whereYear('created_at', $d->year)->whereMonth('created_at', $d->month)
+                ->where('RequestStatus', 'like', '%Rejected%')->count();
+            $teamMonthlyPending[]  = LeaveRequest::whereIn('EmployeeNumber', $teamEmpNums)
+                ->whereYear('created_at', $d->year)->whereMonth('created_at', $d->month)
+                ->where('RequestStatus', 'like', '%Pending%')->count();
+        }
+
+        // ── Team Analytics: Status breakdown ────────────────────────────────
+        $teamStatusBreakdown = [
+            'Approved' => $approvedTeamRequests,
+            'Rejected' => $rejectedTeamRequests,
+            'Pending'  => $pendingSupervisorRequests,
+        ];
+
+        // ── Team Analytics: Member leave balance ─────────────────────────────
+        $teamBalanceLabels = $employeesUnderSupervisor->pluck('FirstName')->toArray();
+        $teamBalanceData   = $employeesUnderSupervisor->map(fn($e) => $e->leave_days_remaining)->toArray();
+
         return view('dashboards.supervisor', compact(
             'leaveRequests',
             'pendingSupervisorRequests',
@@ -114,7 +146,15 @@ class SupervisorController extends Controller
             'employeesUnderSupervisor',
             'personalLeaveBalance',
             'personalRecentRequests',
-            'supervisor'
+            'supervisor',
+            // Analytics
+            'teamMonthlyLabels',
+            'teamMonthlyApproved',
+            'teamMonthlyRejected',
+            'teamMonthlyPending',
+            'teamStatusBreakdown',
+            'teamBalanceLabels',
+            'teamBalanceData'
         ));
     }
 

@@ -37,9 +37,17 @@ class LeaveExtensionController extends Controller
 
             // Update the actual leave request
             $leaveRequest = $leaveExtension->leaveRequest;
+
+            // Ensure requested end date exists
+            $newEnd = $leaveExtension->requested_end_date ?? null;
+            if (is_null($newEnd)) {
+                Log::error("LeaveExtension id {$leaveExtension->id} missing requested_end_date");
+                return redirect()->back()->with('error', 'Requested end date is missing for this extension.');
+            }
+
             $leaveRequest->update([
-                'EndDate' => $leaveExtension->new_end_date,
-                'TotalDays' => $leaveRequest->TotalDays + $leaveExtension->extension_days,
+                'EndDate' => $newEnd,
+                'TotalDays' => $leaveRequest->TotalDays + (int) $leaveExtension->extension_days,
             ]);
 
             // Determine if Admin approval is needed? 

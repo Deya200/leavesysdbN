@@ -41,3 +41,10 @@ if ($stmt->execute()) {
 $stmt->close();
 $conn->close();
 ?>
+
+<?php
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ValidationController;
+
+Route::post('/validate/email', [ValidationController::class, 'checkEmail']);
+

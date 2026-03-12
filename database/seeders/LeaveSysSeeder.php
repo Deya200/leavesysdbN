@@ -185,6 +185,16 @@ class LeaveSysSeeder extends Seeder
         );
 
         $this->command->info('Database seeded successfully with user: lumalizani@gmail.com');
+
+        // Propagate department SupervisorID to employees in that department
+        $departmentsWithSupervisors = Department::whereNotNull('SupervisorID')->get();
+        foreach ($departmentsWithSupervisors as $dept) {
+            Employee::where('DepartmentID', $dept->DepartmentID)
+                ->where('EmployeeNumber', '!=', $dept->SupervisorID)
+                ->update(['SupervisorID' => $dept->SupervisorID]);
+        }
+
+        $this->command->info('Propagated SupervisorID from departments to department employees.');
     }
 
     /**

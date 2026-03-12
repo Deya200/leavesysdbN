@@ -33,20 +33,22 @@ class EmployeeController extends Controller
         // Fetch employees with optional search filtering
         $employees = Employee::with(['department', 'role'])
             ->when($search, function ($query, $search) {
-            $query->where('FirstName', 'like', "%{$search}%")
-                ->orWhere('LastName', 'like', "%{$search}%")
-                ->orWhereHas('department', function ($departmentQuery) use ($search) {
-                $departmentQuery->where('DepartmentName', 'like', "%{$search}%");
-            }
-            );
-        })
+                $query->where('FirstName', 'like', "%{$search}%")
+                    ->orWhere('LastName', 'like', "%{$search}%")
+                    ->orWhereHas(
+                        'department',
+                        function ($departmentQuery) use ($search) {
+                            $departmentQuery->where('DepartmentName', 'like', "%{$search}%");
+                        }
+                    );
+            })
             ->orderBy('FirstName', 'asc')
             ->paginate(10) //
             ->appends([
-            'search' => $search,
-            'sort' => $sortColumn,
-            'order' => $sortOrder,
-        ]); //
+                'search' => $search,
+                'sort' => $sortColumn,
+                'order' => $sortOrder,
+            ]); //
 
         // Return the view with the employees and search query
         return view('employees.index', compact('employees', 'search', 'sortColumn', 'sortOrder'));
@@ -78,6 +80,7 @@ class EmployeeController extends Controller
     {
         $validatedData = $request->validate([
             'EmployeeNumber' => 'required|unique:employees,EmployeeNumber',
+            'national_id' => 'required|string|max:20|unique:employees,national_id',
             'FirstName' => 'required|string|max:255',
             'LastName' => 'required|string|max:255',
             'email' => 'required|email|unique:employees,email',
@@ -101,8 +104,7 @@ class EmployeeController extends Controller
             try {
                 $token = \Illuminate\Support\Facades\Password::getRepository()->create($employee);
                 $employee->sendPasswordResetNotification($token);
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 // Silently fail or log if mail fails, but don't break the redirect
                 \Illuminate\Support\Facades\Log::error("Failed to send invitation to new employee: " . $e->getMessage());
             }
@@ -141,6 +143,8 @@ class EmployeeController extends Controller
         $validatedData = $request->validate([
             'FirstName' => 'required|string|max:255',
             'LastName' => 'required|string|max:255',
+            'national_id' => 'required|string|max:20|unique:employees,national_id,' . $employee->EmployeeNumber . ',EmployeeNumber',
+            'email' => 'required|email|unique:employees,email,' . $employee->EmployeeNumber . ',EmployeeNumber',
             'DateOfBirth' => 'required|date',
             'DepartmentID' => 'required|exists:departments,DepartmentID',
             'GradeID' => 'required|exists:grades,GradeID',
@@ -261,22 +265,20 @@ class EmployeeController extends Controller
         }
 
         $token = Password::getRepository()->create($employee);
-        $employee->sendPasswordResetNotification($token);
+        $admin = auth()->user();
+        /** @var \App\Models\Employee|null $admin */
+        $employee->sendPasswordResetNotification($token, $admin);
 
         return back()->with('success', "Invitation sent to {$employee->FirstName} ({$employee->email}).");
     }
 
-    /**
-     * Bulk send invitations.
-     */
     public function bulkSendInvitations(Request $request)
     {
         $employeeNumbers = $request->input('employee_numbers', []);
 
         if ($request->input('scope') === 'all') {
             $employees = Employee::whereNotNull('email')->get();
-        }
-        else {
+        } else {
             $employees = Employee::whereIn('EmployeeNumber', $employeeNumbers)->whereNotNull('email')->get();
         }
 
@@ -284,26 +286,14 @@ class EmployeeController extends Controller
             return back()->with('error', "No employees with email addresses selected.");
         }
 
+        $admin = auth()->user();
         foreach ($employees as $employee) {
+            /** @var \App\Models\Employee $employee */
             $token = Password::getRepository()->create($employee);
-            $employee->sendPasswordResetNotification($token);
+            /** @var \App\Models\Employee|null $admin */
+            $employee->sendPasswordResetNotification($token, $admin);
         }
 
         return back()->with('success', "Invitations sent to " . $employees->count() . " employees.");
-    }
-
-    /**
-     * Manually set password for an employee.
-     */
-    public function manualSetPassword(Request $request, Employee $employee)
-    {
-        $request->validate([
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $employee->password = Hash::make($request->password);
-        $employee->save();
-
-        return back()->with('success', "Password manually set for {$employee->FirstName} {$employee->LastName}.");
     }
 }

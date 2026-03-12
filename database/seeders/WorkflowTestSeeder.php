@@ -27,63 +27,63 @@ class WorkflowTestSeeder extends Seeder
         $department = Department::first() ?? Department::create(['DepartmentID' => 1, 'DepartmentName' => 'Administration']);
         $position = Position::first() ?? Position::create(['PositionID' => 1, 'PositionName' => 'Staff', 'GradeID' => $grade->GradeID, 'DepartmentID' => $department->DepartmentID]);
 
-        $password = Hash::make('password123');
+        $password = Hash::make('Airtel@2063');
 
         // 2. Create Test Admin
         Employee::updateOrCreate(
-        ['email' => 'admin@test.com'],
-        [
-            'EmployeeNumber' => 'WF-ADMIN-001',
-            'FirstName' => 'Workflow',
-            'LastName' => 'Admin',
-            'Gender' => 'Other',
-            'DateOfBirth' => '1980-01-01',
-            'DepartmentID' => $department->DepartmentID,
-            'GradeID' => $grade->GradeID,
-            'PositionID' => $position->PositionID,
-            'SupervisorID' => null,
-            'role_id' => $roleAdmin->id,
-            'password' => $password,
-            'RemainingAnnualLeaveDays' => 30,
-        ]
+            ['email' => 'admin@test.com'],
+            [
+                'EmployeeNumber' => 'WF-ADMIN-001',
+                'FirstName' => 'Workflow',
+                'LastName' => 'Admin',
+                'Gender' => 'Other',
+                'DateOfBirth' => '1980-01-01',
+                'DepartmentID' => $department->DepartmentID,
+                'GradeID' => $grade->GradeID,
+                'PositionID' => $position->PositionID,
+                'SupervisorID' => null,
+                'role_id' => $roleAdmin->id,
+                'password' => $password,
+                'RemainingAnnualLeaveDays' => 30,
+            ]
         );
 
         // 3. Create Test Supervisor
         $supervisor = Employee::updateOrCreate(
-        ['email' => 'supervisor@test.com'],
-        [
-            'EmployeeNumber' => 'WF-SUP-001',
-            'FirstName' => 'Workflow',
-            'LastName' => 'Supervisor',
-            'Gender' => 'Other',
-            'DateOfBirth' => '1985-05-05',
-            'DepartmentID' => $department->DepartmentID,
-            'GradeID' => $grade->GradeID,
-            'PositionID' => $position->PositionID,
-            'SupervisorID' => 'WF-ADMIN-001',
-            'role_id' => $roleSupervisor->id,
-            'password' => $password,
-            'RemainingAnnualLeaveDays' => 30,
-        ]
+            ['email' => 'supervisor@test.com'],
+            [
+                'EmployeeNumber' => 'WF-SUP-001',
+                'FirstName' => 'Workflow',
+                'LastName' => 'Supervisor',
+                'Gender' => 'Other',
+                'DateOfBirth' => '1985-05-05',
+                'DepartmentID' => $department->DepartmentID,
+                'GradeID' => $grade->GradeID,
+                'PositionID' => $position->PositionID,
+                'SupervisorID' => 'WF-ADMIN-001',
+                'role_id' => $roleSupervisor->id,
+                'password' => $password,
+                'RemainingAnnualLeaveDays' => 30,
+            ]
         );
 
         // 4. Create Test Employee (Supervised by Test Supervisor)
         Employee::updateOrCreate(
-        ['email' => 'employee@test.com'],
-        [
-            'EmployeeNumber' => 'WF-EMP-001',
-            'FirstName' => 'Workflow',
-            'LastName' => 'Employee',
-            'Gender' => 'Other',
-            'DateOfBirth' => '1990-10-10',
-            'DepartmentID' => $department->DepartmentID,
-            'GradeID' => $grade->GradeID,
-            'PositionID' => $position->PositionID,
-            'SupervisorID' => $supervisor->EmployeeNumber,
-            'role_id' => $roleEmployee->id,
-            'password' => $password,
-            'RemainingAnnualLeaveDays' => 30,
-        ]
+            ['email' => 'employee@test.com'],
+            [
+                'EmployeeNumber' => 'WF-EMP-001',
+                'FirstName' => 'Workflow',
+                'LastName' => 'Employee',
+                'Gender' => 'Other',
+                'DateOfBirth' => '1990-10-10',
+                'DepartmentID' => $department->DepartmentID,
+                'GradeID' => $grade->GradeID,
+                'PositionID' => $position->PositionID,
+                'SupervisorID' => $supervisor->EmployeeNumber,
+                'role_id' => $roleEmployee->id,
+                'password' => $password,
+                'RemainingAnnualLeaveDays' => 30,
+            ]
         );
 
         $this->command->info('Workflow test users seeded successfully!');

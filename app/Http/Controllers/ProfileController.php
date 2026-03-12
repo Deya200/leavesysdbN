@@ -30,15 +30,24 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'profile_photo' => 'image|mimes:jpeg,png,jpg,gif|max:5120', // Allows images up to 5MB
-        ]);
-
         $user = auth()->user();
-        $user->name = $request->name;
-        $user->email = $request->email;
+        $isAdmin = $user->role_id === 1;
+
+        $rules = [
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        ];
+
+        if ($isAdmin) {
+            $rules['name'] = 'required|string|max:255';
+            $rules['email'] = 'required|email|max:255';
+        }
+
+        $request->validate($rules);
+
+        if ($isAdmin) {
+            $user->name = $request->name;
+            $user->email = $request->email;
+        }
 
         
         // Handle Profile Photo Upload
@@ -62,6 +71,6 @@ class ProfileController extends Controller
         $user->save();
         
 
-        return redirect()->route('profile')->with('success', 'Profile updated successfully.');
+        return redirect()->back()->with('success', 'Profile updated successfully.');
     }
 }

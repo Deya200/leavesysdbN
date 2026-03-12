@@ -29,9 +29,9 @@
         <tbody>
             @foreach($leaveRequests as $request)
             <tr>
-                <td>{{ $request->employee->FirstName }} {{ $request->employee->LastName }}</td>
+                <td>{{ optional($request->employee)->FirstName }} {{ optional($request->employee)->LastName }}</td>
 
-                <td>{{ $request->employee->department->DepartmentName ?? 'N/A' }}</td>
+                <td>{{ optional($request->employee->department)->DepartmentName ?? 'N/A' }}</td>
                 <td>{{ $request->leaveType->LeaveTypeName }}</td>
                 <td>{{ $request->Reason }}</td>
                 <td>{{ $request->RequestStatus }}</td>

@@ -3,130 +3,155 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Employee;
+use App\Models\Department;
+use App\Models\Grade;
+use App\Models\Position;
+use App\Models\Role;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use App\Models\Role;
 
 class UserController extends Controller
 {
-    // /
-    //  * Display a listing of users.
-    //  *
-    //  * @return \Illuminate\View\View
-    //  */
+    /**
+     * Display a listing of users (employees with login access).
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
-        $users = User::with('employee')->orderBy('created_at', 'desc')->get();
+        // Show all employees as potential users
+        $users = Employee::with(['department', 'grade', 'position', 'role'])->orderBy('FirstName', 'asc')->get();
         return view('user_management', compact('users'));
     }
     
-    // /
-    //  * Show the form for creating a new user.
-    //  *
-    //  * @return \Illuminate\View\View
-    //  */
+    /**
+     * Show the form for creating a new user.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create()
     {
-        return view('user.create');
+        $departments = Department::all();
+        $grades = Grade::all();
+        $positions = Position::all();
+        $roles = Role::all();
+        
+        return view('user.create', compact('departments', 'grades', 'positions', 'roles'));
     }
 
-    // /
-    //  * Store a newly created user in the database.
-    //  *
-    //  * @param \Illuminate\Http\Request $request
-    //  * @return \Illuminate\Http\RedirectResponse
-    //  */
+    /**
+     * Store a newly created user (employee) in the database.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'EmployeeNumber' => 'required|string|unique:employees,EmployeeNumber',
+            'FirstName' => 'required|string|max:100',
+            'LastName' => 'required|string|max:100',
+            'email' => 'required|email|unique:employees,email',
+            'Gender' => 'required|in:Male,Female,Other',
+            'DateOfBirth' => 'required|date',
+            'DepartmentID' => 'required|exists:departments,DepartmentID',
+            'GradeID' => 'required|exists:grades,GradeID',
+            'PositionID' => 'required|exists:positions,PositionID',
             'role_id' => 'required|exists:roles,id',
-            'EmployeeNumber' => 'nullable|string|unique:users,EmployeeNumber',
         ]);
 
-        // Generate a random password for new users
-        $password = Str::random(12);
-        $validatedData['password'] = bcrypt($password);
-        $validatedData['is_active'] = true;
+        // Generate a temporary password
+        $tempPassword = Str::random(12);
+        $validatedData['password'] = bcrypt($tempPassword);
 
-        $user = User::create($validatedData);
+        // Create the employee record
+        $employee = Employee::create($validatedData);
 
-        // Send invitation link
+        // Send password reset invitation
         try {
-            // Since Employee is the auth model, and User shares EmployeeNumber,
-            // we should send the notification to the Employee model if possible,
-            // or just use the Password broker which is configured for Employee.
-            $token = \Illuminate\Support\Facades\Password::getRepository()->create($user);
-            $user->sendPasswordResetNotification($token);
+            $token = Password::getRepository()->create($employee);
+            $employee->sendPasswordResetNotification($token);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Failed to send invitation to new user: " . $e->getMessage());
         }
 
-        session()->flash('success', 'User has been successfully added! An invitation has been sent to their email.');
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success', 'User has been successfully added! An invitation has been sent to their email.');
     }
 
-    // /
-    //  * Show the form for editing an existing user.
-    //  *
-    //  * @param int $id
-    //  * @return \Illuminate\View\View
-    //  */
+    /**
+     * Show the form for editing an existing user.
+     *
+     * @param string $id
+     * @return \Illuminate\View\View
+     */
     public function edit($id)
     {
-        $user = User::findOrFail($id);
-        return view('user.edit', compact('user'));
+        $user = Employee::findOrFail($id);
+        $departments = Department::all();
+        $grades = Grade::all();
+        $positions = Position::all();
+        $roles = Role::all();
+        
+        return view('user.edit', compact('user', 'departments', 'grades', 'positions', 'roles'));
     }
 
+    /**
+     * Toggle user active status.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function toggleStatus($id)
-{
-    $user = User::findOrFail($id);
-    $user->update([
-        'is_active' => !$user->is_active, // Toggle status
-    ]);
+    {
+        // Note: This would require an is_active column in the employees table
+        // For now, we'll just return a message
+        return redirect()->route('users.index')->with('info', 'Status toggle not yet implemented for employees.');
+    }
 
-    return redirect()->route('users.index')->with('success', 'User status updated.');
-}
-
-
-    // /
-    //  * Update a user's information in the database.
-    //  *
-    //  * @param \Illuminate\Http\Request $request
-    //  * @param int $id
-    //  * @return \Illuminate\Http\RedirectResponse
-    //  */
+    /**
+     * Update a user's (employee's) information in the database.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, $id)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $id . ',EmployeeNumber',
-        'role_id' => 'required|exists:roles,id',
-        'is_active' => 'required|boolean',
-    ]);
+    {
+        $employee = Employee::findOrFail($id);
 
-    $user = User::findOrFail($id);
-    $user->update($request->only('name', 'email', 'role_id', 'is_active'));
+        $validatedData = $request->validate([
+            'FirstName' => 'required|string|max:100',
+            'LastName' => 'required|string|max:100',
+            'email' => 'required|email|unique:employees,email,' . $id . ',EmployeeNumber',
+            'Gender' => 'required|in:Male,Female,Other',
+            'DateOfBirth' => 'required|date',
+            'DepartmentID' => 'required|exists:departments,DepartmentID',
+            'GradeID' => 'required|exists:grades,GradeID',
+            'PositionID' => 'required|exists:positions,PositionID',
+            'role_id' => 'required|exists:roles,id',
+        ]);
 
-    return redirect()->route('users.index')->with('success', 'User updated successfully.');
-}
+        $employee->update($validatedData);
 
-    
-    // /
-    //  * Remove a user from the database.
-    //  *
-    //  * @param int $id
-    //  * @return \Illuminate\Http\RedirectResponse
-    //  */
+        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+    }
+
+    /**
+     * Remove a user (employee) from the database.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        $employee = Employee::findOrFail($id);
+        $firstName = $employee->FirstName;
+        $lastName = $employee->LastName;
+        
+        $employee->delete();
 
-        session()->flash('success', 'User ' . $user->name . ' has been successfully deleted!');
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success', "User {$firstName} {$lastName} has been successfully deleted!");
     }
 }

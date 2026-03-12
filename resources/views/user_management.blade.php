@@ -2,12 +2,6 @@
 
 @section('title', 'User Management')
 
-@section('content')
-@php
-    // Fetch all users with their employee details
-    $users = \App\Models\User::with('employee')->orderBy('created_at', 'desc')->get();
-@endphp
-
 @section('styles')
 <style>
     .manage-container {
@@ -52,10 +46,6 @@
 @endsection
 
 @section('content')
-@php
-    $users = \App\Models\User::with('employee')->orderBy('created_at', 'desc')->get();
-@endphp
-
 <div class="manage-container py-4">
     <!-- Header Card -->
     <div class="card-custom mb-4">
@@ -74,30 +64,57 @@
                 <table class="table table-bordered align-middle">
                     <thead>
                         <tr>
+                            <th>Employee Number</th>
                             <th>Full Name</th>
-                            <th>Role</th>
                             <th>Email</th>
-                            <th>Employee No.</th>
-                            <th>Joined</th>
-                            <th>Status</th>
+                            <th>Department</th>
+                            <th>Position</th>
+                            <th>Role</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($users as $user)
+                        @foreach ($users as $employee)
                             <tr class="hover-up">
-                                <td class="fw-bold">{{ $user->name }}</td>
+                                <td><code class="text-primary">{{ $employee->EmployeeNumber }}</code></td>
+                                <td class="fw-bold">{{ $employee->FirstName }} {{ $employee->LastName }}</td>
+                                <td>{{ $employee->email }}</td>
+                                <td>{{ $employee->department->DepartmentName ?? 'N/A' }}</td>
+                                <td>{{ $employee->position->PositionName ?? 'N/A' }}</td>
                                 <td>
                                     <span class="badge bg-light text-dark border">
-                                        {{ ucfirst($user->role->name ?? 'N/A') }}
+                                        {{ ucfirst($employee->role->name ?? 'N/A') }}
                                     </span>
                                 </td>
-                                <td>{{ $user->email }}</td>
-                                <td><code class="text-primary">{{ $user->EmployeeNumber ?? 'N/A' }}</code></td>
-                                <td>{{ $user->created_at->format('M d, Y') }}</td>
                                 <td>
-                                    <span class="badge {{ $user->is_active ? 'bg-success' : 'bg-danger' }}">
-                                        {{ $user->is_active ? 'Active' : 'Disabled' }}
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a href="{{ route('users.edit', $employee->EmployeeNumber) }}" 
+                                           class="btn btn-sm btn-warning text-white" 
+                                           title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('users.destroy', $employee->EmployeeNumber) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure?')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="alert alert-info text-center m-0">
+                No users found. Use the "Add New User" button to create one.
+            </div>
+        @endif
+    </div>
+</div>
+@endsection
                                     </span>
                                 </td>
                                 <td>

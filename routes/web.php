@@ -17,7 +17,8 @@ SupervisorController,
 AdminController,
 LeaveAppealController,
 LeaveExtensionController,
-LeaveCancellationController
+LeaveCancellationController,
+ReportController
 };
 
 //Route::fallback(function () {
@@ -87,7 +88,6 @@ s', [LeaveRequestController::class , 'index'])->name('leave_requests');
                     Route::get('/', [EmployeeController::class , 'index'])->name('manage.employees');
                     Route::post('/{employee}/assign-supervisor', [EmployeeController::class , 'assignSupervisor'])->name('employees.assignSupervisor');
                     Route::post('/{employee}/send-invitation', [EmployeeController::class , 'sendInvitation'])->name('employees.sendInvitation');
-                    Route::post('/{employee}/manual-set-password', [EmployeeController::class , 'manualSetPassword'])->name('employees.manualSetPassword');
                     Route::post('/bulk-send-invitations', [EmployeeController::class , 'bulkSendInvitations'])->name('employees.bulkSendInvitations');
                 }
                 );
@@ -118,6 +118,7 @@ s', [LeaveRequestController::class , 'index'])->name('leave_requests');
             Route::get('/dashboards/employee', [LeaveRequestController::class , 'employeeDashboard'])->name('dashboards.employee');
         });
 
+Route::middleware(['auth'])->group(function () {
 // Supervisor Routes
 Route::get('/supervisors', [SupervisorController::class , 'index'])->name('supervisor.index');
 
@@ -160,6 +161,7 @@ Route::get('/users/{user}/delete', [UserController::class , 'destroy'])->name('u
 
 //Leave routes
 Route::get('/leave-requests', [LeaveRequestController::class , 'index'])->name('leave_requests.index');
+Route::get('/leave-requests/employee/history', [LeaveRequestController::class , 'employeeFullHistory'])->name('leave_requests.employee_history');
 Route::get('/leave-requests/create', [LeaveRequestController::class , 'create'])->name('leave_requests.create');
 Route::post('/leave-requests/store', [LeaveRequestController::class , 'store'])->name('leave_requests.store');
 
@@ -178,6 +180,14 @@ Route::get('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::cl
 Route::get('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class , 'reject'])->name('leave_requests.reject');
 Route::post('/leave-requests/{leaveRequest}/supervisor-approve', [LeaveRequestController::class , 'supervisorApprove'])->name('leave_requests.supervisor.approve');
 Route::post('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestController::class , 'supervisorReject'])->name('leave_requests.supervisor.reject');
+
+// Leave Request Archive (Admin Only)
+Route::post('/leave-requests/{leaveRequest}/archive', [LeaveRequestController::class , 'archive'])->name('leave_requests.archive');
+Route::post('/leave-requests/{leaveRequest}/restore', [LeaveRequestController::class , 'restore'])->name('leave_requests.restore');
+Route::get('/admin/archive-leaves', [LeaveRequestController::class , 'showArchiveManager'])->name('leave_requests.archive_manager');
+Route::get('/admin/view-archived-leaves', [LeaveRequestController::class , 'viewArchived'])->name('leave_requests.view_archived');
+Route::get('/admin/all-requests', [LeaveRequestController::class , 'adminAllRequests'])->name('leave_requests.admin_all');
+Route::post('/admin/archive-leaves/bulk', [LeaveRequestController::class , 'bulkArchive'])->name('leave_requests.bulk_archive');
 
 // Leave Appeals
 Route::post('/leave-requests/{leaveRequest}/appeal', [LeaveRequestController::class , 'appeal'])->name('leave_requests.appeal');
@@ -228,7 +238,7 @@ Route::delete('/leave-types/{leaveType}', [LeaveTypeController::class , 'destroy
 
 Route::get('/leave-requests/{leaveRequest}/edit', [LeaveRequestController::class , 'edit'])->name('leave_requests.edit');
 
-
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class , 'index'])->name('profile');
@@ -252,7 +262,6 @@ Route::get('/employee-gender/{employeeNumber}', [EmployeeController::class , 'ge
 
 //Modifications
 Route::get('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestController::class , 'showAdminRejectForm'])->name('leave_requests.admin.reject.form');
-use App\Http\Controllers\ReportController;
 
 Route::get('/leave-report-pdf', [ReportController::class , 'generatePDF'])->name('leave.report.pdf');
 Route::middleware(['auth'])->get('/my-leave-report-pdf', [ReportController::class , 'generateEmployeePDF'])->name('leave.report.employee.pdf');

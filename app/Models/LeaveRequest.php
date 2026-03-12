@@ -37,6 +37,8 @@ class LeaveRequest extends Model
         'appeal_deadline',
         'is_active',
         'is_cancelled',
+        'is_archived',
+        'archived_at',
         'carried_over_days',
         'financial_year',
     ];
@@ -51,6 +53,8 @@ class LeaveRequest extends Model
         'appeal_deadline' => 'datetime',
         'is_active' => 'boolean',
         'is_cancelled' => 'boolean',
+        'is_archived' => 'boolean',
+        'archived_at' => 'datetime',
         'StartDate' => 'date',
         'EndDate' => 'date',
     ];

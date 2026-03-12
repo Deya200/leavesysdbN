@@ -28,7 +28,7 @@ class LoginController extends Controller
             'admin' => route('dashboard'),
             'supervisor' => route('supervisor.index'),
             'employee' => route('dashboards.employee'),
-           // default => route('employee.dashboard'),
+        // default => route('employee.dashboard'),
         };
     }
 
@@ -40,12 +40,18 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout'); // Restrict login page to guests only
     }
 
+
+
     /**
-     * Get the login credentials from the request.
+     * Get the login username to be used by the controller.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return string
      */
+    public function username()
+    {
+        return 'EmployeeNumber'; // Use EmployeeNumber instead of email
+    }
+
     /**
      * Get the login credentials from the request.
      *
@@ -71,6 +77,57 @@ class LoginController extends Controller
     }
 
     /**
+     * Handle a login request to the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function login(Request $request)
+    {
+        $this->validateLogin($request);
+
+        // If the class is using the ThrottlesLogins trait, we can automatically throttle
+        // the login attempts for this application. We'll key this by the username and
+        // the IP address of the client making these requests into this application.
+        if (
+            method_exists($this, 'hasTooManyLoginAttempts') &&
+            $this->hasTooManyLoginAttempts($request)
+        ) {
+            $this->fireLockoutEvent($request);
+
+            return $this->sendLockoutResponse($request);
+        }
+
+        try {
+            if ($this->attemptLogin($request)) {
+                if ($request->hasSession()) {
+                    $request->session()->put('auth.password_confirmed_at', time());
+                }
+
+                return $this->sendLoginResponse($request);
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Log the error for internal debugging
+            \Illuminate\Support\Facades\Log::error('Login Connection Error: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput($request->only($this->username(), 'remember'))
+                ->withErrors([
+                    $this->username() => 'Unable to connect to the login service. Please try again later.',
+                ]);
+        }
+
+        // If the login attempt was unsuccessful we will increment the number of attempts
+        // to login and redirect the user back to the login form. Of course, when this
+        // user surpasses their maximum number of attempts they will get locked out.
+        $this->incrementLoginAttempts($request);
+
+        return $this->sendFailedLoginResponse($request);
+    }
+
+    /**
      * Validate the login request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -79,7 +136,7 @@ class LoginController extends Controller
     protected function validateLogin(Request $request)
     {
         $request->validate([
-            'EmployeeNumber' => 'required|string|exists:employees,EmployeeNumber',
+            'EmployeeNumber' => 'required|string',
             'password' => 'required|string|min:6',
         ]);
     }
@@ -117,8 +174,12 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Forcibly clear the session cookie from the browser
+        $cookie = \Illuminate\Support\Facades\Cookie::forget(config('session.cookie'));
+
         return redirect()->route('login')
             ->with('success', 'You have been logged out successfully.')
+            ->withCookie($cookie)
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');

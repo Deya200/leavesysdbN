@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\PasswordResetNotification;
 
 class Employee extends Authenticatable
 {
@@ -23,8 +25,19 @@ class Employee extends Authenticatable
         return 'EmployeeNumber';
     }
 
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName()
+    {
+        return 'EmployeeNumber';
+    }
+
     protected $fillable = [
         'EmployeeNumber',
+        'national_id',
         'FirstName',
         'LastName',
         'DateOfBirth',
@@ -50,6 +63,7 @@ class Employee extends Authenticatable
 
     protected $casts = [
         'EmployeeNumber' => 'string',
+        'national_id' => 'string',
         'SupervisorID' => 'string',
         'RemainingAnnualLeaveDays' => 'integer', // Cast to integer
         'email_notifications_enabled' => 'boolean',
@@ -151,8 +165,18 @@ class Employee extends Authenticatable
     }
 
     /**
+     * Relationship: Tasks assigned to the employee
+     * @return HasMany
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'EmployeeNumber', 'EmployeeNumber');
+    }
+
+    /**
      * Get the Employee's computed leave days remaining.
      * (This is a computed accessor if you want to show the theoretical remaining days based on the grade.)
+     * Excludes archived leave requests from the calculation.
      * @return int
      */
     public function getLeaveDaysRemainingAttribute(): int
@@ -160,12 +184,13 @@ class Employee extends Authenticatable
         $totalLeaveDays = optional($this->grade)->AnnualLeaveDays ?? 0;
         $usedLeaveDays = $this->leaveRequests()
             ->where('RequestStatus', 'Approved')
+            ->where('is_archived', false)
             ->whereHas('leaveType', fn($q) => $q->where('LeaveTypeName', 'Annual Leave'))
             ->sum('TotalDays');
 
         // Include carried over days from previous year
         $totalAvailable = $totalLeaveDays + ($this->carried_over_leave_days ?? 0);
-        
+
         return max(0, $totalAvailable - $usedLeaveDays);
     }
 
@@ -197,7 +222,7 @@ class Employee extends Authenticatable
     {
         return $this->hasRole('Admin'); // Uses Spatie's role-checking method
     }
-    
+
     /**
      * Ensure that the employee has at least one role.
      * If no role is assigned, assign the default 'Employee' role.
@@ -210,7 +235,7 @@ class Employee extends Authenticatable
             $this->assignRole('Employee');
         }
     }
-    
+
     /**
      * Accessor to get a comma-separated list of roles assigned to the employee.
      *
@@ -221,7 +246,7 @@ class Employee extends Authenticatable
         return $this->roles->pluck('name')->implode(', ');
     }
 
-        public function role(): BelongsTo
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
@@ -233,9 +258,24 @@ class Employee extends Authenticatable
     }
 
     // ✅ Check if employee is admin
-   // public function isAdmin(): bool
+    // public function isAdmin(): bool
     //{
     //    return $this->hasRole('admin');
     //}
+
+    /**
+     * Send password reset notification to employee.
+     * @param string $token
+     * @param Employee|null $admin
+     * @return void
+     */
+    public function sendPasswordResetNotification($token, $admin = null)
+    {
+        // Use custom notification with admin info
+        if ($admin === null) {
+            $admin = auth()->user(); // Get current authenticated user (admin)
+        }
+        $this->notify(new PasswordResetNotification($token, $admin));
+    }
 
 }

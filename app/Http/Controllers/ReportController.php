@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use App\Models\LeaveRequest;
 
 class ReportController extends Controller
@@ -14,7 +15,7 @@ class ReportController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $pdf = Pdf::loadView('reports.leave_pdf', compact('leaveRequests'));
+        $pdf = PDF::loadView('reports.leave_pdf', compact('leaveRequests'));
         return $pdf->download('leave_report.pdf');
     }
 
@@ -27,7 +28,7 @@ class ReportController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $pdf = Pdf::loadView('reports.leave_pdf', compact('leaveRequests'));
+        $pdf = PDF::loadView('reports.leave_pdf', compact('leaveRequests'));
         return $pdf->download('my_leave_report_' . $employee->EmployeeNumber . '.pdf');
     }
 }

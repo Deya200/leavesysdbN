@@ -16,7 +16,6 @@ class LeaveType extends Model
 
     // Mass assignable fields
     protected $fillable = [
-        'LeaveTypeID',
         'LeaveTypeName',
         'IsPaidLeave',
         'GenderApplicable',

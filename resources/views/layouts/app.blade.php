@@ -9,9 +9,8 @@
   <link rel="icon" type="image/png" href="{{ asset('logo3.png') }}">
 
   <!-- Fonts & Styles -->
-  @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-
-  <link rel="stylesheet" href="{{ asset('fontawesome-free-6.7.2-web/css/all.min.css') }}">
+ @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+ 
   <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
   <link rel="stylesheet" href="{{ asset('css/header.css') }}">
   <link rel="stylesheet" href="{{ asset('css/darkmode.css') }}">
@@ -19,6 +18,7 @@
   <!-- Custom Styles -->
   <style>
     :root {
+<<<<<<< HEAD
       --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
       --color-bg: #f9fafb;
       --color-surface: #ffffff;
@@ -56,9 +56,27 @@
       --glass-bg: rgba(255, 255, 255, 0.9);
       --glass-border: rgba(255, 255, 255, 0.5);
       --glass-blur: blur(12px);
-    }
+=======
+      --font-primary: 'Inter', sans-serif;
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-primary: #4f46e5;
+      --color-primary-dark: #3730a3;
+      --color-secondary: #64748b;
+      --color-text-main: #0f172a;
+      --color-text-muted: #64748b;
+      --sidebar-width: 280px;
+      --header-height: 70px;
 
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+>>>>>>> f5f5d8d51819440a33e09306187146bcf25c4f5d
+    }
 
     body {
       font-family: var(--font-primary);
@@ -68,13 +86,52 @@
       overflow-x: hidden;
     }
 
+<<<<<<< HEAD
     /* Global Transition */
     .transition-all {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+=======
+    /* Layout Logic */
+    .wrapper {
+      display: flex;
+      width: 100%;
+      min-height: calc(100vh - var(--header-height));
+>>>>>>> f5f5d8d51819440a33e09306187146bcf25c4f5d
     }
 
-    .cursor-pointer {
-        cursor: pointer;
+    @media (min-width: 992px) {
+      #mainSidebar {
+        width: var(--sidebar-width) !important;
+        height: calc(100vh - var(--header-height)) !important;
+        position: fixed !important;
+        top: var(--header-height) !important;
+        left: 0 !important;
+        z-index: 1000 !important;
+        transform: none !important;
+        visibility: visible !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        background: #1e293b;
+        /* Dark sidebar */
+      }
+
+      main {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        padding: 2.5rem !important;
+        min-height: calc(100vh - var(--header-height));
+      }
+
+      .offcanvas-backdrop {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 991.98px) {
+      main {
+        margin-left: 0;
+        width: 100%;
+        padding: 1.5rem;
+      }
     }
 
     /* Modern Card Styles */
@@ -89,12 +146,16 @@
 
     .card:hover {
       box-shadow: var(--shadow-md);
+<<<<<<< HEAD
     }
 
     .card-glass {
       background: var(--glass-bg);
       backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
+=======
+      transform: translateY(-4px);
+>>>>>>> f5f5d8d51819440a33e09306187146bcf25c4f5d
     }
 
     .card-header {
@@ -114,6 +175,7 @@
     }
 
     .btn-primary {
+<<<<<<< HEAD
       background-color: var(--color-primary);
       border-color: var(--color-primary);
       box-shadow: var(--shadow-indigo);
@@ -420,16 +482,24 @@
     }
 
     .hover-up:hover {
+=======
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      border: none;
+      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-primary:hover {
+>>>>>>> f5f5d8d51819440a33e09306187146bcf25c4f5d
       transform: translateY(-2px);
-      background-color: var(--color-slate-50);
+      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
     }
 
-    .transition-all {
-      transition: all 0.2s ease;
-    }
 
-    .cursor-pointer {
-      cursor: pointer;
+    /* Beautification - Alerts */
+    .alert {
+      border: none;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
     }
   </style>
 
@@ -437,40 +507,40 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+  @include('layouts.header')
 
-  <div class="wrapper d-flex">
+  <div class="wrapper">
     @include('layouts.sidebar')
 
-    <div class="main-container flex-grow-1 d-flex flex-column">
-      @include('layouts.header')
-
-      <main class="flex-grow-1">
-        @if (session('success'))
-          <div class="alert alert-success alert-dismissible fade show mb-4 d-flex align-items-center" role="alert">
-            <i class="fas fa-check-circle me-3 fs-5"></i>
-            <div>{{ session('success') }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        @endif
-
-        @if (session('error'))
-          <div class="alert alert-danger alert-dismissible fade show mb-4 d-flex align-items-center" role="alert">
-            <i class="fas fa-exclamation-circle me-3 fs-5"></i>
-            <div>{{ session('error') }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        @endif
-
-        @yield('content')
-      </main>
-
-      <footer class="text-center mt-auto bg-white border-top d-flex align-items-center justify-content-center" style="height: var(--footer-height); min-height: var(--footer-height);">
-        <div class="container">
-          <p class="mb-0 text-muted small text-center">&copy; {{ date('Y') }} ABC leave Management system. All rights reserved.</p>
+    <main class="flex-grow-1">
+      @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-4 d-flex align-items-center" role="alert">
+          <i class="fas fa-check-circle me-3 fs-5"></i>
+          <div>{{ session('success') }}</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-      </footer>
-    </div>
+      @endif
+
+      @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-4 d-flex align-items-center" role="alert">
+          <i class="fas fa-exclamation-circle me-3 fs-5"></i>
+          <div>{{ session('error') }}</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      @endif
+
+      @yield('content')
+    </main>
   </div>
+
+  <footer class="text-center mt-auto py-3 bg-white border-top">
+    <div class="container">
+      <p class="mb-0 text-muted small">&copy; {{ date('Y') }} Leave Management System. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <!-- Scripts are handled via @vite in the head -->
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -507,83 +577,42 @@
     });
   </script>
 
-  <style>
-    /* Final Layout Source of Truth */
-    .wrapper {
-      display: flex;
-      width: 100%;
-      min-height: 100vh;
-    }
-
-    .main-container {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    main {
-      flex: 1;
-      padding: 0.75rem !important;
-    }
-
-    @media (min-width: 992px) {
-      #mainSidebar {
-        width: var(--sidebar-width) !important;
-        height: 100vh !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        z-index: 1050 !important;
-        visibility: visible !important;
-        transform: none !important;
-        border-right: 1px solid var(--color-slate-200);
-      }
-
-      .main-container {
-        margin-left: var(--sidebar-width);
-      }
-
-      header {
-        position: sticky;
-        top: 0;
-        z-index: 1040;
-        background: white !important;
-        border-bottom: 1px solid var(--color-slate-200) !important;
-      }
-
-      .offcanvas-backdrop {
-        display: none !important;
-      }
-    }
-
-    @media (max-width: 991.98px) {
-      .main-container {
-        margin-left: 0;
-        width: 100%;
-      }
-      
-      main {
-        padding: 1rem !important;
-      }
-
-      #mainSidebar {
-        z-index: 1060 !important;
-      }
-    }
-  </style>
-
-  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-    @csrf
-  </form>
-
   <script>
-    function confirmLogout() {
-      if (confirm('Are you sure you want to log out?')) {
-        document.getElementById('logout-form').submit();
+    // When offcanvas (sidebar) opens on medium+ screens, push main content
+    document.addEventListener('DOMContentLoaded', function () {
+      var sidebarEl = document.getElementById('mainSidebar');
+      var mainEl = document.querySelector('main');
+      if (!sidebarEl || !mainEl) return;
+
+      function applySidebarPush() {
+        var sidebarWidth = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') || '280px';
+        sidebarWidth = sidebarWidth.trim();
+        if (window.innerWidth >= 768) {
+          mainEl.style.transition = 'margin-left 200ms ease, width 200ms ease';
+          mainEl.style.marginLeft = sidebarWidth;
+          mainEl.style.width = 'calc(100% - ' + sidebarWidth + ')';
+        }
       }
-    }
+
+      function removeSidebarPush() {
+        mainEl.style.marginLeft = '';
+        mainEl.style.width = '';
+      }
+
+      sidebarEl.addEventListener('show.bs.offcanvas', function () {
+        applySidebarPush();
+      });
+      sidebarEl.addEventListener('hidden.bs.offcanvas', function () {
+        removeSidebarPush();
+      });
+
+      // If user resizes while open/closed, reset
+      window.addEventListener('resize', function () {
+        if (window.innerWidth < 768) {
+          removeSidebarPush();
+        }
+      });
+    });
   </script>
 
   @yield('scripts')

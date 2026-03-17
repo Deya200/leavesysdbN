@@ -734,8 +734,17 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
     </div>
 
+    <!-- Pagination -->
+    @if(method_exists($leaveRequests, 'links'))
+        <div class="mt-4">
+            {{ $leaveRequests->appends(request()->query())->links() }}
+        </div>
+    @endif
+
+    <!-- Modals -->
     <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form id="actionForm" method="POST">
@@ -764,6 +773,7 @@
     <!-- Include View Leave Modal -->
     @include('leave_requests._view_modal')
 </div>
+@endsection
 
 @section('scripts')
 <script>

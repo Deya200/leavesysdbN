@@ -1,3 +1,7 @@
+@extends('layouts.app')
+
+<style>
+    .steps {
         justify-content: center;
         align-items: center;
         margin-bottom: 2rem;
@@ -111,7 +115,6 @@
         }
     }
 </style>
-@endsection
 
 @section('content')
 <div class="container">
@@ -143,7 +146,7 @@
                             <div class="step-label">Submit</div>
                         </div>
                     </div>
-                    <!-- Defensive check to prevent error if not POSTed from form -->
+                    <!-- Defensive check -->
                     @if(isset($leaveType) && isset($data) && isset($totalDays))
                         <div class="review-summary-card">
                             <div class="review-row">
@@ -175,9 +178,6 @@
                                         @if($leaveType->deductsFromAnnual())
                                             {{ $remainingDays }} days
                                         @else
-                                            {{-- Calculate specific remaining for non-annual with limits if needed, 
-                                                 or just show the type-specific limit if we don't have usage data yet. 
-                                                 For now, we'll just show the limit passed or hide if unlimited. --}}
                                             {{ $leaveType->MaxLeaveDays }} days (Limit)
                                         @endif
                                     </div>

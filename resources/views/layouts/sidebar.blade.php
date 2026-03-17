@@ -1,28 +1,21 @@
 <!-- Modern Offcanvas Sidebar -->
-<div class="offcanvas offcanvas-start border-0 shadow-lg" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel" style="width: 280px; top: 60px; height: calc(100vh - 60px); background: #1e1b4b; color: white;" data-bs-scroll="true" data-bs-backdrop="false">
+<div class="offcanvas offcanvas-start border-0 shadow-lg sidebar-main" tabindex="-1" id="mainSidebar" aria-labelledby="mainSidebarLabel" style="width: 280px; top: 0; height: 100vh; border-radius: 0 !important;" data-bs-scroll="true" data-bs-backdrop="false">
     
     <!-- Sidebar Header -->
-<<<<<<< HEAD
-    <div class="offcanvas-header p-0" style="background-color: var(--color-primary) !important;">
-        <div class="p-4 d-flex align-items-center gap-3 w-100 border-bottom border-white border-opacity-10">
-            <div class="bg-white rounded-3 shadow-sm d-flex align-items-center justify-content-center"
-                style="width: 42px; height: 42px; min-width: 42px; overflow: hidden;">
+    <div class="offcanvas-header p-0 sidebar-header-accent">
+        <div class="p-4 d-flex align-items-center gap-3 w-100">
+            <div class="logo-box rounded-3 shadow-sm d-flex align-items-center justify-content-center"
+                style="width: 42px; height: 42px; min-width: 42px; overflow: hidden; background: white;">
                 <img src="{{ asset('logo3.png') }}" alt="ABC Logo"
                     style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
             </div>
             <div class="d-flex flex-column overflow-hidden">
-                <h6 class="text-white fw-bold mb-0 text-nowrap" style="letter-spacing: -0.5px; font-size: 1.1rem;">ABC Leave</h6>
-                <small class="text-white text-opacity-75 text-nowrap" style="font-size: 0.75rem;">Management System</small>
+                <h6 class="fw-bold mb-0 text-nowrap sidebar-branding-text" style="letter-spacing: -0.5px; font-size: 1.1rem;">ABC Leave</h6>
+                <small class="text-nowrap mt-n1 sidebar-subtitle-text" style="font-size: 0.7rem; font-weight: 500;">Management System</small>
             </div>
         </div>
-        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 d-md-none"
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-3 d-md-none shadow-none"
             data-bs-dismiss="offcanvas" aria-label="Close"></button>
-=======
-    <div class="offcanvas-header border-bottom border-light border-opacity-10 py-4 d-flex flex-column align-items-center">
-
-        <h5 class="offcanvas-title mt-2 fw-bold text-white small text-uppercase tracking-wider text-center">ABC Leave Management System</h5>
-        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 d-md-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
->>>>>>> 99b4aaf3f9db029efb59209ba49918a6140f7474
     </div>
 
     <!-- Sidebar Body -->
@@ -31,7 +24,7 @@
             <ul class="nav flex-column px-3 gap-1">
                 
                 <!-- Section Header -->
-                <li class="nav-item px-3 mb-2 small text-uppercase text-white-50 fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Menu</li>
+                <li class="nav-item px-3 mb-2 small text-uppercase fw-bold sidebar-section-title-text" style="font-size: 0.7rem; letter-spacing: 1px;">Menu</li>
 
                 <!-- Main Navigation -->
                 @if(auth()->check() && auth()->user()->role_id === 1)
@@ -124,28 +117,87 @@
             </ul>
         </nav>
         
-        <!-- Footer -->
-        <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-10">
-            <div class="d-flex align-items-center gap-3">
-                 <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px;">
-                    {{ substr(Auth::user()->FirstName ?? 'U', 0, 1) }}
-                 </div>
-                 <div class="d-flex flex-column" style="font-size: 0.8rem; line-height: 1.2;">
-                    <span class="fw-bold text-white">{{ auth()->user()->FirstName ?? 'User' }}</span>
-                    <small class="text-white-50">Log out</small>
-                 </div>
-                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="ms-auto text-white-50 hover-text-white transition-all">
-                    <i class="fas fa-sign-out-alt"></i>
-                 </a>
-            </div>
-        </div>
     </div>
 </div>
 
 <style>
-    /* Sidebar Custom Styles */
+    /* Sidebar Custom Styles - Responsive Theme */
+    .sidebar-main {
+        background: #f1f5f9 !important; /* Soft neutral for light theme */
+        color: #334155 !important;
+        border-right: 1px solid rgba(0,0,0,0.05) !important;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-branding-text {
+        color: #1e293b;
+    }
+
+    .sidebar-subtitle-text {
+        color: #64748b;
+    }
+
+    .sidebar-section-title-text {
+        color: #94a3b8;
+    }
+
+    .sidebar-main .nav-link {
+        color: #475569 !important;
+    }
+
+    .sidebar-main .nav-link:hover {
+        background-color: rgba(61, 81, 159, 0.05) !important;
+        color: #3D519F !important;
+    }
+
+    .sidebar-main .nav-link.bg-primary.bg-opacity-10 {
+        background-color: #3D519F !important;
+        color: white !important;
+    }
+
+    .sidebar-header-accent {
+        background-color: transparent !important;
+    }
+
+    /* Dark Mode Overrides */
+    body.dark-mode .sidebar-main {
+        background: #0f172a !important;
+        color: white !important;
+        border-right: none !important;
+    }
+
+    body.dark-mode .sidebar-branding-text {
+        color: white !important;
+    }
+
+    body.dark-mode .sidebar-subtitle-text {
+        color: rgba(255,255,255,0.7) !important;
+    }
+
+    body.dark-mode .sidebar-section-title-text {
+        color: rgba(255,255,255,0.4) !important;
+    }
+
+    body.dark-mode .sidebar-main .nav-link {
+        color: rgba(255,255,255,0.8) !important;
+    }
+
+    body.dark-mode .sidebar-main .nav-link:hover {
+        background-color: rgba(255,255,255,0.1) !important;
+        color: white !important;
+    }
+
+    body.dark-mode .sidebar-header-accent {
+        background-color: transparent !important;
+        border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    body.dark-mode .logo-box {
+        background-color: white !important;
+    }
+
     .amused-sidebar {
-        background: linear-gradient(180deg, #1f2f63 0%, #1a2551 50%, #151e40 100%) !important;
+        background: #1e1b4b !important;
     }
 
     .sidebar-section-title {

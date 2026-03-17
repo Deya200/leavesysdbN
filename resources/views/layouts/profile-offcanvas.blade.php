@@ -1,4 +1,4 @@
-<div class="offcanvas offcanvas-end border-0 shadow-lg" tabindex="-1" id="profileOffcanvas" aria-labelledby="profileOffcanvasLabel" style="width: 380px;">
+<div class="offcanvas offcanvas-end border-0 shadow-lg" tabindex="-1" id="profileOffcanvas" aria-labelledby="profileOffcanvasLabel" style="width: 380px; z-index: 2000;">
     <!-- Profile Header -->
     <div class="offcanvas-header p-4 d-flex flex-column align-items-center text-center position-relative" style="background: var(--color-primary); min-height: 220px;">
         <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -90,29 +90,19 @@
             </div>
         </div>
 
-        <div class="px-4"> <hr class="my-0 text-slate-100"> </div>
-
-        <!-- Settings Section -->
-        <div class="p-4 bg-slate-50 mt-2">
-            <h6 class="text-slate-400 fw-bold text-uppercase small mb-3 ls-wide" style="font-size: 0.7rem;">Account Settings</h6>
-            
-            <div class="form-check form-switch mb-3">
-                <input class="form-check-input shadow-none" type="checkbox" role="switch" id="emailNotifications" {{ Auth::user()->email_notifications_enabled ? 'checked' : '' }} disabled>
-                <label class="form-check-label small fw-medium text-slate-700" for="emailNotifications">Email Notifications</label>
-            </div>
-            
-            <div class="form-check form-switch">
-                <input class="form-check-input shadow-none" type="checkbox" role="switch" id="systemNotifications" {{ Auth::user()->system_notifications_enabled ? 'checked' : '' }} disabled>
-                <label class="form-check-label small fw-medium text-slate-700" for="systemNotifications">Push Notifications</label>
-            </div>
-        </div>
+        <!-- Form for Photo Upload -->
+        <form id="profilePhotoForm" action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="d-none">
+            @csrf
+            @method('PATCH')
+            <input type="file" name="profile_photo" id="profilePhotoInput" onchange="document.getElementById('profilePhotoForm').submit();">
+        </form>
     </div>
 
     <!-- Footer Action -->
     <div class="offcanvas-footer p-4 border-top">
-        <a href="{{ route('profile.edit') }}" class="btn btn-primary w-100 fw-bold py-2 shadow-sm rounded-3">
-            <i class="fas fa-edit me-2"></i> Edit Account Info
-        </a>
+        <button type="button" onclick="document.getElementById('profilePhotoInput').click();" class="btn btn-primary w-100 fw-bold py-2 shadow-sm rounded-3">
+            <i class="fas fa-camera me-2"></i> Update Profile Picture
+        </button>
     </div>
 </div>
 

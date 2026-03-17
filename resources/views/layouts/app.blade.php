@@ -90,7 +90,6 @@
         transform: none !important;
         visibility: visible !important;
         border-right: 1px solid rgba(0, 0, 0, 0.05);
-        background: #1e293b;
       }
 
       header {

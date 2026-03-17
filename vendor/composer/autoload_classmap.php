@@ -6,9 +6,11 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Console\\Commands\\CarryOverLeaves' => $baseDir . '/app/Console/Commands/CarryOverLeaves.php',
     'App\\Console\\Commands\\ResetPgSequences' => $baseDir . '/app/Console/Commands/ResetPgSequences.php',
     'App\\Console\\Commands\\SendRealInvite' => $baseDir . '/app/Console/Commands/SendRealInvite.php',
     'App\\Http\\Controllers\\AdminController' => $baseDir . '/app/Http/Controllers/AdminController.php',
+    'App\\Http\\Controllers\\Api\\ValidationController' => $baseDir . '/app/Http/Controllers/Api/ValidationController.php',
     'App\\Http\\Controllers\\Auth\\ConfirmPasswordController' => $baseDir . '/app/Http/Controllers/Auth/ConfirmPasswordController.php',
     'App\\Http\\Controllers\\Auth\\ForgotPasswordController' => $baseDir . '/app/Http/Controllers/Auth/ForgotPasswordController.php',
     'App\\Http\\Controllers\\Auth\\LoginController' => $baseDir . '/app/Http/Controllers/Auth/LoginController.php',
@@ -38,6 +40,7 @@ return array(
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
     'App\\Http\\Middleware\\AdminMiddleware' => $baseDir . '/app/Http/Middleware/AdminMiddleware.php',
     'App\\Http\\Middleware\\EmployeeMiddleware' => $baseDir . '/app/Http/Middleware/EmployeeMiddleware.php',
+    'App\\Http\\Middleware\\PreventBackHistory' => $baseDir . '/app/Http/Middleware/PreventBackHistory.php',
     'App\\Http\\Middleware\\RedirectBasedOnRole' => $baseDir . '/app/Http/Middleware/RedirectBasedOnRole.php',
     'App\\Http\\Middleware\\RedirectIfAuthenticated' => $baseDir . '/app/Http/Middleware/RedirectIfAuthenticated.php',
     'App\\Http\\Middleware\\RoleMiddleware' => $baseDir . '/app/Http/Middleware/RoleMiddleware.php',
@@ -188,6 +191,7 @@ return array(
     'Cron\\MinutesField' => $vendorDir . '/dragonmantank/cron-expression/src/Cron/MinutesField.php',
     'Cron\\MonthField' => $vendorDir . '/dragonmantank/cron-expression/src/Cron/MonthField.php',
     'Database\\Factories\\UserFactory' => $baseDir . '/database/factories/UserFactory.php',
+    'Database\\Seeders\\AnalyticsDataSeeder' => $baseDir . '/database/seeders/AnalyticsDataSeeder.php',
     'Database\\Seeders\\AuditLogsSeeder' => $baseDir . '/database/seeders/AuditLogsSeeder.php',
     'Database\\Seeders\\DatabaseSeeder' => $baseDir . '/database/seeders/DatabaseSeeder.php',
     'Database\\Seeders\\DepartmentSeeder' => $baseDir . '/database/seeders/DepartmentSeeder.php',
@@ -203,12 +207,9 @@ return array(
     'Database\\Seeders\\PositionSeeder' => $baseDir . '/database/seeders/PositionSeeder.php',
     'Database\\Seeders\\ProductionDataSeeder' => $baseDir . '/database/seeders/ProductionDataSeeder.php',
     'Database\\Seeders\\RoleSeeder' => $baseDir . '/database/seeders/RoleSeeder.php',
-<<<<<<< HEAD
-=======
     'Database\\Seeders\\TasksSeeder' => $baseDir . '/database/seeders/TasksSeeder.php',
     'Database\\Seeders\\TrainingSeeder' => $baseDir . '/database/seeders/TrainingSeeder.php',
     'Database\\Seeders\\UserSeeder' => $baseDir . '/database/seeders/UserSeeder.php',
->>>>>>> dbb18b2c20d3f27999de42da0021f1e1122b805f
     'Database\\Seeders\\WorkflowTestSeeder' => $baseDir . '/database/seeders/WorkflowTestSeeder.php',
     'DateError' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
     'DateException' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateException.php',

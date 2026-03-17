@@ -4,7 +4,6 @@
 .offcanvas,
 .offcanvas .offcanvas-body,
 .offcanvas .offcanvas-header {
-    background: #3D519F !important;
     color: #fff;
     font-family: system-ui, "Segoe UI", Arial, sans-serif;
 }

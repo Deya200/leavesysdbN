@@ -272,14 +272,13 @@
                             emailFeedback.classList.remove('text-muted');
                             if (data.available) {
                                 emailFeedback.innerText = '✓ Email is available';
-                                emailFeedback.classList.add('text-success');
+                                emailFeedback.className = 'mt-1 small fw-bold text-success';
                                 emailInput.classList.add('is-valid');
                                 emailInput.classList.remove('is-invalid');
                             } else {
-                                emailFeedback.innerText = '✗ Email is already in use';
-                                emailFeedback.classList.add('text-danger');
-                                emailInput.classList.add('is-invalid');
-                                emailInput.classList.remove('is-valid');
+                                emailFeedback.innerText = '⚠ Valid email format (already in use by another record)';
+                                emailFeedback.className = 'mt-1 small fw-bold text-warning';
+                                emailInput.classList.remove('is-invalid', 'is-valid');
                             }
                         })
                         .catch(error => {

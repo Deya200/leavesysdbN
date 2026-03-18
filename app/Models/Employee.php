@@ -56,6 +56,14 @@ class Employee extends Authenticatable
         'last_password_reset_at',
     ];
 
+    /**
+     * Accessor for full name.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->FirstName} {$this->LastName}";
+    }
+
     protected $hidden = [
         'password',
         'remember_token',

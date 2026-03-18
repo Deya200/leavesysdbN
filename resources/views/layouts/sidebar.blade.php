@@ -61,6 +61,22 @@
                             <span style="font-size: 0.875rem;">Leave Requests</span>
                         </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('grades.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('grades.index') }}">
+                            <i class="fas fa-layer-group" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Grade Management</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('positions.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('positions.index') }}">
+                            <i class="fas fa-briefcase" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Position Management</span>
+                        </a>
+                    </li>
                 @endif
 
                 @if(auth()->check() && auth()->user()->role_id === 2)

@@ -709,25 +709,6 @@
                                     </div>
                                 @endif
 
-                                <!-- Admin Archive/Restore Actions -->
-                                @if (auth()->user()->role_id === 1)
-                                    <div class="mt-2 pt-2 border-top">
-                                        @if ($request->is_archived)
-                                            <form action="{{ route('leave_requests.restore', $request->LeaveRequestID) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-warning w-100" onclick="return confirm('Restore this archived request?')">
-                                                    <i class="fas fa-undo me-1"></i> Restore
-                                                </button>
-                                            </form>
-                                        @else
-                                            <form action="{{ route('leave_requests.archive', $request->LeaveRequestID) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-secondary w-100" onclick="return confirm('Archive this request?')">
-                                                    <i class="fas fa-archive me-1"></i> Archive
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
                                 @endif
                             </td>
                         </tr>

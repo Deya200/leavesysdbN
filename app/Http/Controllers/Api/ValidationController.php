@@ -28,7 +28,7 @@ class ValidationController extends Controller
 
         return response()->json([
             'available' => !$exists,
-            'message' => $exists ? 'This email is already in use.' : 'Email is available.'
+            'message' => $exists ? 'This email is valid but already assigned to another individual.' : 'Email is available.'
         ]);
     }
 }

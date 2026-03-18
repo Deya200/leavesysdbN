@@ -34,12 +34,13 @@
                                 @enderror
                             </div>
 
-                            <!-- Email -->
+                             <!-- Email -->
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email Address *</label>
                                 <input type="email" name="email" id="email"
                                     class="form-control @error('email') is-invalid @enderror"
                                     value="{{ old('email', $employee->email) }}" required>
+                                <div id="email-feedback" class="mt-1 small fw-bold"></div>
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

@@ -31,8 +31,8 @@ Route::resource('employees', EmployeeController::class);
 
 // You can define other admin routes here as needed:
 Route::get('/admin/leave-requests', [AdminController::class , 'leaveRequests'])->name('leave_verification');
-Route::post('/admin/leave-requests/{id}/approve', [AdminController::class , 'approveLeave'])->name('leave_requests.admin.approve');
-Route::post('/admin/leave-requests/{id}/reject', [AdminController::class , 'rejectLeave'])->name('leave_requests.admin.reject');
+// Route::post('/admin/leave-requests/{id}/approve', [AdminController::class , 'approveLeave'])->name('leave_requests.admin.approve');
+// Route::post('/admin/leave-requests/{id}/reject', [AdminController::class , 'rejectLeave'])->name('leave_requests.admin.reject');
 
 
 // Public Routes

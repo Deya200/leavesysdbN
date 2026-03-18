@@ -171,7 +171,7 @@
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending
                                 Approvals</small>
-                            <h3 class="fw-bold mb-0">{{ $leaveRequests->count() }}</h3>
+                            <h3 class="fw-bold mb-0">{{ $leaveRequests->where('RequestStatus', 'Pending Admin Verification')->count() }}</h3>
                         </div>
                     </div>
                 </div>
@@ -330,17 +330,18 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="text-center mt-3">
+                <div class="text-center mt-3 pb-3">
                     <a href="{{ route('leave.report.pdf') }}" class="btn btn-outline-secondary shadow-sm btn-sm">
                         📄 Download Leave Report (PDF)
                     </a>
                 </div>
-                    <div class="alert alert-info border-0 rounded-0 text-center m-0 py-4">
-                        <i class="fas fa-check-circle fs-1 text-success mb-3"></i>
-                        <h5>No leave requests pending admin verification.</h5>
-                        <p class="text-muted mb-0">You're all caught up!</p>
-                    </div>
-                @endif
+            @else
+                <div class="alert alert-info border-0 rounded-0 text-center m-0 py-5">
+                    <i class="fas fa-check-circle fs-1 text-success mb-3"></i>
+                    <h5>No leave requests in the queue.</h5>
+                    <p class="text-muted mb-0">All non-archived requests managed!</p>
+                </div>
+            @endif
             </div>
         </div>
     </div>

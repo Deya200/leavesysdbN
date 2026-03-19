@@ -129,7 +129,7 @@ class DashboardController extends Controller
 
     public function admin()
     {
-        $leaveRequests = \App\Models\LeaveRequest::where('is_archived', false)->latest()->get();
+        $leaveRequests = \App\Models\LeaveRequest::where('is_archived', false)->latest()->paginate(15)->withQueryString();
 
         $totalRequests = LeaveRequest::count();
         $totalApproved = LeaveRequest::where('RequestStatus', 'Approved')->count();

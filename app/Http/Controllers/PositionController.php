@@ -12,10 +12,18 @@ class PositionController extends Controller
     /**
      * Display a listing of positions.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $positions = Position::with('grade')->get();
-        return view('positions.index', compact('positions'));
+        $search = $request->input('search');
+        $positions = Position::with('grade')
+            ->when($search, fn($q) => $q
+                ->where('PositionName', 'like', "%{$search}%")
+                ->orWhereHas('grade', fn($q2) => $q2->where('GradeName', 'like', "%{$search}%"))
+            )
+            ->orderBy('PositionName')
+            ->paginate(15)
+            ->withQueryString();
+        return view('positions.index', compact('positions', 'search'));
     }
 
     /**

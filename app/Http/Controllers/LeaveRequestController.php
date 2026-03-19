@@ -134,7 +134,7 @@ class LeaveRequestController extends Controller
         $rejectedCount = (clone $statsQuery)->where('RequestStatus', 'Rejected')->count();
         $pendingCount = (clone $statsQuery)->where('RequestStatus', 'Pending Admin Verification')->count();
 
-        $leaveRequests = $query->orderByDesc('created_at')->paginate(15);
+        $leaveRequests = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
 
         return view('leave_requests.index', [
             'leaveRequests' => $leaveRequests,
@@ -402,7 +402,8 @@ class LeaveRequestController extends Controller
 
         return DB::transaction(function () use ($validated, $leaveRequest) {
             if (strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') !== 0) {
-                return redirect()->back()->with('error', 'Invalid approval stage');
+                $status = $leaveRequest->RequestStatus;
+                return redirect()->back()->with('error', "Cannot approve at this stage. Current status: {$status}. Please wait for supervisor approval if applicable.");
             }
 
             if ($leaveRequest->leaveType->deductsFromAnnual()) {
@@ -444,8 +445,8 @@ class LeaveRequestController extends Controller
         ]);
 
         return DB::transaction(function () use ($validated, $leaveRequest) {
-            if (strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') !== 0) {
-                return redirect()->back()->with('error', 'Invalid rejection stage');
+            if (strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') !== 0 && strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') !== 0) {
+                return redirect()->back()->with('error', 'Invalid rejection stage. Request must be pending review.');
             }
 
             $leaveRequest->update([

@@ -96,7 +96,7 @@
     </div>
 
     <!-- Grades Table -->
-    <div class="card-custom">
+    <div id="grades-table" class="card-custom">
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
                 <thead>
@@ -108,8 +108,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($grades as $index => $grade)
-                        <tr class="{{ $index >= 10 ? 'hidden-row' : '' }}">
+                    @forelse ($grades as $grade)
+                        <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $grade->GradeName }}</td>
                             <td>{{ $grade->AnnualLeaveDays }}</td>
@@ -133,11 +133,10 @@
             </table>
         </div>
 
-        <!-- See More / See Less -->
-        @if ($grades->count() > 10)
-            <div class="text-center mt-3">
-                <button class="btn btn-outline-primary btn-sm" onclick="toggleGradeTable()" id="showMoreBtn">See More</button>
-                <button class="btn btn-outline-secondary btn-sm" onclick="toggleGradeTable()" id="showLessBtn" style="display: none;">See Less</button>
+        {{-- Pagination --}}
+        @if ($grades->hasPages())
+            <div class="mt-4 d-flex justify-content-center">
+                {{ $grades->links() }}
             </div>
         @endif
     </div>
@@ -146,25 +145,16 @@
 
 @section('scripts')
 <script>
-    function toggleGradeTable() {
-        const rows = document.querySelectorAll('.hidden-row');
-        const moreBtn = document.getElementById('showMoreBtn');
-        const lessBtn = document.getElementById('showLessBtn');
-
-        const showing = rows[0] && rows[0].style.display !== 'none';
-
-        rows.forEach(row => {
-            row.style.display = showing ? 'none' : 'table-row';
+    (function () {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('page')) {
+            const section = document.getElementById('grades-table');
+            if (section) setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+        }
+        document.querySelectorAll('.pagination a').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && !href.includes('#')) link.setAttribute('href', href + '#grades-table');
         });
-
-        moreBtn.style.display = showing ? 'inline-block' : 'none';
-        lessBtn.style.display = showing ? 'none' : 'inline-block';
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.hidden-row').forEach(row => {
-            row.style.display = 'none';
-        });
-    });
+    })();
 </script>
 @endsection

@@ -86,7 +86,7 @@
         <a href="{{ route('positions.create') }}" class="btn btn-success">Add New Position</a>
     </div>
 
-    <div class="card-custom">
+    <div id="positions-table" class="card-custom">
         @if ($positions->isNotEmpty())
             <div class="table-responsive">
                 <table class="table table-bordered align-middle">
@@ -100,7 +100,7 @@
                     </thead>
                     <tbody id="positionsTableBody">
                         @foreach ($positions as $position)
-                            <tr class="position-row" @if($loop->index >= 10) style="display: none;" @endif>
+                            <tr class="position-row">
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $position->PositionName }}</td>
                                 <td>{{ $position->grade->GradeName ?? 'N/A' }}</td>
@@ -119,11 +119,14 @@
                     </tbody>
                 </table>
 
-                <div class="text-center mt-3">
-                    <button id="seeMoreBtn" class="btn btn-outline-primary btn-sm">See More</button>
-                    <button id="seeLessBtn" class="btn btn-outline-secondary btn-sm" style="display: none;">See Less</button>
-                </div>
             </div>
+
+            {{-- Pagination --}}
+            @if ($positions->hasPages())
+                <div class="mt-4 d-flex justify-content-center">
+                    {{ $positions->links() }}
+                </div>
+            @endif
         @else
             <div class="alert alert-info text-center m-0">
                 No positions found. Click "Add New Position" above to add one.
@@ -135,30 +138,16 @@
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const rows = document.querySelectorAll('.position-row');
-        const seeMoreBtn = document.getElementById('seeMoreBtn');
-        const seeLessBtn = document.getElementById('seeLessBtn');
-
-        if (seeMoreBtn && seeLessBtn) {
-            rows.forEach((row, index) => {
-                row.style.display = index < 10 ? 'table-row' : 'none';
-            });
-
-            seeMoreBtn.addEventListener('click', () => {
-                rows.forEach(row => row.style.display = 'table-row');
-                seeMoreBtn.style.display = 'none';
-                seeLessBtn.style.display = 'inline-block';
-            });
-
-            seeLessBtn.addEventListener('click', () => {
-                rows.forEach((row, index) => {
-                    row.style.display = index < 10 ? 'table-row' : 'none';
-                });
-                seeMoreBtn.style.display = 'inline-block';
-                seeLessBtn.style.display = 'none';
-            });
+    (function () {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('page')) {
+            const section = document.getElementById('positions-table');
+            if (section) setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
         }
-    });
+        document.querySelectorAll('.pagination a').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && !href.includes('#')) link.setAttribute('href', href + '#positions-table');
+        });
+    })();
 </script>
 @endsection

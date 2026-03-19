@@ -169,9 +169,10 @@
                             <i class="fas fa-clock fs-5"></i>
                         </div>
                         <div>
-                            <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending
-                                Approvals</small>
-                            <h3 class="fw-bold mb-0">{{ $leaveRequests->where('RequestStatus', 'Pending Admin Verification')->count() }}</h3>
+                            <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending Approvals</small>
+                            <h3 class="fw-bold mb-0">
+                                {{ \App\Models\LeaveRequest::whereIn('RequestStatus', ['Pending Admin Verification', 'Pending Supervisor Approval'])->where('is_archived', false)->count() }}
+                            </h3>
                         </div>
                     </div>
                 </div>
@@ -239,7 +240,7 @@
         </div>
 
         <!-- Pending Requests Section -->
-        <div class="card p-0 border-0 shadow-sm mb-4" style="border-radius: 1rem; overflow: hidden;">
+        <div id="requests-section" class="card p-0 border-0 shadow-sm mb-4" style="border-radius: 1rem; overflow: hidden;">
             <div class="card-header bg-white border-bottom py-3">
                 <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-list-alt text-primary me-2"></i> Processing Queue</h5>
             </div>
@@ -275,12 +276,13 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge
-                                                                            @if($request->RequestStatus === 'Approved') bg-success
-                                                                            @elseif($request->RequestStatus === 'Rejected by Admin' || $request->RequestStatus === 'Rejected') bg-danger
-                                                                            @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
-                                                                            @else bg-warning text-dark @endif">
-                                            {{ ucfirst($request->RequestStatus) }}
+                                        <span class="badge rounded-pill
+                                            @if($request->RequestStatus === 'Approved') bg-success
+                                            @elseif($request->RequestStatus === 'Rejected by Admin' || $request->RequestStatus === 'Rejected') bg-danger
+                                            @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
+                                            @elseif($request->RequestStatus === 'Pending Supervisor Approval') bg-warning text-dark
+                                            @else bg-secondary @endif">
+                                            {{ $request->RequestStatus }}
                                         </span>
                                     </td>
                                     <td>
@@ -299,29 +301,19 @@
                                                         <i class="fas fa-eye text-info me-2"></i> View Details
                                                     </button>
                                                 </li>
-                                                @if ($canAdminAction)
-                                                    <li>
-                                                        <button class="dropdown-item text-success" type="button" onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval')">
-                                                            <i class="fas fa-check-circle me-2"></i> Approve
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button class="dropdown-item text-danger" type="button" onclick="openConfirmModal('reject', '{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}', 'Admin Rejection')">
-                                                            <i class="fas fa-times-circle me-2"></i> Reject
-                                                        </button>
-                                                    </li>
-                                                @elseif ($canSupAction)
-                                                    <li>
-                                                        <button class="dropdown-item text-success" type="button" onclick="openConfirmModal('approve', '{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}', 'Supervisor Approval', 'SupervisorApprovalNote')">
-                                                            <i class="fas fa-check-circle me-2"></i> Sup. Approve
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button class="dropdown-item text-danger" type="button" onclick="openConfirmModal('reject', '{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}', 'Supervisor Rejection', 'SupervisorRejectionReason')">
-                                                            <i class="fas fa-times-circle me-2"></i> Sup. Reject
-                                                        </button>
-                                                    </li>
-                                                @endif
+                                                <li>
+                                                    <button class="dropdown-item text-success" type="button" 
+                                                        onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval', 'AdminApprovalNote')"
+                                                        @if(!$canAdminAction) disabled title="Only available after supervisor approval" @endif>
+                                                        <i class="fas fa-check-circle me-2"></i> Approve
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item text-danger" type="button" 
+                                                        onclick="openConfirmModal('reject', '{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}', 'Admin Rejection', 'AdminRejectionReason')">
+                                                        <i class="fas fa-times-circle me-2"></i> Reject
+                                                    </button>
+                                                </li>
                                             </ul>
                                         </div>
                                     </td>
@@ -330,7 +322,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="text-center mt-3 pb-3">
+                <div class="text-center mt-3 pb-3 d-flex justify-content-center align-items-center gap-3">
+                    {{ $leaveRequests->links() }}
                     <a href="{{ route('leave.report.pdf') }}" class="btn btn-outline-secondary shadow-sm btn-sm">
                         📄 Download Leave Report (PDF)
                     </a>
@@ -350,33 +343,6 @@
     @include('leave_requests._view_modal')
 
 @endsection
-
-<!-- Action Modals -->
-<div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="actionForm" method="POST">
-            @csrf
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Confirm Action</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="modalMessage">Are you sure you want to perform this action?</p>
-                    <div id="noteContainer">
-                        <label for="actionNote" class="form-label">Note/Reason:</label>
-                        <textarea name="note" id="actionNote" class="form-control" rows="3"
-                            placeholder="Enter details here..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" id="submitBtn" class="btn btn-primary">Confirm</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -484,6 +450,25 @@
             const modal = new bootstrap.Modal(document.getElementById('actionModal'));
             modal.show();
         }
+
+        // Auto-scroll to table section when pagination is used
+        (function () {
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('page')) {
+                const section = document.getElementById('requests-section');
+                if (section) {
+                    setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                }
+            }
+
+            // Append #requests-section to all pagination links so the browser also anchors
+            document.querySelectorAll('.pagination a').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && !href.includes('#')) {
+                    link.setAttribute('href', href + '#requests-section');
+                }
+            });
+        })();
 
         // Prevent double form submissions
         document.addEventListener('DOMContentLoaded', function () {

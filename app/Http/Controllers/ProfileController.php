@@ -51,26 +51,38 @@ class ProfileController extends Controller
 
         
         // Handle Profile Photo Upload
-        if ($request->hasFile('profile_photo')) {
-            $uploadedFile = $request->file('profile_photo');
-            $destinationPath = 'external_photos'; // ✅ Store inside `public/external_photos`
-            $fileName = time() . '_' . $uploadedFile->getClientOriginalName();
+        try {
+            if ($request->hasFile('profile_photo')) {
+                $uploadedFile = $request->file('profile_photo');
+                $destinationPath = 'external_photos'; // ✅ Store inside `public/external_photos`
+                $fileName = time() . '_' . $uploadedFile->getClientOriginalName();
 
-            // Ensure the directory exists
-            if (!file_exists(public_path($destinationPath))) {
-                mkdir(public_path($destinationPath), 0777, true);
+                $publicPath = public_path($destinationPath);
+                // Ensure the directory exists
+                if (!file_exists($publicPath)) {
+                    if (!mkdir($publicPath, 0777, true)) {
+                        \Log::error("Failed to create directory: {$publicPath}");
+                        return redirect()->back()->with('error', 'Failed to create upload directory.');
+                    }
+                }
+
+                // Move the uploaded file
+                if ($uploadedFile->move($publicPath, $fileName)) {
+                    // ✅ Save only the relative file path in the database
+                    $user->profile_photo = $destinationPath . '/' . $fileName;
+                    \Log::info("Profile photo updated for User #{$user->id}: {$user->profile_photo}");
+                } else {
+                    \Log::error("Failed to move uploaded file to: {$publicPath}");
+                    return redirect()->back()->with('error', 'Failed to save profile photo.');
+                }
             }
 
-            // Move the uploaded file to the correct directory
-            $uploadedFile->move(public_path($destinationPath), $fileName);
+            $user->save();
+            return redirect()->back()->with('success', 'Profile updated successfully.');
 
-            // ✅ Save only the relative file path in the database
-            $user->profile_photo = $destinationPath . '/' . $fileName;
+        } catch (\Exception $e) {
+            \Log::error("Error updating profile for User #{$user->id}: " . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while updating your profile.');
         }
-
-        $user->save();
-        
-
-        return redirect()->back()->with('success', 'Profile updated successfully.');
     }
 }

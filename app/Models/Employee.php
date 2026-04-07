@@ -54,6 +54,15 @@ class Employee extends Authenticatable
         'system_notifications_enabled',
         'carried_over_leave_days',
         'last_password_reset_at',
+        'HomeAddress',
+        'ResidentialAddress',
+        'NextOfKin',
+        'AppointmentDate',
+        'DutyStation',
+        'BankName',
+        'BankBranch',
+        'BankAccountNumber',
+        'PensionNumber',
     ];
 
     /**
@@ -78,6 +87,8 @@ class Employee extends Authenticatable
         'system_notifications_enabled' => 'boolean',
         'carried_over_leave_days' => 'integer',
         'last_password_reset_at' => 'datetime',
+        'BankAccountNumber' => 'string',
+        'AppointmentDate' => 'date',
     ];
 
 
@@ -179,6 +190,24 @@ class Employee extends Authenticatable
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'EmployeeNumber', 'EmployeeNumber');
+    }
+
+    /**
+     * Relationship: Employee timesheets.
+     * @return HasMany
+     */
+    public function timesheets(): HasMany
+    {
+        return $this->hasMany(Timesheet::class, 'EmployeeNumber', 'EmployeeNumber');
+    }
+
+    /**
+     * Relationship: Employee payroll records.
+     * @return HasMany
+     */
+    public function payrolls(): HasMany
+    {
+        return $this->hasMany(Payroll::class, 'EmployeeNumber', 'EmployeeNumber');
     }
 
     /**

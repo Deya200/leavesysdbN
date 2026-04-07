@@ -60,10 +60,10 @@ class ProductionDataSeeder extends Seeder
 
         // 4. Leave Types
         $leaveTypes = [
-            ['LeaveTypeID' => 1, 'LeaveTypeName' => 'Sick Leave', 'IsPaidLeave' => 1, 'GenderApplicable' => 'Both'],
-            ['LeaveTypeID' => 2, 'LeaveTypeName' => 'Annual Leave', 'IsPaidLeave' => 1, 'GenderApplicable' => 'Both'],
-            ['LeaveTypeID' => 3, 'LeaveTypeName' => 'Paternity Leave', 'IsPaidLeave' => 1, 'GenderApplicable' => 'Male'],
-            ['LeaveTypeID' => 4, 'LeaveTypeName' => 'Dinner leave', 'IsPaidLeave' => 1, 'GenderApplicable' => 'Both'],
+            ['LeaveTypeID' => 1, 'LeaveTypeName' => 'Annual Leave', 'IsPaidLeave' => 1, 'GenderApplicable' => 'Both', 'MaxLeaveDays' => 18, 'MinServiceYears' => 0, 'DeductsFromAnnual' => 0],
+            ['LeaveTypeID' => 2, 'LeaveTypeName' => 'Sick Leave', 'IsPaidLeave' => 1, 'GenderApplicable' => 'Both', 'MaxLeaveDays' => 60, 'MinServiceYears' => 1, 'DeductsFromAnnual' => 0],
+            ['LeaveTypeID' => 3, 'LeaveTypeName' => 'Maternity Leave', 'IsPaidLeave' => 1, 'GenderApplicable' => 'Female', 'MaxLeaveDays' => 56, 'MinServiceYears' => 0, 'DeductsFromAnnual' => 0],
+            ['LeaveTypeID' => 4, 'LeaveTypeName' => 'Paternity Leave', 'IsPaidLeave' => 1, 'GenderApplicable' => 'Male', 'MaxLeaveDays' => 14, 'MinServiceYears' => 1, 'DeductsFromAnnual' => 0],
         ];
         DB::table('leave_types')->delete();
         DB::table('leave_types')->insert($leaveTypes);

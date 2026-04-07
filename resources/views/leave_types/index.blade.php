@@ -30,6 +30,9 @@
                     <tr>
                         <td class="ps-4">
                             <div class="fw-bold text-dark">{{ $type->LeaveTypeName }}</div>
+                            @if($type->isStatutory())
+                                <small class="badge bg-warning text-dark mt-1">Mandatory (Malawi Act)</small>
+                            @endif
                         </td>
                         <td>
                             @if($type->IsPaidLeave)
@@ -51,16 +54,22 @@
                         <td>{{ $type->GenderApplicable }}</td>
                         <td class="pe-4 text-end">
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ route('leave_types.edit', $type->LeaveTypeID) }}" class="btn btn-sm btn-outline-primary px-3">
-                                    <i class="fas fa-edit me-1"></i> Edit
-                                </a>
-                                <form action="{{ route('leave_types.destroy', $type->LeaveTypeID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this leave type? This action cannot be undone.');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger px-3">
-                                        <i class="fas fa-trash-alt me-1"></i> Delete
+                                @if($type->isStatutory())
+                                    <button type="button" class="btn btn-sm btn-outline-secondary px-3" disabled title="Mandatory leave type">
+                                        <i class="fas fa-lock me-1"></i> Locked
                                     </button>
-                                </form>
+                                @else
+                                    <a href="{{ route('leave_types.edit', $type->LeaveTypeID) }}" class="btn btn-sm btn-outline-primary px-3">
+                                        <i class="fas fa-edit me-1"></i> Edit
+                                    </a>
+                                    <form action="{{ route('leave_types.destroy', $type->LeaveTypeID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this leave type? This action cannot be undone.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger px-3">
+                                            <i class="fas fa-trash-alt me-1"></i> Delete
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>

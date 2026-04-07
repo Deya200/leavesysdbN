@@ -12,12 +12,12 @@ class LeaveTypesSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('leave_types')->insert([
+        $leaveTypes = [
             [
                 'LeaveTypeName' => 'Annual Leave',
                 'IsPaidLeave' => true,
                 'GenderApplicable' => 'Both',
-                'MaxLeaveDays' => 30,
+                'MaxLeaveDays' => 18,
                 'MinServiceYears' => 0,
                 'DeductsFromAnnual' => false,
                 'created_at' => now(),
@@ -27,8 +27,8 @@ class LeaveTypesSeeder extends Seeder
                 'LeaveTypeName' => 'Sick Leave',
                 'IsPaidLeave' => true,
                 'GenderApplicable' => 'Both',
-                'MaxLeaveDays' => 15,
-                'MinServiceYears' => 0,
+                'MaxLeaveDays' => 60,
+                'MinServiceYears' => 1,
                 'DeductsFromAnnual' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -37,8 +37,8 @@ class LeaveTypesSeeder extends Seeder
                 'LeaveTypeName' => 'Maternity Leave',
                 'IsPaidLeave' => true,
                 'GenderApplicable' => 'Female',
-                'MaxLeaveDays' => 90,
-                'MinServiceYears' => 1,
+                'MaxLeaveDays' => 56,
+                'MinServiceYears' => 0,
                 'DeductsFromAnnual' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -63,6 +63,13 @@ class LeaveTypesSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($leaveTypes as $leaveType) {
+            DB::table('leave_types')->updateOrInsert(
+                ['LeaveTypeName' => $leaveType['LeaveTypeName']],
+                $leaveType
+            );
+        }
     }
 }

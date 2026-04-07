@@ -63,6 +63,22 @@
                     </li>
 
                     <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('timesheets.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('timesheets.index') }}">
+                            <i class="fas fa-clock" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Timesheets</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('payrolls.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('payrolls.index') }}">
+                            <i class="fas fa-money-check-alt" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Payroll</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('grades.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
                             href="{{ route('grades.index') }}">
                             <i class="fas fa-layer-group" style="width: 18px;"></i>
@@ -105,6 +121,13 @@
                             @endif
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('timesheets.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('timesheets.index') }}">
+                            <i class="fas fa-clock" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Timesheets</span>
+                        </a>
+                    </li>
                 @endif
 
                 @if(auth()->check() && auth()->user()->role_id === 3)
@@ -120,6 +143,20 @@
                             href="{{ route('leave_requests.create') }}">
                             <i class="fas fa-calendar-plus" style="width: 18px;"></i>
                             <span style="font-size: 0.875rem;">Apply for Leave</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('timesheets.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('timesheets.index') }}">
+                            <i class="fas fa-clock" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">My Timesheets</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('payrolls.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('payrolls.index') }}">
+                            <i class="fas fa-money-check-alt" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">My Payroll</span>
                         </a>
                     </li>
                     <li class="nav-item">

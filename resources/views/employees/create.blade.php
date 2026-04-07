@@ -125,6 +125,33 @@
                     </div>
 
                     <div class="form-group mb-3">
+                        <label for="HomeAddress" class="form-label">Home Address</label>
+                        <input type="text" id="HomeAddress" name="HomeAddress"
+                            class="form-control @error('HomeAddress') is-invalid @enderror" value="{{ old('HomeAddress') }}">
+                        @error('HomeAddress')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="ResidentialAddress" class="form-label">Residential Address</label>
+                        <input type="text" id="ResidentialAddress" name="ResidentialAddress"
+                            class="form-control @error('ResidentialAddress') is-invalid @enderror" value="{{ old('ResidentialAddress') }}">
+                        @error('ResidentialAddress')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="NextOfKin" class="form-label">Next of Kin</label>
+                        <input type="text" id="NextOfKin" name="NextOfKin"
+                            class="form-control @error('NextOfKin') is-invalid @enderror" value="{{ old('NextOfKin') }}">
+                        @error('NextOfKin')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group mb-3">
                         <label for="email" class="form-label">Email Address</label>
                         <input type="email" id="email" name="email"
                             class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
@@ -140,6 +167,15 @@
                             class="form-control @error('DateOfBirth') is-invalid @enderror" value="{{ old('DateOfBirth') }}"
                             required>
                         @error('DateOfBirth')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="AppointmentDate" class="form-label">Appointment Date</label>
+                        <input type="date" id="AppointmentDate" name="AppointmentDate"
+                            class="form-control @error('AppointmentDate') is-invalid @enderror" value="{{ old('AppointmentDate') }}">
+                        @error('AppointmentDate')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -221,6 +257,54 @@
                         @enderror
                     </div>
 
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="DutyStation" class="form-label">Duty Station</label>
+                            <input type="text" id="DutyStation" name="DutyStation"
+                                class="form-control @error('DutyStation') is-invalid @enderror"
+                                value="{{ old('DutyStation') }}" placeholder="Lilongwe HQ">
+                            @error('DutyStation')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label for="PensionNumber" class="form-label">Pension Number</label>
+                            <input type="text" id="PensionNumber" name="PensionNumber"
+                                class="form-control @error('PensionNumber') is-invalid @enderror"
+                                value="{{ old('PensionNumber') }}" placeholder="PEN-001">
+                            @error('PensionNumber')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="BankName" class="form-label">Bank Name</label>
+                            <input type="text" id="BankName" name="BankName"
+                                class="form-control @error('BankName') is-invalid @enderror"
+                                value="{{ old('BankName') }}" placeholder="National Bank">
+                            @error('BankName')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="BankBranch" class="form-label">Bank Branch</label>
+                            <input type="text" id="BankBranch" name="BankBranch"
+                                class="form-control @error('BankBranch') is-invalid @enderror"
+                                value="{{ old('BankBranch') }}" placeholder="Capital City">
+                            @error('BankBranch')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="BankAccountNumber" class="form-label">Bank Account Number</label>
+                            <input type="text" id="BankAccountNumber" name="BankAccountNumber"
+                                class="form-control @error('BankAccountNumber') is-invalid @enderror"
+                                value="{{ old('BankAccountNumber') }}" placeholder="00123456789">
+                            @error('BankAccountNumber')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary w-100">Add Employee</button>
                     </div>
@@ -242,7 +326,7 @@
                 const email = emailInput.value.trim();
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-                emailFeedback.className = 'mt-1 small fw-bold'; // Reset classes
+                emailFeedback.className = 'mt-1 small fw-bold';
                 emailFeedback.innerText = '';
                 emailInput.classList.remove('is-invalid', 'is-valid');
 
@@ -265,7 +349,7 @@
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ email: email }) // Note: Requires CSRF if it was a web route, but it's an API route or configured otherwise.
+                        body: JSON.stringify({ email: email })
                     })
                         .then(response => response.json())
                         .then(data => {

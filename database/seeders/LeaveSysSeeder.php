@@ -52,22 +52,22 @@ class LeaveSysSeeder extends Seeder
         LeaveType::updateOrCreate(['LeaveTypeName' => 'Annual Leave'], [
             'IsPaidLeave' => true,
             'GenderApplicable' => 'Both',
-            'MaxLeaveDays' => 30,
+            'MaxLeaveDays' => 18,
             'MinServiceYears' => 0,
         ]);
 
         LeaveType::updateOrCreate(['LeaveTypeName' => 'Sick Leave'], [
             'IsPaidLeave' => true,
             'GenderApplicable' => 'Both',
-            'MaxLeaveDays' => 14,
-            'MinServiceYears' => 0,
+            'MaxLeaveDays' => 60,
+            'MinServiceYears' => 1,
         ]);
 
         LeaveType::updateOrCreate(['LeaveTypeName' => 'Maternity Leave'], [
             'IsPaidLeave' => true,
             'GenderApplicable' => 'Female',
-            'MaxLeaveDays' => 90,
-            'MinServiceYears' => 1,
+            'MaxLeaveDays' => 56,
+            'MinServiceYears' => 0,
         ]);
 
         LeaveType::updateOrCreate(['LeaveTypeName' => 'Paternity Leave'], [

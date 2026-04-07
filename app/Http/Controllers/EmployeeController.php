@@ -89,6 +89,15 @@ class EmployeeController extends Controller
             'GradeID' => 'required|exists:grades,GradeID',
             'PositionID' => 'required|exists:positions,PositionID',
             'Gender' => 'required|in:Male,Female,Other',
+            'HomeAddress' => 'nullable|string|max:255',
+            'ResidentialAddress' => 'nullable|string|max:255',
+            'NextOfKin' => 'nullable|string|max:255',
+            'AppointmentDate' => 'nullable|date',
+            'DutyStation' => 'nullable|string|max:255',
+            'BankName' => 'nullable|string|max:255',
+            'BankBranch' => 'nullable|string|max:255',
+            'BankAccountNumber' => 'nullable|string|max:100',
+            'PensionNumber' => 'nullable|string|max:100',
         ]);
 
         // Set a default role_id for a new employee.
@@ -151,6 +160,15 @@ class EmployeeController extends Controller
             'PositionID' => 'required|exists:positions,PositionID',
             'Gender' => 'required|in:Male,Female,Other',
             'role_id' => 'required|integer',
+            'HomeAddress' => 'nullable|string|max:255',
+            'ResidentialAddress' => 'nullable|string|max:255',
+            'NextOfKin' => 'nullable|string|max:255',
+            'AppointmentDate' => 'nullable|date',
+            'DutyStation' => 'nullable|string|max:255',
+            'BankName' => 'nullable|string|max:255',
+            'BankBranch' => 'nullable|string|max:255',
+            'BankAccountNumber' => 'nullable|string|max:100',
+            'PensionNumber' => 'nullable|string|max:100',
         ]);
 
         $employee->update($validatedData);

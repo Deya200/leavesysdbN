@@ -68,6 +68,36 @@
                                 @enderror
                             </div>
 
+                            <div class="mb-3">
+                                <label for="HomeAddress" class="form-label">Home Address</label>
+                                <input type="text" name="HomeAddress" id="HomeAddress"
+                                    class="form-control @error('HomeAddress') is-invalid @enderror"
+                                    value="{{ old('HomeAddress', $employee->HomeAddress) }}">
+                                @error('HomeAddress')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="ResidentialAddress" class="form-label">Residential Address</label>
+                                <input type="text" name="ResidentialAddress" id="ResidentialAddress"
+                                    class="form-control @error('ResidentialAddress') is-invalid @enderror"
+                                    value="{{ old('ResidentialAddress', $employee->ResidentialAddress) }}">
+                                @error('ResidentialAddress')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="NextOfKin" class="form-label">Next of Kin</label>
+                                <input type="text" name="NextOfKin" id="NextOfKin"
+                                    class="form-control @error('NextOfKin') is-invalid @enderror"
+                                    value="{{ old('NextOfKin', $employee->NextOfKin) }}">
+                                @error('NextOfKin')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <!-- Date of Birth -->
                             <div class="mb-3">
                                 <label for="DateOfBirth" class="form-label">Date of Birth</label>
@@ -75,6 +105,16 @@
                                     class="form-control @error('DateOfBirth') is-invalid @enderror"
                                     value="{{ old('DateOfBirth', $employee->DateOfBirth) }}" required>
                                 @error('DateOfBirth')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="AppointmentDate" class="form-label">Appointment Date</label>
+                                <input type="date" name="AppointmentDate" id="AppointmentDate"
+                                    class="form-control @error('AppointmentDate') is-invalid @enderror"
+                                    value="{{ old('AppointmentDate', $employee->AppointmentDate) }}">
+                                @error('AppointmentDate')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -156,6 +196,54 @@
                                 @error('role_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="DutyStation" class="form-label">Duty Station</label>
+                                    <input type="text" name="DutyStation" id="DutyStation"
+                                        class="form-control @error('DutyStation') is-invalid @enderror"
+                                        value="{{ old('DutyStation', $employee->DutyStation) }}">
+                                    @error('DutyStation')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="PensionNumber" class="form-label">Pension Number</label>
+                                    <input type="text" name="PensionNumber" id="PensionNumber"
+                                        class="form-control @error('PensionNumber') is-invalid @enderror"
+                                        value="{{ old('PensionNumber', $employee->PensionNumber) }}">
+                                    @error('PensionNumber')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="BankName" class="form-label">Bank Name</label>
+                                    <input type="text" name="BankName" id="BankName"
+                                        class="form-control @error('BankName') is-invalid @enderror"
+                                        value="{{ old('BankName', $employee->BankName) }}">
+                                    @error('BankName')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="BankBranch" class="form-label">Bank Branch</label>
+                                    <input type="text" name="BankBranch" id="BankBranch"
+                                        class="form-control @error('BankBranch') is-invalid @enderror"
+                                        value="{{ old('BankBranch', $employee->BankBranch) }}">
+                                    @error('BankBranch')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="BankAccountNumber" class="form-label">Bank Account Number</label>
+                                    <input type="text" name="BankAccountNumber" id="BankAccountNumber"
+                                        class="form-control @error('BankAccountNumber') is-invalid @enderror"
+                                        value="{{ old('BankAccountNumber', $employee->BankAccountNumber) }}">
+                                    @error('BankAccountNumber')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- Submit Button -->

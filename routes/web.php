@@ -18,7 +18,9 @@ AdminController,
 LeaveAppealController,
 LeaveExtensionController,
 LeaveCancellationController,
-ReportController
+ReportController,
+TimesheetController,
+PayrollController
 };
 
 //Route::fallback(function () {
@@ -235,6 +237,23 @@ Route::post('/leave-types', [LeaveTypeController::class , 'store'])->name('leave
 Route::get('/leave-types/{leaveType}/edit', [LeaveTypeController::class , 'edit'])->name('leave_types.edit');
 Route::put('/leave-types/{leaveType}', [LeaveTypeController::class , 'update'])->name('leave_types.update');
 Route::delete('/leave-types/{leaveType}', [LeaveTypeController::class , 'destroy'])->name('leave_types.destroy');
+
+Route::get('/timesheets', [TimesheetController::class, 'index'])->name('timesheets.index');
+Route::get('/timesheets/create', [TimesheetController::class, 'create'])->name('timesheets.create');
+Route::post('/timesheets', [TimesheetController::class, 'store'])->name('timesheets.store');
+Route::post('/timesheets/{timesheet}/approve', [TimesheetController::class, 'approve'])->name('timesheets.approve');
+Route::post('/timesheets/{timesheet}/reject', [TimesheetController::class, 'reject'])->name('timesheets.reject');
+
+Route::get('/payrolls', [PayrollController::class, 'index'])->name('payrolls.index');
+Route::get('/payrolls/create', [PayrollController::class, 'create'])->name('payrolls.create');
+Route::post('/payrolls', [PayrollController::class, 'store'])->name('payrolls.store');
+Route::get('/payrolls/master-data', [PayrollController::class, 'masterData'])->name('payrolls.master-data');
+Route::get('/payrolls/pension-deductions', [PayrollController::class, 'pensionDeductions'])->name('payrolls.pension-deductions');
+Route::get('/payrolls/bank-list', [PayrollController::class, 'bankList'])->name('payrolls.bank-list');
+Route::get('/payrolls/report', [PayrollController::class, 'payrollReport'])->name('payrolls.report');
+Route::get('/payrolls/{payroll}', [PayrollController::class, 'show'])->name('payrolls.show');
+Route::get('/payrolls/{payroll}/receipt', [PayrollController::class, 'receipt'])->name('payrolls.receipt');
+Route::get('/payrolls/{payroll}/payslip', [PayrollController::class, 'payslip'])->name('payrolls.payslip');
 
 Route::get('/leave-requests/{leaveRequest}/edit', [LeaveRequestController::class , 'edit'])->name('leave_requests.edit');
 

@@ -13,7 +13,7 @@
             <div class="flex-grow-1 d-none d-lg-flex justify-content-center">
                 <div class="px-3 py-1 rounded-pill" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);">
                     <small class="fw-medium text-white opacity-90">
-                        <i class="far fa-clock me-2"></i>{{ now()->format('H:i') }} • <span class="opacity-75">{{ now()->format('D, M j') }}</span>
+                        <i class="far fa-clock me-2"></i><span id="current-time">{{ now()->format('H:i') }}</span> • <span class="opacity-75" id="current-date">{{ now()->format('D, M j') }}</span>
                     </small>
                 </div>
             </div>
@@ -21,10 +21,9 @@
             <!-- Right: Notifications, Dark Mode, and Profile -->
             <div class="d-flex align-items-center gap-2">
                 <!-- Dark mode toggle with modern styling -->
-                <button id="darkModeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle dark mode" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; color: white; transition: all 0.3s ease;">
+                <button id="darkModeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle dark mode" onclick="toggleTheme()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; color: white; transition: all 0.3s ease; position: relative; z-index: 10; cursor: pointer; outline: none;">
                     <i class="fas fa-moon fs-5"></i>
                 </button>
-            </div>
 
                 <!-- Notifications Dropdown with Modern Design -->
                 <div class="dropdown">
@@ -150,9 +149,48 @@
     </form>
 </header>
 
+<script>
+// Function to update the time display
+function updateTime() {
+    const now = new Date();
+    
+    // Format time as HH:MM
+    const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                      now.getMinutes().toString().padStart(2, '0');
+    
+    // Format date as Day, Mon DD (e.g., Sat, Mar 28)
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    const dateString = days[now.getDay()] + ', ' + 
+                      months[now.getMonth()] + ' ' + 
+                      now.getDate();
+    
+    // Update the DOM elements
+    const timeElement = document.getElementById('current-time');
+    const dateElement = document.getElementById('current-date');
+    
+    if (timeElement) timeElement.textContent = timeString;
+    if (dateElement) dateElement.textContent = dateString;
+}
+
+// Update time immediately and then every minute
+document.addEventListener('DOMContentLoaded', function() {
+    updateTime(); // Update immediately
+    setInterval(updateTime, 60000); // Update every minute
+});
+
+// Function to confirm logout
+function confirmLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        document.getElementById('logout-form').submit();
+    }
+}
+</script>
+
 <style>
-    /* Modern Font Import */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    /* Using system fonts for performance */
 
     /* Header Styles */
     header {
@@ -385,5 +423,28 @@
             });
         });
     });
+
+    function toggleTheme() {
+    const body = document.body;
+
+    // Toggle class
+    body.classList.toggle('dark-mode');
+
+    // Save preference (optional but recommended)
+    if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark');
+    } else {
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Load saved theme on page load
+document.addEventListener('DOMContentLoaded', function () {
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+});
 </script>
 </header>

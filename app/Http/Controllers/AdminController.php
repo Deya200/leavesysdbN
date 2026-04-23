@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\Role;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
@@ -64,6 +65,13 @@ class AdminController extends Controller
             'AdminApproval' => true,
         ]);
 
+        AuditLog::record(
+            Auth::user()->EmployeeNumber,
+            'Approved leave request',
+            'leave_requests',
+            $leaveRequest->LeaveRequestID
+        );
+
         return redirect()->back()->with('success', 'Leave request approved successfully.');
     }
 
@@ -89,6 +97,13 @@ class AdminController extends Controller
             'RejectionReason' => $request->RejectionReason,
         ]);
 
+        AuditLog::record(
+            Auth::user()->EmployeeNumber,
+            'Rejected leave request',
+            'leave_requests',
+            $leaveRequest->LeaveRequestID
+        );
+
         return redirect()->back()->with('success', 'Leave request rejected.');
     }
 
@@ -113,6 +128,13 @@ class AdminController extends Controller
         $employee = Employee::where('EmployeeNumber', $employeeNumber)->firstOrFail();
         $employee->update(['role_id' => $request->role_id]);
 
+        AuditLog::record(
+            Auth::user()->EmployeeNumber,
+            "Assigned role {$request->role_id} to employee {$employee->EmployeeNumber}",
+            'employees',
+            intval($employee->EmployeeNumber)
+        );
+
         return redirect()->back()->with('success', 'Role assigned successfully.');
     }
 
@@ -123,5 +145,43 @@ class AdminController extends Controller
     {
         $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->get();
         return view('admin.leave_requests', compact('leaveRequests'));
+    }
+
+    /**
+     * Audit trail listing for admins.
+     */
+    public function auditTrail(Request $request)
+    {
+        if (auth()->user()->role_id !== 1) {
+            return redirect()->back()->with('error', 'You do not have permission to access audit logs.');
+        }
+
+        $query = AuditLog::with('employee')
+            ->orderByDesc('timestamp');
+
+        // Apply filters
+        if ($request->filled('date_from')) {
+            $query->whereDate('timestamp', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('timestamp', '<=', $request->date_to);
+        }
+
+        if ($request->filled('action')) {
+            $query->where('action', 'like', '%' . $request->action . '%');
+        }
+
+        if ($request->filled('employee_number')) {
+            $query->where('EmployeeNumber', $request->employee_number);
+        }
+
+        if ($request->filled('table_name')) {
+            $query->where('table_name', $request->table_name);
+        }
+
+        $auditLogs = $query->paginate(25)->appends($request->query());
+
+        return view('admin.audit_trail', compact('auditLogs'));
     }
 }

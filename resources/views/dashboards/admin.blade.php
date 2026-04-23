@@ -134,7 +134,7 @@
                     style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white;">
                     <div class="d-flex align-items-center">
                         <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
-                            <i class="fas fa-users fs-5"></i>
+                            <i class="fas fa-users fs-4"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Total
@@ -149,7 +149,7 @@
                     style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
                     <div class="d-flex align-items-center">
                         <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
-                            <i class="fas fa-calendar-check fs-5"></i>
+                            <i class="fas fa-calendar-check fs-4"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Active
@@ -166,7 +166,7 @@
                     style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
                     <div class="d-flex align-items-center">
                         <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
-                            <i class="fas fa-clock fs-5"></i>
+                            <i class="fas fa-clock fs-4"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending
@@ -181,7 +181,7 @@
                     style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white;">
                     <div class="d-flex align-items-center">
                         <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
-                            <i class="fas fa-building fs-5"></i>
+                            <i class="fas fa-building fs-4"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Departments</small>
@@ -301,14 +301,14 @@
                                                 </li>
                                                 @if ($canAdminAction)
                                                     <li>
-                                                        <button class="dropdown-item text-success" type="button" onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval')">
+                                                        <a href="{{ route('leave_requests.admin.approve.form', $request->LeaveRequestID) }}" class="dropdown-item text-success">
                                                             <i class="fas fa-check-circle me-2"></i> Approve
-                                                        </button>
+                                                        </a>
                                                     </li>
                                                     <li>
-                                                        <button class="dropdown-item text-danger" type="button" onclick="openConfirmModal('reject', '{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}', 'Admin Rejection')">
+                                                        <a href="{{ route('leave_requests.admin.reject.form', $request->LeaveRequestID) }}" class="dropdown-item text-danger">
                                                             <i class="fas fa-times-circle me-2"></i> Reject
-                                                        </button>
+                                                        </a>
                                                     </li>
                                                 @elseif ($canSupAction)
                                                     <li>
@@ -379,7 +379,7 @@
 </div>
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/chart.min.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ── Monthly Verification Trend ──

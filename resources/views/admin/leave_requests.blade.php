@@ -112,21 +112,14 @@
                                     </td>
                                     <td>
                                         @if ($request->RequestStatus === 'Pending Admin Verification')
-                                            <form action="{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}"
-                                                method="POST" style="display:inline;">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-success mb-1">Approve</button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-success mb-1"
+                                                onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval', 'AdminApprovalNote')">
+                                                Approve
+                                            </button>
                                             <button type="button" class="btn btn-sm btn-danger mb-1"
-                                                onclick="toggleRejectForm('{{ $request->LeaveRequestID }}')">Reject</button>
-                                            <form id="rejectForm-{{ $request->LeaveRequestID }}"
-                                                action="{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}"
-                                                method="POST" style="display:none; margin-top:5px;">
-                                                @csrf
-                                                <textarea name="RejectionReason" class="form-control mb-2"
-                                                    placeholder="Enter rejection reason" required></textarea>
-                                                <button type="submit" class="btn btn-sm btn-danger w-100">Confirm Rejection</button>
-                                            </form>
+                                                onclick="openConfirmModal('reject', '{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}', 'Admin Rejection', 'AdminRejectionReason')">
+                                                Reject
+                                            </button>
                                         @else
                                             <em class="text-muted">No actions available</em>
                                         @endif
@@ -145,11 +138,77 @@
     </div>
 
     <script>
-        function toggleRejectForm(id) {
-            const form = document.getElementById('rejectForm-' + id);
-            if (form) {
-                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        function openConfirmModal(type, url, title, fieldName = null) {
+            const form = document.getElementById('actionForm');
+            const titleEl = document.getElementById('modalTitle');
+            const messageEl = document.getElementById('modalMessage');
+            const noteEl = document.getElementById('actionNote');
+            const submitBtn = document.getElementById('submitBtn');
+
+            form.action = url;
+            titleEl.innerText = title;
+
+            noteEl.value = '';
+            noteEl.required = (type === 'reject');
+
+            if (type === 'approve') {
+                messageEl.innerText = 'Please provide an optional approval note.';
+                submitBtn.className = 'btn btn-success';
+                submitBtn.innerText = 'Confirm Approval';
+            } else {
+                messageEl.innerText = 'Please provide a mandatory rejection reason.';
+                submitBtn.className = 'btn btn-danger';
+                submitBtn.innerText = 'Confirm Rejection';
             }
+
+            noteEl.name = fieldName || (type === 'approve' ? 'AdminApprovalNote' : 'AdminRejectionReason');
+            noteEl.placeholder = type === 'reject' ? 'Rejection reason is required...' : 'Optional approval notes...';
+
+            const modal = new bootstrap.Modal(document.getElementById('actionModal'));
+            modal.show();
         }
+
+        // Close modal on successful form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('success') || sessionStorage.getItem('modalClosed')) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('actionModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                sessionStorage.removeItem('modalClosed');
+            }
+
+            // Mark modal as closed when form is submitted
+            document.getElementById('actionForm').addEventListener('submit', function() {
+                sessionStorage.setItem('modalClosed', 'true');
+            });
+        });
     </script>
+
+    <!-- Action Modal -->
+    <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form id="actionForm" method="POST">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Confirm Action</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="modalMessage">Are you sure you want to perform this action?</p>
+                        <div id="noteContainer">
+                            <label for="actionNote" class="form-label">Note/Reason:</label>
+                            <textarea name="note" id="actionNote" class="form-control" rows="4" placeholder="Enter details here..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="submitBtn" class="btn btn-primary">Confirm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection

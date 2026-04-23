@@ -54,6 +54,7 @@ class Employee extends Authenticatable
         'system_notifications_enabled',
         'carried_over_leave_days',
         'last_password_reset_at',
+        'profile_photo',
     ];
 
     /**
@@ -219,7 +220,9 @@ class Employee extends Authenticatable
      */
     public function isSupervisor(): bool
     {
-        return $this->subordinates()->exists();
+        // Supervisor status is granted either via explicit role or by having direct subordinates.
+        return $this->hasRole('Supervisor')
+            || $this->subordinates()->exists();
     }
 
     /**

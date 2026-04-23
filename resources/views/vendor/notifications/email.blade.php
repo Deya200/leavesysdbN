@@ -1,6 +1,9 @@
 @component('mail::message')
 {{-- Header with Logo --}}
 <div style="text-align: center; margin-bottom: 40px; padding: 20px 0; border-bottom: 3px solid #2E3A87;">
+    <div style="margin-bottom: 15px;">
+        <img src="{{ asset('logo3.png') }}" alt="ABC Leave Management System Logo" style="max-width: 150px; height: auto;">
+    </div>
     <div style="font-size: 32px; font-weight: bold; color: #2E3A87; margin-bottom: 5px;">
         ABC Leave Management System
     </div>

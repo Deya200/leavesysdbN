@@ -12,7 +12,7 @@
                     </div>
                     <div class="card-body" style="background-color: #f8f9fa;">
 
-                        <form method="POST" action="{{ route('employees.update', $employee->EmployeeNumber) }}">
+                        <form method="POST" action="{{ route('employees.update', $employee->EmployeeNumber) }}" id="editEmployeeForm">
                             @csrf
                             @method('PUT')
 
@@ -25,7 +25,7 @@
 
                             <!-- National ID -->
                             <div class="mb-3">
-                                <label for="national_id" class="form-label">National ID Address *</label>
+                                <label for="national_id" class="form-label">National ID *</label>
                                 <input type="text" name="national_id" id="national_id"
                                     class="form-control @error('national_id') is-invalid @enderror"
                                     value="{{ old('national_id', $employee->national_id) }}" required>
@@ -159,8 +159,9 @@
                             </div>
 
                             <!-- Submit Button -->
-                            <button type="submit" class="btn text-white w-100" style="background-color: #2E3A87;;">Update
-                                Employee</button>
+                            <button type="button" class="btn text-white w-100" style="background-color: #2E3A87;" onclick="openConfirmModal('update', '{{ $employee->FirstName }} {{ $employee->LastName }}')">
+                                Update Employee
+                            </button>
                         </form>
 
                     </div>
@@ -168,4 +169,36 @@
             </div>
         </div>
     </div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Employee Update</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to update this employee?</p>
+                <p class="mb-0" style="color: #666; font-size: 0.95rem;"><strong id="employeeName">{{ $employee->FirstName }} {{ $employee->LastName }}</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitEmployeeForm()">Confirm & Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openConfirmModal(action, employeeName) {
+        document.getElementById('employeeName').innerText = employeeName || 'Employee';
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    }
+
+    function submitEmployeeForm() {
+        document.getElementById('editEmployeeForm').submit();
+    }
+</script>
 @endsection

@@ -134,11 +134,11 @@
                     <!-- Steps -->
                     <div class="steps mb-4" style="max-width: 430px; margin: 0 auto 2.1rem;">
                         <div class="step completed">
-                            <div class="step-circle">1</div>
+                            <div class="step-circle"><i class="fas fa-check"></i></div>
                             <div class="step-label">Details</div>
                         </div>
                         <div class="step active">
-                            <div class="step-circle">2</div>
+                            <div class="step-circle"><i class="fas fa-check"></i></div>
                             <div class="step-label">Review</div>
                         </div>
                         <div class="step">

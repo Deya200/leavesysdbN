@@ -97,6 +97,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
+            font-size: 18px;
         }
 
         .count-badge {
@@ -529,7 +530,7 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/chart.min.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ── Team Trend Chart ──

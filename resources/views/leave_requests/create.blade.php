@@ -34,6 +34,11 @@
             color: white;
         }
 
+        .step.completed .step-circle {
+            background: #28a745;
+            color: white;
+        }
+
         .step:not(:last-child)::after {
             content: '';
             position: absolute;
@@ -128,7 +133,7 @@
                             <!--Steps-->
                             <div class="steps mb-4">
                                 <div class="step active">
-                                    <div class="step-circle">1</div>
+                                    <div class="step-circle"><i class="fas fa-check"></i></div>
                                     <div class="step-label">Details</div>
                                 </div>
                                 <div class="step">

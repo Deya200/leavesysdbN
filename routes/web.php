@@ -67,10 +67,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Approval Routes
 
-    Route::post('/{leaveRequest}/supervisor-approve', [LeaveRequestController::class , 'supervisorApprove'])->name('leave_requests.supervisor.approve');
-    Route::post('/{leaveRequest}/supervisor-reject', [LeaveRequestController::class , 'supervisorReject'])->name('leave_requests.supervisor.reject');
-    Route::post('/{leaveRequest}/admin-approve', [LeaveRequestController::class , 'adminApprove'])->name('leave_requests.admin.approve');
-    Route::post('/{leaveRequest}/admin-reject', [LeaveRequestController::class , 'adminReject'])->name('leave_requests.admin.reject');
+    Route::post('/leave-requests/{leaveRequest}/supervisor-approve', [LeaveRequestController::class , 'supervisorApprove'])->name('leave_requests.supervisor.approve');
+    Route::post('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestController::class , 'supervisorReject'])->name('leave_requests.supervisor.reject');
+    Route::post('/leave-requests/{leaveRequest}/admin-approve', [LeaveRequestController::class , 'adminApprove'])->name('leave_requests.admin.approve');
+    Route::post('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestController::class , 'adminReject'])->name('leave_requests.admin.reject');
 
 
     // Admin Routes
@@ -178,8 +178,6 @@ Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class ,
 
 Route::get('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class , 'approve'])->name('leave_requests.approve');
 Route::get('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class , 'reject'])->name('leave_requests.reject');
-Route::post('/leave-requests/{leaveRequest}/supervisor-approve', [LeaveRequestController::class , 'supervisorApprove'])->name('leave_requests.supervisor.approve');
-Route::post('/leave-requests/{leaveRequest}/supervisor-reject', [LeaveRequestController::class , 'supervisorReject'])->name('leave_requests.supervisor.reject');
 
 // Leave Request Archive (Admin Only)
 Route::post('/leave-requests/{leaveRequest}/archive', [LeaveRequestController::class , 'archive'])->name('leave_requests.archive');
@@ -188,6 +186,7 @@ Route::get('/admin/archive-leaves', [LeaveRequestController::class , 'showArchiv
 Route::get('/admin/view-archived-leaves', [LeaveRequestController::class , 'viewArchived'])->name('leave_requests.view_archived');
 Route::get('/admin/all-requests', [LeaveRequestController::class , 'adminAllRequests'])->name('leave_requests.admin_all');
 Route::post('/admin/archive-leaves/bulk', [LeaveRequestController::class , 'bulkArchive'])->name('leave_requests.bulk_archive');
+Route::get('/admin/audit-trail', [AdminController::class, 'auditTrail'])->name('admin.audit_trail');
 
 // Leave Appeals
 Route::post('/leave-requests/{leaveRequest}/appeal', [LeaveRequestController::class , 'appeal'])->name('leave_requests.appeal');
@@ -261,6 +260,7 @@ Route::get('/employee-gender/{employeeNumber}', [EmployeeController::class , 'ge
 
 
 //Modifications
+Route::get('/leave-requests/{leaveRequest}/admin-approve', [LeaveRequestController::class , 'showAdminApproveForm'])->name('leave_requests.admin.approve.form');
 Route::get('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestController::class , 'showAdminRejectForm'])->name('leave_requests.admin.reject.form');
 
 Route::get('/leave-report-pdf', [ReportController::class , 'generatePDF'])->name('leave.report.pdf');

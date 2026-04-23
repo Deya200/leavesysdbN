@@ -11,6 +11,7 @@ use App\Models\Position;
 use App\Models\LeaveType;
 use App\Models\LeaveRequest;
 use App\Models\Role;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Mail;
@@ -91,6 +92,11 @@ class EmployeeController extends Controller
             'Gender' => 'required|in:Male,Female,Other',
         ]);
 
+        $emailVerification = (new \App\Services\EmailVerificationService())->verify($validatedData['email']);
+        if (!$emailVerification['valid']) {
+            return redirect()->back()->withInput()->withErrors(['email' => $emailVerification['reason']]);
+        }
+
         // Set a default role_id for a new employee.
         // Adjust the value as needed (for example, if role "Employee" has an id of 2).
         $defaultRole = Role::where('name', 'Employee')->first();
@@ -109,6 +115,13 @@ class EmployeeController extends Controller
                 \Illuminate\Support\Facades\Log::error("Failed to send invitation to new employee: " . $e->getMessage());
             }
         }
+
+        AuditLog::record(
+            auth()->user()->EmployeeNumber,
+            "Created employee {$employee->EmployeeNumber}",
+            'employees',
+            is_numeric($employee->EmployeeNumber) ? intval($employee->EmployeeNumber) : 0
+        );
 
         return redirect()->route('employees.index')
             ->with('success', 'Employee successfully added! ' . ($employee->email ? 'An invitation has been sent.' : ''));
@@ -153,7 +166,20 @@ class EmployeeController extends Controller
             'role_id' => 'required|integer',
         ]);
 
+        $emailVerification = (new \App\Services\EmailVerificationService())->verify($validatedData['email']);
+        if (!$emailVerification['valid']) {
+            return redirect()->back()->withInput()->withErrors(['email' => $emailVerification['reason']]);
+        }
+
         $employee->update($validatedData);
+
+        AuditLog::record(
+            auth()->user()->EmployeeNumber,
+            "Updated employee {$employee->EmployeeNumber}",
+            'employees',
+            is_numeric($employee->EmployeeNumber) ? intval($employee->EmployeeNumber) : 0
+        );
+
         // Since role_id is updated in the employee record, no further role syncing is required.
         // Optionally, you can verify the role exists:
         Role::findOrFail($validatedData['role_id']);
@@ -172,6 +198,13 @@ class EmployeeController extends Controller
     {
         // Simply delete the employee record; no detaching of roles/permissions is needed.
         $employee->delete();
+
+        AuditLog::record(
+            auth()->user()->EmployeeNumber,
+            "Deleted employee {$employee->EmployeeNumber}",
+            'employees',
+            is_numeric($employee->EmployeeNumber) ? intval($employee->EmployeeNumber) : 0
+        );
 
         return redirect()->route('employees.index')
             ->with('success', 'Employee successfully deleted!');
@@ -206,6 +239,13 @@ class EmployeeController extends Controller
             $employee->role_id = $supervisorRole->id;
             $employee->save();
         }
+
+        AuditLog::record(
+            auth()->user()->EmployeeNumber,
+            "Assigned {$employee->EmployeeNumber} as supervisor for department {$department->DepartmentID}",
+            'departments',
+            is_numeric($department->DepartmentID) ? intval($department->DepartmentID) : 0
+        );
 
         return redirect()->route('employees.index')
             ->with('success', 'Employee assigned as Supervisor successfully! All department employees updated.');

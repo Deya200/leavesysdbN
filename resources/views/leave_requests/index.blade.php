@@ -3,8 +3,7 @@
 @section('title', 'Supervisor Dashboard')
 
 @section('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ asset('css/animate.min.css') }}">
 
 <style>
     :root {
@@ -707,8 +706,6 @@
                                         <i class="fas fa-lock me-1"></i>
                                         No actions available
                                     </div>
-                                @endif
-
                                 @endif
                             </td>
                         </tr>

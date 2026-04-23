@@ -40,14 +40,27 @@ class LeaveRequestPolicy
 
     public function supervisorApprove(Employee $user, LeaveRequest $leaveRequest)
     {
-        // Allow admins to approve at any stage, or supervisors for their direct reports
-        if ($user->isAdmin()) {
-            return strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
+        // Only pending supervisor approval can be handled here.
+        if (strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') !== 0) {
+            return false;
         }
-        
+
+        // Admin can approve any pending supervisor request.
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // Supervisors can approve their direct reports or any employee in their department.
+        $employee = $leaveRequest->employee;
+        if (!$employee) {
+            return false;
+        }
+
         return $user->isSupervisor()
-            && $user->EmployeeNumber === $leaveRequest->employee->SupervisorID
-            && strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
+            && (
+                $user->EmployeeNumber === $employee->SupervisorID
+                || $user->DepartmentID === $employee->DepartmentID
+            );
     }
 
     public function adminApprove(Employee $user, LeaveRequest $leaveRequest)
@@ -58,14 +71,24 @@ class LeaveRequestPolicy
 
     public function supervisorReject(Employee $user, LeaveRequest $leaveRequest)
     {
-        // Allow admins to reject at any stage, or supervisors for their direct reports
-        if ($user->isAdmin()) {
-            return strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
+        if (strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') !== 0) {
+            return false;
         }
-        
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        $employee = $leaveRequest->employee;
+        if (!$employee) {
+            return false;
+        }
+
         return $user->isSupervisor()
-            && $user->EmployeeNumber === $leaveRequest->employee->SupervisorID
-            && strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') === 0;
+            && (
+                $user->EmployeeNumber === $employee->SupervisorID
+                || $user->DepartmentID === $employee->DepartmentID
+            );
     }
 
     public function adminReject(Employee $user, LeaveRequest $leaveRequest)

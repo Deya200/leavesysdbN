@@ -81,7 +81,7 @@
                 @endif
 
                 <!-- Form -->
-                <form method="POST" action="{{ route('employees.store') }}">
+                <form method="POST" action="{{ route('employees.store') }}" id="createEmployeeForm">
                     @csrf
 
                     <div class="form-group mb-3">
@@ -222,7 +222,9 @@
                     </div>
 
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary w-100">Add Employee</button>
+                        <button type="button" class="btn btn-primary w-100" onclick="openConfirmModal('create', '{{ old('FirstName') }} {{ old('LastName') }}')">
+                            Add Employee
+                        </button>
                     </div>
                 </form>
             </div>
@@ -265,28 +267,86 @@
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ email: email }) // Note: Requires CSRF if it was a web route, but it's an API route or configured otherwise.
+                        body: JSON.stringify({ email: email })
                     })
                         .then(response => response.json())
                         .then(data => {
                             emailFeedback.classList.remove('text-muted');
-                            if (data.available) {
-                                emailFeedback.innerText = '✓ Email is available';
-                                emailFeedback.className = 'mt-1 small fw-bold text-success';
-                                emailInput.classList.add('is-valid');
-                                emailInput.classList.remove('is-invalid');
-                            } else {
-                                emailFeedback.innerText = '⚠ Valid email format (already in use by another record)';
-                                emailFeedback.className = 'mt-1 small fw-bold text-warning';
-                                emailInput.classList.remove('is-invalid', 'is-valid');
+
+                            if (!data.is_valid) {
+                                emailFeedback.innerText = `✖ ${data.verification_reason}`;
+                                emailFeedback.className = 'mt-1 small fw-bold text-danger';
+                                emailInput.classList.add('is-invalid');
+                                emailInput.classList.remove('is-valid');
+                                return;
                             }
+
+                            if (!data.available) {
+                                emailFeedback.innerText = '⚠ This email is already in use by another record.';
+                                emailFeedback.className = 'mt-1 small fw-bold text-warning';
+                                emailInput.classList.remove('is-valid');
+                                emailInput.classList.add('is-invalid');
+                                return;
+                            }
+
+                            let statusText = '✓ Email is available and looks deliverable.';
+                            let statusClass = 'mt-1 small fw-bold text-success';
+
+                            if (data.smtp_ok === false) {
+                                statusText = '⚠ Email domain exists but SMTP recipient check failed.';
+                                statusClass = 'mt-1 small fw-bold text-warning';
+                            } else if (data.smtp_ok === null) {
+                                statusText = '⚠ Email domain exists; could not verify mailbox conclusively.';
+                                statusClass = 'mt-1 small fw-bold text-info';
+                            }
+
+                            emailFeedback.innerText = statusText;
+                            emailFeedback.className = statusClass;
+                            emailInput.classList.add('is-valid');
+                            emailInput.classList.remove('is-invalid');
                         })
                         .catch(error => {
                             console.error('Error validating email:', error);
-                            emailFeedback.innerText = '';
+                            emailFeedback.innerText = 'Unable to verify email at the moment.';
+                            emailFeedback.className = 'mt-1 small fw-bold text-warning';
                         });
                 }, 500);
             });
         });
+    </script>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Employee Creation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to create this employee?</p>
+                    <p class="mb-0" style="color: #666; font-size: 0.95rem;"><strong id="employeeName"></strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitEmployeeForm()">Confirm & Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openConfirmModal(action, employeeName) {
+            const firstName = document.getElementById('FirstName').value;
+            const lastName = document.getElementById('LastName').value;
+            document.getElementById('employeeName').innerText = (firstName + ' ' + lastName).trim() || 'New Employee';
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        function submitEmployeeForm() {
+            document.getElementById('createEmployeeForm').submit();
+        }
     </script>
 @endsection

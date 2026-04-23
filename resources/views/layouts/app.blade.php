@@ -514,50 +514,64 @@
   <!-- Scripts are handled in the head -->
 
   <script>
+    // Dark Mode Configuration
+    const DARK_CLASS = 'dark-mode';
+    const STORAGE_KEY = 'darkMode';
+
+    // Helper function to update icon
+    function updateThemeIcon(isDark) {
+      const btn = document.getElementById('darkModeToggle');
+      if (!btn) return;
+      
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.classList.remove('fa-moon', 'fa-sun');
+        icon.classList.add(isDark ? 'fa-sun' : 'fa-moon');
+      }
+
+      btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+
+    // Helper function to apply theme
+    function applyTheme(isDark) {
+      if (isDark) {
+        document.body.classList.add(DARK_CLASS);
+      } else {
+        document.body.classList.remove(DARK_CLASS);
+      }
+      localStorage.setItem(STORAGE_KEY, isDark ? 'on' : 'off');
+      updateThemeIcon(isDark);
+    }
+
+    // Global toggleTheme function for inline onclick usage
+    window.toggleTheme = function () {
+      const isDarkNow = document.body.classList.contains(DARK_CLASS);
+      applyTheme(!isDarkNow);
+    };
+
     document.addEventListener('DOMContentLoaded', function () {
-      // Tooltips
+      // Initialize tooltips
       var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
       })
 
-      // Dark Mode Logic
+      // Initialize dark mode from localStorage
       const btn = document.getElementById('darkModeToggle');
+
       if (btn) {
-        const icon = btn.querySelector('i');
-        const darkClass = 'dark-mode';
+        const persisted = localStorage.getItem(STORAGE_KEY);
+        const isDark = persisted === 'on';
 
-        if (localStorage.getItem('darkMode') === 'on') {
-          document.body.classList.add(darkClass);
-          if (icon) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-          }
-        }
+        // Apply saved preference
+        applyTheme(isDark);
 
-        btn.addEventListener('click', function () {
-          document.body.classList.toggle(darkClass);
-          const isDark = document.body.classList.contains(darkClass);
-          if (icon) {
-            icon.classList.toggle('fa-moon', !isDark);
-            icon.classList.toggle('fa-sun', isDark);
-          }
-          localStorage.setItem('darkMode', isDark ? 'on' : 'off');
+        // Add click event listener
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const isDarkNow = document.body.classList.contains(DARK_CLASS);
+          applyTheme(!isDarkNow);
         });
-      }
-    });
-  </script>
-
-  <script>
-    // When offcanvas (sidebar) opens on medium+ screens, push main content
-    document.addEventListener('DOMContentLoaded', function () {
-      var sidebarEl = document.getElementById('mainSidebar');
-      var mainEl = document.querySelector('main');
-      if (!sidebarEl || !mainEl) return;
-
-      function applySidebarPush() {
-        var sidebarWidth = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') || '280px';
-        sidebarWidth = sidebarWidth.trim();
         if (window.innerWidth >= 768) {
           mainEl.style.transition = 'margin-left 200ms ease, width 200ms ease';
           mainEl.style.marginLeft = sidebarWidth;
@@ -592,7 +606,8 @@
     @csrf
   </form>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="{{ asset('css/sweetalert2.min.css') }}">
+  <script src="{{ asset('js/sweetalert2.min.js') }}"></script>
   <script>
     function confirmLogout() {
       Swal.fire({
@@ -610,6 +625,40 @@
         }
       })
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // auto-dismiss any Bootstrap alert message
+      document.querySelectorAll('.alert-dismissible').forEach((alertElem) => {
+        setTimeout(() => {
+          const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElem);
+          bsAlert.close();
+        }, 4300);
+      });
+
+      // Toast-style notification (popup for a few seconds)
+      function showToast(type, message) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: type,
+          title: message,
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true,
+          background: 'rgba(32, 34, 40, 0.95)',
+          color: '#fff',
+          customClass: {
+            popup: 'border border-1 border-light'
+          }
+        });
+      }
+
+      @if(session('success'))
+        showToast('success', '{!! addslashes(session('success')) !!}');
+      @elseif(session('error'))
+        showToast('error', '{!! addslashes(session('error')) !!}');
+      @endif
+    });
   </script>
 
   @yield('scripts')

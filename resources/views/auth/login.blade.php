@@ -4,19 +4,21 @@
 
 @section('styles')
     <style>
-        /* Import modern font and Font Awesome for additional icons */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+        /* Using system fonts and local Font Awesome */
         
         body {
-            background: linear-gradient(135deg, #0a0f1e 0%, #1a1f35 30%, #2a2f52 70%, #1e1b4b 100%);
-            background-size: 300% 300%;
-            animation: gradientShift 12s ease infinite;
+            background-image: url('{{ asset("images/login.png") }}');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             color: #fff;
             position: relative;
+            margin: 0;
+            padding: 0;
         }
 
         @keyframes gradientShift {
@@ -84,31 +86,151 @@
             100% { transform: translate(50px, 50px); }
         }
 
-        /* Animated floating particles */
+        /* ===== ADVANCED GRAPHICAL EFFECTS ===== */
+        
+        /* Enhanced particle system */
         .particles {
             position: absolute;
             width: 100%;
             height: 100%;
             z-index: 3;
             overflow: hidden;
+            pointer-events: none;
         }
 
         .particle {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            pointer-events: none;
-            animation: float 20s infinite linear;
-            box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.8), rgba(79, 70, 229, 0.4));
+            animation: floatParticle 25s infinite linear;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.6);
+            backdrop-filter: blur(1px);
         }
 
-        @keyframes float {
+        .particle:nth-child(odd) {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.6), rgba(236, 72, 153, 0.3));
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+        }
+
+        .particle:nth-child(3n) {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.7), rgba(16, 185, 129, 0.4));
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.6);
+        }
+
+        @keyframes floatParticle {
             0% {
-                transform: translateY(0) rotate(0deg);
+                transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+                opacity: 0.1;
+            }
+            25% {
+                transform: translateY(-30vh) translateX(10vw) rotate(90deg) scale(1.2);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-60vh) translateX(-5vw) rotate(180deg) scale(0.8);
+                opacity: 0.2;
+            }
+            75% {
+                transform: translateY(-90vh) translateX(15vw) rotate(270deg) scale(1.1);
+                opacity: 0.4;
             }
             100% {
-                transform: translateY(-100vh) rotate(360deg);
+                transform: translateY(-120vh) translateX(0) rotate(360deg) scale(1);
+                opacity: 0.1;
             }
+        }
+
+        /* Geometric shapes overlay */
+        .geometric-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.05;
+            animation: shapeFloat 30s infinite ease-in-out;
+        }
+
+        .shape.circle {
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4f46e5, #ec4899);
+        }
+
+        .shape.square {
+            background: linear-gradient(45deg, #06b6d4, #10b981);
+            transform: rotate(45deg);
+        }
+
+        .shape.triangle {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 87px solid #8b5cf6;
+            background: none;
+        }
+
+        @keyframes shapeFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            33% {
+                transform: translateY(-20px) rotate(120deg) scale(1.1);
+            }
+            66% {
+                transform: translateY(10px) rotate(240deg) scale(0.9);
+            }
+        }
+
+        /* Enhanced glow effects */
+        .glow-effect {
+            display: none !important;
+        }
+
+        .medical-icons,
+        .grid-pattern,
+        .particles,
+        .geometric-shapes,
+        .bg-abstract-shape,
+        .shape1,
+        .shape2,
+        .shape3 {
+            display: none !important;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Interactive hover effects */
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 40px 80px -20px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+                0 0 40px rgba(79, 70, 229, 0.3);
+        }
+
+        .input-group:hover .input-group-text {
+            background: none;
+            transform: scale(1.05);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.8);
         }
 
         /* Abstract shapes with medical cross patterns */
@@ -166,15 +288,15 @@
         }
 
         .input-group-text {
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            border: none;
-            color: white;
+            background: rgba(79, 70, 229, 0.12);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            color: #4f46e5;
             border-radius: 1rem 0 0 1rem;
             padding: 0 1.5rem;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+            box-shadow: none;
         }
 
         .input-group-text::before {
@@ -185,7 +307,7 @@
             width: 0;
             height: 0;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
+            background: none;
             transform: translate(-50%, -50%);
             transition: width 0.6s, height 0.6s;
         }
@@ -211,18 +333,18 @@
         .form-control {
             padding: 1.2rem 1rem;
             border-radius: 0 1rem 1rem 0;
-            border: 2px solid transparent;
-            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            background-color: rgba(255, 255, 255, 0.95);
             font-size: 1rem;
             transition: all 0.3s;
-            color: #1f2937;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            color: #111827;
+            box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
         }
 
         .form-control:focus {
             border-color: #4f46e5;
-            background-color: white;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15), 0 4px 15px rgba(79, 70, 229, 0.2);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12), 0 4px 15px rgba(79, 70, 229, 0.12);
             outline: none;
         }
 
@@ -248,37 +370,77 @@
             opacity: 1;
         }
 
-        /* Rest of your existing styles remain the same */
+        .input-group.invalid .input-group-text {
+            background: none;
+        }
+
+        .input-group.invalid .form-control {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        /* ===== RESPONSIVE FULL-SCREEN DESIGN ===== */
+        
         .login-wrapper {
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
             position: relative;
             z-index: 10;
+            overflow: auto;
         }
 
+        .login-container {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 3rem;
+        }
+
+        /* ===== ENHANCED BRAND SECTION ===== */
+        
         .brand-section {
-            padding-right: 3rem;
+            flex: 1;
+            padding: 3rem 2rem;
+            text-align: left;
             position: relative;
             z-index: 20;
             animation: slideInLeft 1s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            max-width: 600px;
         }
 
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-50px);
+        @media (max-width: 1000px) {
+            .brand-section {
+                display: none;
             }
-            to {
-                opacity: 1;
-                transform: translateX(0);
+            
+            .login-container {
+                max-width: 100%;
+                justify-content: center;
+            }
+            
+            .login-section {
+                max-width: 450px;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .login-wrapper {
+                overflow-y: auto;
+                min-height: 100vh;
             }
         }
 
         .brand-icon {
-            width: 220px;
+            width: 250px;
             height: auto;
             margin-bottom: 2rem;
             filter: drop-shadow(0 20px 25px -5px rgba(0, 0, 0, 0.3));
@@ -286,50 +448,65 @@
         }
 
         @keyframes floatIcon {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
         }
 
         .brand-title {
             font-weight: 800;
-            color: #ffffff;
-            font-size: 3.2rem;
+            color: #28a745;
+            font-size: 2.8rem;
             line-height: 1.2;
             margin-bottom: 1.5rem;
             letter-spacing: -0.025em;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .brand-text {
-            color: #e0e7ff;
-            font-size: 1.2rem;
-            line-height: 1.7;
-            margin-bottom: 2.5rem;
-            max-width: 500px;
-            opacity: 0.9;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
         }
 
         .feature-list {
             list-style: none;
             padding: 0;
             margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            align-items: flex-start;
         }
 
         .feature-item {
             display: flex;
             align-items: center;
-            margin-bottom: 1.25rem;
-            color: #ffffff;
+            color: #111827;
             font-weight: 500;
-            font-size: 1.1rem;
+            font-size: 1rem;
             animation: fadeInUp 0.5s ease forwards;
             opacity: 0;
             animation-delay: calc(var(--item-index) * 0.2s);
+            background: rgba(255, 255, 255, 0.72);
+            padding: 1rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
+            text-shadow: none;
+            text-align: left;
+            justify-content: flex-start;
+            width: 100%;
         }
 
         .feature-item:nth-child(1) { --item-index: 1; }
         .feature-item:nth-child(2) { --item-index: 2; }
         .feature-item:nth-child(3) { --item-index: 3; }
+
+        .feature-item:hover {
+            transform: translateX(10px);
+            background: none;
+            box-shadow: none;
+        }
+
+        .feature-item:hover .feature-icon {
+            background: none;
+        }
 
         @keyframes fadeInUp {
             from {
@@ -345,80 +522,51 @@
         .feature-icon {
             color: #10b981;
             margin-right: 1rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: none;
             padding: 0.5rem;
             border-radius: 50%;
-            backdrop-filter: blur(4px);
+            backdrop-filter: none;
             transition: transform 0.3s ease;
+            font-size: 1.2rem;
         }
 
         .feature-item:hover .feature-icon {
-            transform: scale(1.2);
-            background: rgba(16, 185, 129, 0.2);
+            transform: scale(1.2) rotate(10deg);
+            background: none;
+        }
+
+        /* ===== ENHANCED LOGIN CARD ===== */
+        
+        .login-section {
+            flex: 0 0 auto;
+            width: 100%;
+            max-width: 480px;
+            padding: 0;
         }
 
         .login-card {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 2rem;
-            box-shadow: 
-                0 30px 60px -15px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-                0 0 30px rgba(79, 70, 229, 0.2);
-            padding: 3.5rem;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 1.5rem;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
+            padding: 2.5rem;
             width: 100%;
             position: relative;
             overflow: hidden;
             z-index: 20;
             animation: slideInRight 1s ease;
+            backdrop-filter: blur(12px);
         }
 
         @keyframes slideInRight {
             from {
                 opacity: 0;
-                transform: translateX(50px);
+                transform: translateX(50px) scale(0.9);
             }
             to {
                 opacity: 1;
-                transform: translateX(0);
+                transform: translateX(0) scale(1);
             }
-        }
-
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: linear-gradient(90deg, #ec4899, #4f46e5, #06b6d4, #10b981);
-            background-size: 300% 300%;
-            animation: gradientFlow 6s ease infinite;
-        }
-
-        @keyframes gradientFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .login-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
 
         .form-label {
@@ -438,43 +586,33 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #4f46e5, #6366f1, #8b5cf6);
-            background-size: 200% 200%;
-            border: none;
+            background: #28a745;
+            border: 1px solid #28a745;
+            color: #fff;
             padding: 1.2rem;
             border-radius: 1rem;
             font-weight: 600;
             font-size: 1.1rem;
             width: 100%;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.4);
+            box-shadow: 0 12px 24px rgba(18, 99, 44, 0.2);
             position: relative;
             overflow: hidden;
             letter-spacing: 0.5px;
         }
 
         .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+            display: none;
         }
 
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.6);
-            background-position: 100% 100%;
+            box-shadow: 0 18px 30px rgba(18, 99, 44, 0.3);
         }
 
         .btn-primary:hover::before {
-            width: 300px;
-            height: 300px;
+            width: 0;
+            height: 0;
         }
 
         .form-check-input {
@@ -541,218 +679,193 @@
 
         @media (max-width: 991px) {
             .brand-section {
-                padding-right: 0;
-                margin-bottom: 3rem;
-                text-align: center;
+                display: none; /* Hide brand section on mobile for better focus */
             }
 
-            .brand-icon {
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .feature-item {
-                justify-content: center;
+            .login-section {
+                max-width: 100%;
+                padding: 1rem;
             }
 
             .login-card {
-                padding: 2.5rem 1.5rem;
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+                border-radius: 1.5rem;
+            }
+
+            .brand-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .login-card {
+                padding: 1.5rem 1rem;
+                margin: 0.5rem;
+            }
+
+            .brand-title {
+                font-size: 1.8rem;
+            }
+
+            .feature-item {
+                padding: 0.75rem;
+                font-size: 0.9rem;
             }
         }
     </style>
 @endsection
 
 @section('content')
-    <!-- ENHANCED BACKGROUND GRAPHICS -->
-    
-    <!-- Medical/Healthcare themed floating icons -->
-    <div class="medical-icons">
-        <i class="fas fa-hospital medical-icon"></i>
-        <i class="fas fa-stethoscope medical-icon"></i>
-        <i class="fas fa-heartbeat medical-icon"></i>
-        <i class="fas fa-ambulance medical-icon"></i>
-        <i class="fas fa-user-md medical-icon"></i>
-        <i class="fas fa-clinic-medical medical-icon"></i>
-        <i class="fas fa-syringe medical-icon"></i>
-        <i class="fas fa-capsules medical-icon"></i>
-        <i class="fas fa-notes-medical medical-icon"></i>
-        <i class="fas fa-bone medical-icon"></i>
-        <i class="fas fa-brain medical-icon"></i>
-        <i class="fas fa-lungs medical-icon"></i>
-        <i class="fas fa-heart medical-icon"></i>
-        <i class="fas fa-tooth medical-icon"></i>
-        <i class="fas fa-eye medical-icon"></i>
-    </div>
-
-    <!-- Animated grid pattern -->
-    <div class="grid-pattern"></div>
-    
-    <!-- Animated Particles -->
-    <div class="particles" id="particles"></div>
-    
-    <!-- Abstract Background Shapes -->
-    <div class="bg-abstract-shape shape1"></div>
-    <div class="bg-abstract-shape shape2"></div>
-    <div class="bg-abstract-shape shape3"></div>
-    
     <div class="login-wrapper">
-        <div class="container">
-            <div class="row align-items-center justify-content-center">
+        <div class="login-container">
+            <!-- Left Side: Enhanced Branding -->
+            <div class="brand-section">
+                <img src="{{ asset('logo3.png') }}" alt="Logo" class="brand-icon">
+                <h1 class="brand-title">ABC Mission Hospital<br>Leave Management System</h1>
+                
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <i class="fas fa-chart-line feature-icon"></i>
+                        <span>Real-time leave balance tracking with analytics</span>
+                    </li>
+                    <li class="feature-item">
+                        <i class="fas fa-bell feature-icon"></i>
+                        <span>Seamless approval workflows with instant notifications</span>
+                    </li>
+                    <li class="feature-item">
+                        <i class="fas fa-file-alt feature-icon"></i>
+                        <span>Detailed leave history & interactive reports</span>
+                    </li>
+                </ul>
+            </div>
 
-                <!-- Left Side: Enhanced Branding -->
-                <div class="col-lg-6 mb-5 mb-lg-0">
-                    <div class="brand-section">
-                        <img src="{{ asset('logo3.png') }}" alt="Logo" class="brand-icon">
-                        <h1 class="brand-title">ABC Mission Hospital<br>Leave Management System</h1>
-                        <p class="brand-text">
-                            Welcome to your centralized employee portal. Experience a simpler, faster, and more transparent way to
-                            manage your time off with our intelligent leave management platform.
-                        </p>
-
-                        <ul class="feature-list">
-                            <li class="feature-item">
-                                <i class="fas fa-chart-line feature-icon"></i>
-                                <span>Real-time leave balance tracking with analytics</span>
-                            </li>
-                            <li class="feature-item">
-                                <i class="fas fa-bell feature-icon"></i>
-                                <span>Seamless approval workflows with instant notifications</span>
-                            </li>
-                            <li class="feature-item">
-                                <i class="fas fa-file-alt feature-icon"></i>
-                                <span>Detailed leave history & interactive reports</span>
-                            </li>
-                        </ul>
+            <!-- Right Side: Enhanced Login Form -->
+            <div class="login-section">
+                <div class="login-card">
+                    <div class="mb-4 text-center">
+                        <h3 class="fw-bold text-dark mb-2" style="font-size: 1.5rem;">
+                            <i class="fas fa-user-circle text-primary me-2"></i>Welcome Back!
+                        </h3>
+                        <p class="text-muted" style="font-size: 0.9rem;">Sign in to access your dashboard</p>
                     </div>
-                </div>
 
-                <!-- Right Side: Enhanced Login Form with Better Icons -->
-                <div class="col-lg-5 offset-lg-1">
-                    <div class="login-card">
-                        <div class="mb-5 text-center text-lg-start">
-                            <h3 class="fw-bold text-dark mb-2" style="font-size: 2rem;">
-                                <i class="fas fa-user-circle text-primary me-2"></i>Welcome Back!
-                            </h3>
-                            <p class="text-muted small">Sign in to access your employee dashboard</p>
+                    <!-- Success Message -->
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show border-0 bg-success bg-opacity-10 text-success"
+                            role="alert">
+                            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    <!-- Error Message -->
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show border-0 bg-danger bg-opacity-10 text-danger"
+                            role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong>Login Failed:</strong>
+                            <ul class="mb-0 mt-2 ps-3">
+                                @foreach ($errors->all() as $error)
+                                    <li><i class="fas fa-times-circle me-2" style="font-size: 0.8rem;"></i>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('login') }}" id="loginForm">
+                        @csrf
+
+                        <!-- Employee Number with Enhanced Icon -->
+                        <div class="mb-4">
+                            <label for="EmployeeNumber" class="form-label">
+                                <i class="fas fa-id-card"></i> Employee ID
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-id-badge"></i>
+                                </span>
+                                <input id="EmployeeNumber" type="text" name="EmployeeNumber"
+                                    class="form-control @error('EmployeeNumber') is-invalid @enderror"
+                                    placeholder="EMP001" value="{{ old('EmployeeNumber') }}" required autofocus>
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <small class="text-muted ms-2">
+                                <i class="fas fa-info-circle me-1"></i>Enter your 6-digit employee ID
+                            </small>
                         </div>
 
-                        <!-- Success Message -->
-                        @if (session('success'))
-                            <div class="alert alert-success alert-dismissible fade show border-0 bg-success bg-opacity-10 text-success"
-                                role="alert">
-                                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <!-- Password with Enhanced Icon -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-key"></i> Password
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input id="password" type="password" name="password"
+                                    class="form-control @error('password') is-invalid @enderror"
+                                    placeholder="Enter your password" required>
+                                <i class="fas fa-check-circle"></i>
                             </div>
-                        @endif
-
-                        <!-- Error Message -->
-                        @if ($errors->any())
-                            <div class="alert alert-danger alert-dismissible fade show border-0 bg-danger bg-opacity-10 text-danger"
-                                role="alert">
-                                <i class="fas fa-exclamation-circle me-2"></i>
-                                <strong>Login Failed:</strong>
-                                <ul class="mb-0 mt-2 ps-3">
-                                    @foreach ($errors->all() as $error)
-                                        <li><i class="fas fa-times-circle me-2" style="font-size: 0.8rem;"></i>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        @endif
-
-                        <form method="POST" action="{{ route('login') }}" id="loginForm">
-                            @csrf
-
-                            <!-- Employee Number with Enhanced Icon -->
-                            <div class="mb-4">
-                                <label for="EmployeeNumber" class="form-label">
-                                    <i class="fas fa-id-card"></i> Employee ID
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-id-badge"></i>
-                                    </span>
-                                    <input id="EmployeeNumber" type="text" name="EmployeeNumber"
-                                        class="form-control @error('EmployeeNumber') is-invalid @enderror"
-                                        placeholder="EMP001" value="{{ old('EmployeeNumber') }}" required autofocus>
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <small class="text-muted ms-2">
-                                    <i class="fas fa-info-circle me-1"></i>Enter your 6-digit employee ID
-                                </small>
-                            </div>
-
-                            <!-- Password with Enhanced Icon -->
-                            <div class="mb-4">
-                                <label for="password" class="form-label">
-                                    <i class="fas fa-key"></i> Password
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-lock"></i>
-                                    </span>
-                                    <input id="password" type="password" name="password"
-                                        class="form-control @error('password') is-invalid @enderror"
-                                        placeholder="Enter your password" required>
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="text-end mt-1">
-                                    <small class="text-muted">
-                                        <i class="fas fa-shield-alt me-1"></i>Password is encrypted
-                                    </small>
-                                </div>
-                            </div>
-
-                            <!-- Actions with Enhanced Design -->
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                                    <label class="form-check-label small text-muted fw-semibold" for="remember">
-                                        <i class="fas fa-save me-1"></i>Keep me signed in
-                                    </label>
-                                </div>
-                                <a href="{{ route('password.request') }}"
-                                    class="text-decoration-none small text-primary fw-bold">
-                                    <i class="fas fa-question-circle me-1"></i>Forgot password?
-                                </a>
-                            </div>
-
-                            <!-- Enhanced Submit Button -->
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary text-white">
-                                    <i class="fas fa-sign-in-alt me-2"></i> Sign In to Dashboard
-                                    <i class="fas fa-arrow-right ms-2"></i>
-                                </button>
-                            </div>
-                            
-                            <!-- Additional Info -->
-                            <div class="text-center mt-4">
+                            <div class="text-end mt-1">
                                 <small class="text-muted">
-                                    <i class="fas fa-shield-alt me-1"></i> Secure login • SSL encrypted
-                                    <span class="mx-2">|</span>
-                                    <i class="fas fa-clock me-1"></i> Session timeout: 30 min
+                                    <i class="fas fa-shield-alt me-1"></i>Password is encrypted
                                 </small>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+
+                        <!-- Actions with Enhanced Design -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                <label class="form-check-label small text-muted fw-semibold" for="remember">
+                                    <i class="fas fa-save me-1"></i>Keep me signed in
+                                </label>
+                            </div>
+                            <a href="{{ route('password.request') }}"
+                                class="text-decoration-none small text-primary fw-bold">
+                                <i class="fas fa-question-circle me-1"></i>Forgot password?
+                            </a>
+                        </div>
+
+                        <!-- Enhanced Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary text-white">
+                                <i class="fas fa-sign-in-alt me-2"></i> Sign In to Dashboard
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Additional Info -->
+                        <div class="text-center mt-4">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt me-1"></i> Secure login • SSL encrypted
+                                <span class="mx-2">|</span>
+                                <i class="fas fa-clock me-1"></i> Session timeout: 30 min
+                            </small>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript for Particles and Form Validation -->
+    <!-- JavaScript for Enhanced Particles and Form Validation -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Create particles
+            // Create enhanced particles
             const particlesContainer = document.getElementById('particles');
-            const particleCount = 50;
+            const particleCount = 60;
 
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 
-                // Random size
-                const size = Math.random() * 8 + 2;
+                // Random size with more variety
+                const size = Math.random() * 12 + 3;
                 particle.style.width = size + 'px';
                 particle.style.height = size + 'px';
                 
@@ -760,38 +873,69 @@
                 particle.style.left = Math.random() * 100 + '%';
                 particle.style.top = Math.random() * 100 + '%';
                 
-                // Random animation delay
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                
-                // Random animation duration
-                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                // Random animation delay and duration
+                particle.style.animationDelay = Math.random() * 25 + 's';
+                particle.style.animationDuration = (Math.random() * 15 + 20) + 's';
                 
                 // Random opacity
-                particle.style.opacity = Math.random() * 0.3 + 0.1;
+                particle.style.opacity = Math.random() * 0.4 + 0.1;
                 
                 particlesContainer.appendChild(particle);
             }
 
-            // Simple validation for icons (optional)
+            // Enhanced form validation with visual feedback
             const employeeInput = document.getElementById('EmployeeNumber');
             const passwordInput = document.getElementById('password');
+            const loginForm = document.getElementById('loginForm');
             
-            employeeInput.addEventListener('input', function() {
-                const inputGroup = this.closest('.input-group');
-                if (this.value.length >= 3) {
+            function validateInput(input, minLength) {
+                const inputGroup = input.closest('.input-group');
+                if (input.value.length >= minLength) {
                     inputGroup.classList.add('valid');
+                    inputGroup.classList.remove('invalid');
                 } else {
                     inputGroup.classList.remove('valid');
+                    if (input.value.length > 0) {
+                        inputGroup.classList.add('invalid');
+                    } else {
+                        inputGroup.classList.remove('invalid');
+                    }
                 }
+            }
+
+            employeeInput.addEventListener('input', function() {
+                validateInput(this, 3);
             });
 
             passwordInput.addEventListener('input', function() {
-                const inputGroup = this.closest('.input-group');
-                if (this.value.length >= 6) {
-                    inputGroup.classList.add('valid');
-                } else {
-                    inputGroup.classList.remove('valid');
-                }
+                validateInput(this, 6);
+            });
+
+            // Add loading state to button
+            loginForm.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Signing In...';
+                submitBtn.disabled = true;
+                
+                // Re-enable after 3 seconds (in case of error)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            });
+
+            // Add smooth scrolling and focus effects
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.closest('.input-group').style.transform = 'translateY(-2px)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.closest('.input-group').style.transform = 'translateY(0)';
+                });
             });
         });
     </script>

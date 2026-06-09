@@ -597,7 +597,10 @@ class LeaveRequestController extends Controller
 
         // Fetch recent tasks and notifications
         $activeTasks = $employee->tasks()->where('status', '!=', 'Completed')->orderBy('due_date')->take(5)->get();
-        $recentNotifications = $employee->notifications()->orderByDesc('created_at')->take(5)->get();
+        $recentNotifications = $employee->notifications()->orderByDesc('created_at')->take(10)->get();
+        $locumInvitations = $recentNotifications->filter(function ($notification) {
+            return str_contains(strtolower($notification->Message), 'locum');
+        });
 
         return view('dashboards.employee', [
             'dashboardData' => $dashboardData,
@@ -605,7 +608,8 @@ class LeaveRequestController extends Controller
             'leaveRequests' => $leaveRequests->take(10),
             'employee' => $employee,
             'activeTasks' => $activeTasks,
-            'recentNotifications' => $recentNotifications
+            'recentNotifications' => $recentNotifications,
+            'locumInvitations' => $locumInvitations,
         ]);
     }
 

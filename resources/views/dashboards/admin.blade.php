@@ -192,6 +192,35 @@
             </div>
         </div>
 
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 1rem;">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark"><i class="fas fa-money-bill-wave text-success me-2"></i>Institution Locum Spend</h5>
+                            <p class="mb-0 text-muted">Current month total for all departments.</p>
+                        </div>
+                        <span class="badge bg-success align-self-start">This month</span>
+                    </div>
+                    <h2 class="fw-bold mb-3">{{ $formattedLocumSpendThisMonth }}</h2>
+                    <p class="mb-0 text-muted">{{ $totalLocumSessionsThisMonth }} locum session{{ $totalLocumSessionsThisMonth === 1 ? '' : 's' }} recorded.</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 1rem;">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>Locum Reporting</h5>
+                            <p class="mb-0 text-muted">Review every locum session across the institution.</p>
+                        </div>
+                        <span class="badge bg-primary align-self-start">All departments</span>
+                    </div>
+                    <p class="mb-4 text-dark">Navigate to the full locum monthly report to see all sessions, earnings, and department-level details.</p>
+                    <a href="{{ route('locum.report') }}" class="btn btn-primary px-4 py-2">View Locum Report</a>
+                </div>
+            </div>
+        </div>
+
         <!-- Analytics Section -->
         <div class="row g-4 mb-4">
             <!-- Left: Verification Activity Trend -->

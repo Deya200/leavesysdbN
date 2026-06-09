@@ -12,7 +12,7 @@ Hello {{ $supervisor->FirstName }},
 A leave extension request has been submitted and requires your review.
 
 {{-- Extension Details --}}
-@component('mail::section')
+@component('mail::panel')
 **Employee:** {{ $employee->FirstName }} {{ $employee->LastName }}
 **Employee Number:** {{ $employee->EmployeeNumber }}
 **Original Leave Request ID:** #{{ $leaveRequest->LeaveRequestID }}

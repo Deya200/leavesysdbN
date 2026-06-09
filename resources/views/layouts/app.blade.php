@@ -19,7 +19,7 @@
   <!-- Custom Styles -->
   <style>
     :root {
-      --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-primary: 'Maiandra GD', 'Inter', system-ui, -apple-system, sans-serif;
       --color-bg: #f9fafb;
       --color-surface: #ffffff;
       --color-primary: #3b4c9b;

@@ -12,7 +12,7 @@ Hello {{ $supervisor->FirstName }},
 A leave appeal has been submitted and requires your attention.
 
 {{-- Appeal Details --}}
-@component('mail::section')
+@component('mail::panel')
 **Employee:** {{ $employee->FirstName }} {{ $employee->LastName }}
 **Employee Number:** {{ $employee->EmployeeNumber }}
 **Original Request ID:** #{{ $leaveRequest->LeaveRequestID }}

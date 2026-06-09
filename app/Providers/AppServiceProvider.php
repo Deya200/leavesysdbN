@@ -76,6 +76,12 @@ class AppServiceProvider extends ServiceProvider
                  $view->with('unreadCount', 0);
             }
         });
+
+        // Ensure the mail view namespace points to the HTML mail component views.
+        View::addNamespace('mail', [
+            resource_path('views/vendor/mail/html'),
+            base_path('vendor/laravel/framework/src/Illuminate/Mail/resources/views/html'),
+        ]);
     }
 
     /**

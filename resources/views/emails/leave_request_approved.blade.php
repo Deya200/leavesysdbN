@@ -12,7 +12,7 @@ Hello {{ $employee->FirstName }},
 Great news! Your leave request has been **approved**.
 
 {{-- Leave Details --}}
-@component('mail::section')
+@component('mail::panel')
 **Leave Type:** {{ $leaveType->LeaveTypeName }}
 **Total Days:** {{ $leaveRequest->TotalDays }} day(s)
 **Start Date:** {{ \Carbon\Carbon::parse($leaveRequest->StartDate)->format('M d, Y (l)') }}

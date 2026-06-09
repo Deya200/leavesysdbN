@@ -12,7 +12,7 @@ Hello {{ $employee->FirstName }},
 Your leave cancellation request has been **approved**.
 
 {{-- Cancellation Details --}}
-@component('mail::section')
+@component('mail::panel')
 **Leave Type:** {{ $leaveRequest->leaveType->LeaveTypeName }}
 **Leave Dates:** {{ \Carbon\Carbon::parse($leaveRequest->StartDate)->format('M d, Y') }} to {{ \Carbon\Carbon::parse($leaveRequest->EndDate)->format('M d, Y') }}
 **Refunded Days:** {{ $leaveCancellation->refundable_days }} day(s)

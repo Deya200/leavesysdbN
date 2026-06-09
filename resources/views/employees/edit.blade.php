@@ -158,6 +158,58 @@
                                 @enderror
                             </div>
 
+                            <!-- Employment Type -->
+                            <div class="mb-3">
+                                <label for="employment_type" class="form-label">Employment Type</label>
+                                <select id="employment_type" name="employment_type" class="form-select @error('employment_type') is-invalid @enderror">
+                                    <option value="Permanent" {{ old('employment_type', $employee->employment_type ?? 'Permanent') === 'Permanent' ? 'selected' : '' }}>Permanent</option>
+                                    <option value="Temporary" {{ old('employment_type', $employee->employment_type) === 'Temporary' ? 'selected' : '' }}>Temporary</option>
+                                    <option value="Locum" {{ old('employment_type', $employee->employment_type) === 'Locum' ? 'selected' : '' }}>Locum</option>
+                                    <option value="Contract" {{ old('employment_type', $employee->employment_type) === 'Contract' ? 'selected' : '' }}>Contract</option>
+                                </select>
+                                @error('employment_type')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Is Locum -->
+                            <div class="mb-3">
+                                <label for="is_locum" class="form-label">Is Locum Staff</label>
+                                <div class="form-check">
+                                    <input type="checkbox" id="is_locum" name="is_locum" value="1" 
+                                        class="form-check-input @error('is_locum') is-invalid @enderror" 
+                                        {{ old('is_locum', $employee->is_locum) ? 'checked' : '' }}>
+                                    <label for="is_locum" class="form-check-label">
+                                        Check if this employee is dedicated locum staff
+                                    </label>
+                                </div>
+                                @error('is_locum')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Contract Start Date -->
+                            <div class="mb-3" id="contract_dates" style="display: none;">
+                                <label for="contract_start_date" class="form-label">Contract Start Date</label>
+                                <input type="date" id="contract_start_date" name="contract_start_date"
+                                    class="form-control @error('contract_start_date') is-invalid @enderror" 
+                                    value="{{ old('contract_start_date', $employee->contract_start_date) }}">
+                                @error('contract_start_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Contract End Date -->
+                            <div class="mb-3" id="contract_end_dates" style="display: none;">
+                                <label for="contract_end_date" class="form-label">Contract End Date</label>
+                                <input type="date" id="contract_end_date" name="contract_end_date"
+                                    class="form-control @error('contract_end_date') is-invalid @enderror" 
+                                    value="{{ old('contract_end_date', $employee->contract_end_date) }}">
+                                @error('contract_end_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <!-- Submit Button -->
                             <button type="button" class="btn text-white w-100" style="background-color: #2E3A87;" onclick="openConfirmModal('update', '{{ $employee->FirstName }} {{ $employee->LastName }}')">
                                 Update Employee
@@ -191,6 +243,33 @@
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Employment type change handler
+        const employmentTypeSelect = document.getElementById('employment_type');
+        const isLocumCheckbox = document.getElementById('is_locum');
+        const contractDatesDiv = document.getElementById('contract_dates');
+        const contractEndDatesDiv = document.getElementById('contract_end_dates');
+
+        function toggleContractDates() {
+            const employmentType = employmentTypeSelect.value;
+            const isLocum = isLocumCheckbox.checked;
+
+            if (employmentType === 'Temporary' || employmentType === 'Locum' || employmentType === 'Contract' || isLocum) {
+                contractDatesDiv.style.display = 'block';
+                contractEndDatesDiv.style.display = 'block';
+            } else {
+                contractDatesDiv.style.display = 'none';
+                contractEndDatesDiv.style.display = 'none';
+            }
+        }
+
+        employmentTypeSelect.addEventListener('change', toggleContractDates);
+        isLocumCheckbox.addEventListener('change', toggleContractDates);
+
+        // Initial check
+        toggleContractDates();
+    });
+
     function openConfirmModal(action, employeeName) {
         document.getElementById('employeeName').innerText = employeeName || 'Employee';
         const modal = new bootstrap.Modal(document.getElementById('confirmModal'));

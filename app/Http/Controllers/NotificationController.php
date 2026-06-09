@@ -20,7 +20,11 @@ class NotificationController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('notifications.index', compact('notifications'));
+        $locumInvitations = $notifications->filter(function ($notification) {
+            return stripos($notification->Message, 'locum') !== false;
+        });
+
+        return view('notifications.index', compact('notifications', 'locumInvitations'));
     }
 
     /**
@@ -64,5 +68,26 @@ class NotificationController extends Controller
         $notification->delete();
 
         return redirect()->back()->with('success', 'Notification deleted successfully.');
+    }
+
+    /**
+     * Bulk delete notifications.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'notification_ids' => 'required|array',
+            'notification_ids.*' => 'integer|exists:notifications,id',
+        ]);
+
+        // Delete only notifications belonging to the authenticated user
+        Notification::where('EmployeeNumber', auth()->user()->EmployeeNumber)
+            ->whereIn('id', $request->notification_ids)
+            ->delete();
+
+        return redirect()->back()->with('success', 'Selected notifications deleted successfully.');
     }
 }

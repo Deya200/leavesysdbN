@@ -5,7 +5,7 @@
 .offcanvas .offcanvas-body,
 .offcanvas .offcanvas-header {
     color: #fff;
-    font-family: system-ui, "Segoe UI", Arial, sans-serif;
+    font-family: inherit;
 }
 
 /* Sidebar: only round top-right and bottom-right, no extra margin, flush with top and bottom */

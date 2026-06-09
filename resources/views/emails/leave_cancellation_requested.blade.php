@@ -12,7 +12,7 @@ Hello {{ $supervisor->FirstName }},
 A leave cancellation request has been submitted and requires your approval.
 
 {{-- Cancellation Details --}}
-@component('mail::section')
+@component('mail::panel')
 **Employee:** {{ $employee->FirstName }} {{ $employee->LastName }}
 **Employee Number:** {{ $employee->EmployeeNumber }}
 **Leave Request ID:** #{{ $leaveRequest->LeaveRequestID }}

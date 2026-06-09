@@ -48,6 +48,16 @@
             transform: scale(1.01);
         }
 
+        .hover-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        }
+
         .summary-card h6 {
             font-size: 13px;
             margin-bottom: 4px;
@@ -192,7 +202,7 @@
 
         <!-- Management Actions -->
         <div class="row g-4 mb-5">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <a href="{{ route('leave-appeals.index') }}" class="text-decoration-none">
                     <div
                         class="card management-card h-100 border-0 shadow-sm hover-up border-start border-4 border-warning">
@@ -217,7 +227,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <a href="{{ route('leave-extensions.index') }}" class="text-decoration-none">
                     <div class="card management-card h-100 border-0 shadow-sm hover-up border-start border-4 border-info">
                         <div class="card-body d-flex align-items-center">
@@ -240,7 +250,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <a href="{{ route('leave-cancellations.index') }}" class="text-decoration-none">
                     <div class="card management-card h-100 border-0 shadow-sm hover-up border-start border-4 border-danger">
                         <div class="card-body d-flex align-items-center">
@@ -263,11 +273,52 @@
                     </div>
                 </a>
             </div>
+            <div class="col-md-3">
+                <a href="{{ route('supervisor.locum.index') }}" class="text-decoration-none">
+                    <div class="card management-card h-100 border-0 shadow-sm hover-up border-start border-4 border-success">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="management-icon bg-success bg-opacity-10 text-success">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="d-flex align-items-center">
+                                    <h6 class="fw-bold text-dark mb-0">Locum Management</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Monitor locum activities and send emergency notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ route('notifications') }}" class="text-decoration-none">
+                    <div class="card management-card h-100 border-0 shadow-sm hover-up border-start border-4 border-primary">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="management-icon bg-primary bg-opacity-10 text-primary">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="d-flex align-items-center">
+                                    <h6 class="fw-bold text-dark mb-0">Notifications</h6>
+                                    @if(isset($unreadNotifications) && $unreadNotifications > 0)
+                                        <span class="badge bg-primary text-white ms-auto count-badge">{{ $unreadNotifications }}</span>
+                                    @endif
+                                </div>
+                                <p class="text-muted small mb-0">View and manage system notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
 
         <!-- Summary Stats -->
         <div class="row g-3 mb-5">
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-2">
                 <div class="card border-0 shadow-sm h-100 bg-primary bg-opacity-10">
                     <div class="card-body p-4 text-center">
                         <h6 class="text-muted small text-uppercase fw-bold mb-2">Team Members</h6>
@@ -275,7 +326,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-2">
                 <div class="card border-0 shadow-sm h-100 bg-warning bg-opacity-10">
                     <div class="card-body p-4 text-center">
                         <h6 class="text-muted small text-uppercase fw-bold mb-2">Currently on Leave</h6>
@@ -283,7 +334,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-2">
                 <div class="card border-0 shadow-sm h-100 bg-success bg-opacity-10">
                     <div class="card-body p-4 text-center">
                         <h6 class="text-muted small text-uppercase fw-bold mb-2">My Balance</h6>
@@ -292,7 +343,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-2">
                 <div class="card border-0 shadow-sm h-100"
                     style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">
                     <div class="card-body p-4 text-center text-white">
@@ -300,6 +351,17 @@
                         <h2 class="fw-bold text-white mb-0">{{ $pendingSupervisorRequests }}</h2>
                     </div>
                 </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="{{ route('supervisor.locum.index') }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 bg-info bg-opacity-10 hover-card">
+                        <div class="card-body p-4 text-center">
+                            <i class="fas fa-user-md fa-2x text-info mb-2"></i>
+                            <h6 class="text-muted small text-uppercase fw-bold mb-2">Locum Management</h6>
+                            <h2 class="fw-bold text-info mb-0">View</h2>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
 

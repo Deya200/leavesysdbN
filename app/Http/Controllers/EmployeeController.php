@@ -90,12 +90,20 @@ class EmployeeController extends Controller
             'GradeID' => 'required|exists:grades,GradeID',
             'PositionID' => 'required|exists:positions,PositionID',
             'Gender' => 'required|in:Male,Female,Other',
+            'employment_type' => 'nullable|in:Permanent,Temporary,Locum,Contract',
+            'is_locum' => 'nullable|boolean',
+            'contract_start_date' => 'nullable|date',
+            'contract_end_date' => 'nullable|date|after:contract_start_date',
         ]);
 
         $emailVerification = (new \App\Services\EmailVerificationService())->verify($validatedData['email']);
         if (!$emailVerification['valid']) {
             return redirect()->back()->withInput()->withErrors(['email' => $emailVerification['reason']]);
         }
+
+        // Set defaults for new fields
+        $validatedData['employment_type'] = $validatedData['employment_type'] ?? 'Permanent';
+        $validatedData['is_locum'] = $request->has('is_locum') ? 1 : 0;
 
         // Set a default role_id for a new employee.
         // Adjust the value as needed (for example, if role "Employee" has an id of 2).
@@ -105,11 +113,19 @@ class EmployeeController extends Controller
 
         $employee = Employee::create($validatedData);
 
-        // Send invitation if email is provided
+        // Send invitation or activation email
         if ($employee->email) {
             try {
-                $token = \Illuminate\Support\Facades\Password::getRepository()->create($employee);
-                $employee->sendPasswordResetNotification($token);
+                if ($employee->is_locum) {
+                    // For locum employees, send activation email with token
+                    $token = $employee->generateActivationToken();
+                    \Illuminate\Support\Facades\Mail::to($employee->email)
+                        ->send(new \App\Mail\LocumActivationMail($employee, $token));
+                } else {
+                    // For regular employees, send password reset invitation
+                    $token = \Illuminate\Support\Facades\Password::getRepository()->create($employee);
+                    $employee->sendPasswordResetNotification($token);
+                }
             } catch (\Exception $e) {
                 // Silently fail or log if mail fails, but don't break the redirect
                 \Illuminate\Support\Facades\Log::error("Failed to send invitation to new employee: " . $e->getMessage());
@@ -123,8 +139,15 @@ class EmployeeController extends Controller
             is_numeric($employee->EmployeeNumber) ? intval($employee->EmployeeNumber) : 0
         );
 
+        $message = 'Employee successfully added!';
+        if ($employee->email) {
+            $message .= $employee->is_locum 
+                ? ' An activation link has been sent to the locum employee.' 
+                : ' An invitation has been sent.';
+        }
+
         return redirect()->route('employees.index')
-            ->with('success', 'Employee successfully added! ' . ($employee->email ? 'An invitation has been sent.' : ''));
+            ->with('success', $message);
     }
 
     /**
@@ -164,6 +187,10 @@ class EmployeeController extends Controller
             'PositionID' => 'required|exists:positions,PositionID',
             'Gender' => 'required|in:Male,Female,Other',
             'role_id' => 'required|integer',
+            'employment_type' => 'nullable|in:Permanent,Temporary,Locum,Contract',
+            'is_locum' => 'nullable|boolean',
+            'contract_start_date' => 'nullable|date',
+            'contract_end_date' => 'nullable|date|after:contract_start_date',
         ]);
 
         $emailVerification = (new \App\Services\EmailVerificationService())->verify($validatedData['email']);
@@ -171,7 +198,27 @@ class EmployeeController extends Controller
             return redirect()->back()->withInput()->withErrors(['email' => $emailVerification['reason']]);
         }
 
+        // Set defaults for new fields
+        $validatedData['employment_type'] = $validatedData['employment_type'] ?? 'Permanent';
+        $validatedData['is_locum'] = $request->has('is_locum') ? 1 : 0;
+
+        // Check if employee is being converted to locum and doesn't have an activation token yet
+        $wasNotLocum = !$employee->is_locum;
+        $isNowLocum = $validatedData['is_locum'];
+        $needsActivation = $wasNotLocum && $isNowLocum && !$employee->activation_token;
+
         $employee->update($validatedData);
+
+        // Send activation email if employee is newly converted to locum
+        if ($needsActivation && $employee->email) {
+            try {
+                $token = $employee->generateActivationToken();
+                \Illuminate\Support\Facades\Mail::to($employee->email)
+                    ->send(new \App\Mail\LocumActivationMail($employee, $token));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send locum activation email: " . $e->getMessage());
+            }
+        }
 
         AuditLog::record(
             auth()->user()->EmployeeNumber,

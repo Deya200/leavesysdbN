@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Employee;
+use App\Models\Department;
 use App\Models\LeaveRequest;
 use App\Models\Role;
 use App\Models\AuditLog;
+use App\Models\LocumSession;
 use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
@@ -31,12 +33,61 @@ class AdminController extends Controller
         $pendingLeaves = LeaveRequest::where('RequestStatus', 'Pending Admin Verification')->count();
         $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->latest()->get();
 
+        $currentMonth = now();
+        $locumSessionsThisMonth = LocumSession::whereYear('session_date', $currentMonth->year)
+            ->whereMonth('session_date', $currentMonth->month)
+            ->get();
+
+        $totalLocumSessionsThisMonth = $locumSessionsThisMonth->count();
+        $totalLocumSpendThisMonth = $locumSessionsThisMonth->sum(function ($session) {
+            return $session->total_earnings ?? ($session->hours_worked * ($session->hourly_rate ?? 2000));
+        });
+        $formattedLocumSpendThisMonth = 'MWK ' . number_format($totalLocumSpendThisMonth, 2);
+
+        $totalRequests = LeaveRequest::count();
+        $totalApproved = LeaveRequest::where('RequestStatus', 'Approved')->count();
+        $approvalRate = $totalRequests > 0 ? round(($totalApproved / $totalRequests) * 100, 1) : 0;
+        $avgDuration = round((float) LeaveRequest::where('RequestStatus', 'Approved')->avg('TotalDays'), 1);
+
+        $statusBreakdown = [
+            'Approved' => $totalApproved,
+            'Rejected' => LeaveRequest::where('RequestStatus', 'like', '%Rejected%')->count(),
+            'Pending' => LeaveRequest::where('RequestStatus', 'like', '%Pending%')->count(),
+        ];
+
+        $monthlyVerified = [];
+        $monthlyLabels = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $d = now()->subMonths($i);
+            $monthlyLabels[] = $d->format('M Y');
+            $monthlyVerified[] = LeaveRequest::whereYear('updated_at', $d->year)
+                ->whereMonth('updated_at', $d->month)
+                ->whereIn('RequestStatus', ['Approved', 'Rejected by Admin'])
+                ->count();
+        }
+
+        $deptBalanceStats = Department::all()->map(function ($dept) {
+            $employees = Employee::with('grade')->where('DepartmentID', $dept->DepartmentID)->get();
+            $avgRemaining = $employees->isNotEmpty()
+                ? round($employees->avg(fn($e) => $e->leave_days_remaining), 1)
+                : 0;
+            return ['name' => $dept->DepartmentName, 'avg' => $avgRemaining];
+        })->filter(fn($d) => $d['avg'] > 0)->values();
+
         return view('dashboards.admin', compact(
             'employee',
             'totalEmployees',
             'totalLeaveRequests',
             'pendingLeaves',
-            'leaveRequests'
+            'leaveRequests',
+            'totalLocumSessionsThisMonth',
+            'formattedLocumSpendThisMonth',
+            'statusBreakdown',
+            'monthlyVerified',
+            'monthlyLabels',
+            'deptBalanceStats',
+            'approvalRate',
+            'avgDuration'
         ));
     }
 

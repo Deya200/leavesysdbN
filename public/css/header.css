@@ -9,7 +9,7 @@ header.bg-white {
     background: #3D519F !important; /* blueish purple */
     color: #fff;
     border-bottom: 1px solid #2b3970;
-    font-family: system-ui, "Segoe UI", Arial, sans-serif;
+    font-family: inherit;
 }
 
     header .profile-btn {

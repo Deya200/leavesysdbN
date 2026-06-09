@@ -27,7 +27,7 @@ class LoginController extends Controller
         return match ($roleName) {
             'admin' => route('dashboard'),
             'supervisor' => route('supervisor.index'),
-            'employee' => route('dashboards.employee'),
+            'employee' => route('locum.index'),
         // default => route('employee.dashboard'),
         };
     }

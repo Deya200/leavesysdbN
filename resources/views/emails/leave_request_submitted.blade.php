@@ -12,7 +12,7 @@ Hello {{ $supervisor->FirstName }},
 A new leave request has been submitted and requires your review.
 
 {{-- Employee Information --}}
-@component('mail::section')
+@component('mail::panel')
 **Employee:** {{ $employee->FirstName }} {{ $employee->LastName }}
 **Employee Number:** {{ $employee->EmployeeNumber }}
 **Leave Type:** {{ $leaveType->LeaveTypeName }}

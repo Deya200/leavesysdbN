@@ -14,11 +14,16 @@ PositionController,
 GradeController,
 Auth\LoginController,
 SupervisorController,
+SupervisorLocumController,
 AdminController,
+AdminLocumController,
 LeaveAppealController,
 LeaveExtensionController,
 LeaveCancellationController,
-ReportController
+ReportController,
+LocumController,
+LocumRateController,
+LocumActivationController
 };
 
 //Route::fallback(function () {
@@ -50,6 +55,10 @@ Route::get('/register/thankyou', function () {
     return view('auth.thankyou');
 })->name('register.thankyou');
 
+// Locum Account Activation
+Route::get('/locum/activate/{token}', [LocumActivationController::class, 'show'])->name('locum.activate.show');
+Route::post('/locum/activate/{token}', [LocumActivationController::class, 'activate'])->name('locum.activate');
+
 
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {
@@ -75,48 +84,53 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Routes
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-            Route::get('/dashboard', [AdminController::class , 'index'])->name('dashboard');
-            Route::get('/
-s', [LeaveRequestController::class , 'index'])->name('leave_requests');
+        Route::get('/dashboard', [AdminController::class , 'index'])->name('dashboard');
+        Route::get('/leave-requests', [LeaveRequestController::class , 'index'])->name('leave_requests');
 
-            // User Management
-            Route::resource('users', UserController::class)->except(['show']);
-            Route::put('/users/{user}/toggle-status', [UserController::class , 'toggleStatus'])->name('users.toggleStatus');
+        // User Management
+        Route::resource('users', UserController::class)->except(['show']);
+        Route::put('/users/{user}/toggle-status', [UserController::class , 'toggleStatus'])->name('users.toggleStatus');
 
-            // Employee Management
-            Route::prefix('employees')->group(function () {
-                    Route::get('/', [EmployeeController::class , 'index'])->name('manage.employees');
-                    Route::post('/{employee}/assign-supervisor', [EmployeeController::class , 'assignSupervisor'])->name('employees.assignSupervisor');
-                    Route::post('/{employee}/send-invitation', [EmployeeController::class , 'sendInvitation'])->name('employees.sendInvitation');
-                    Route::post('/bulk-send-invitations', [EmployeeController::class , 'bulkSendInvitations'])->name('employees.bulkSendInvitations');
-                }
-                );
-                Route::resource('employees', EmployeeController::class);
-                //Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
-        
-                // Department Management
-                Route::resource('departments', DepartmentController::class);
-                Route::get('/departments/{department}/employees', [DepartmentController::class , 'getEmployeesByDepartment'])->name('departments.employees');
-
-                // Position Management
-                Route::resource('positions', PositionController::class);
-                Route::resource('grades', GradeController::class);
-
-                // Leave Types Management
-                Route::resource('leave-types', LeaveTypeController::class)->names('leave_types');
-            }
-            );
-
-            // Notifications
-            Route::get('/notifications', [NotificationController::class , 'index'])->name('notifications');
-            Route::post('/notifications/{notification}/mark-read', [NotificationController::class , 'markAsRead'])->name('notifications.markAsRead');
-            Route::post('/notifications/mark-all-read', [NotificationController::class , 'markAllAsRead'])->name('notifications.markAllAsRead');
-            Route::delete('/notifications/{notification}', [NotificationController::class , 'destroy'])->name('notifications.destroy');
-
-
-            // Employee Dashboard
-            Route::get('/dashboards/employee', [LeaveRequestController::class , 'employeeDashboard'])->name('dashboards.employee');
+        // Employee Management
+        Route::prefix('employees')->group(function () {
+            Route::get('/', [EmployeeController::class , 'index'])->name('manage.employees');
+            Route::post('/{employee}/assign-supervisor', [EmployeeController::class , 'assignSupervisor'])->name('employees.assignSupervisor');
+            Route::post('/{employee}/send-invitation', [EmployeeController::class , 'sendInvitation'])->name('employees.sendInvitation');
+            Route::post('/bulk-send-invitations', [EmployeeController::class , 'bulkSendInvitations'])->name('employees.bulkSendInvitations');
         });
+        Route::resource('employees', EmployeeController::class);
+        //Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
+
+        // Department Management
+        Route::resource('departments', DepartmentController::class);
+        Route::get('/departments/{department}/employees', [DepartmentController::class , 'getEmployeesByDepartment'])->name('departments.employees');
+
+        // Position Management
+        Route::resource('positions', PositionController::class);
+        Route::resource('grades', GradeController::class);
+
+        // Leave Types Management
+        Route::resource('leave-types', LeaveTypeController::class)->names('leave_types');
+
+        // Locum Rates Management
+        Route::resource('locum-rates', LocumRateController::class)->names('locum_rates');
+
+        // Admin Locum Management
+        Route::prefix('locum')->name('locum.')->group(function () {
+            Route::get('/', [AdminLocumController::class, 'index'])->name('index');
+            Route::get('/{employee}/sessions', [AdminLocumController::class, 'employeeSessions'])->name('employee-sessions');
+        });
+    });
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class , 'index'])->name('notifications');
+    Route::post('/notifications/{notification}/mark-read', [NotificationController::class , 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/mark-all-read', [NotificationController::class , 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::delete('/notifications/bulk-delete', [NotificationController::class , 'bulkDelete'])->name('notifications.bulkDelete');
+    Route::delete('/notifications/{notification}', [NotificationController::class , 'destroy'])
+        ->whereNumber('notification')
+        ->name('notifications.destroy');
+});
 
 Route::middleware(['auth'])->group(function () {
 // Supervisor Routes
@@ -221,6 +235,11 @@ Route::get('/supervisors/{supervisor}/edit', [SupervisorController::class , 'edi
 Route::put('/supervisors/{supervisor}', [SupervisorController::class , 'update'])->name('supervisor.update');
 Route::delete('/supervisors/{supervisor}', [SupervisorController::class , 'destroy'])->name('supervisor.destroy');
 
+// Supervisor Locum Routes
+Route::get('/supervisor/locum', [SupervisorLocumController::class , 'index'])->name('supervisor.locum.index');
+Route::get('/supervisor/locum/{employee}/sessions', [SupervisorLocumController::class , 'employeeSessions'])->name('supervisor.locum.employee-sessions');
+Route::post('/supervisor/locum/send-emergency', [SupervisorLocumController::class , 'sendEmergencyNotification'])->name('supervisor.locum.send-emergency');
+
 Route::get('/positions', [PositionController::class , 'index'])->name('positions.index');
 Route::get('/positions/create', [PositionController::class , 'create'])->name('positions.create');
 Route::post('/positions', [PositionController::class , 'store'])->name('positions.store');
@@ -243,6 +262,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class , 'index'])->name('profile');
     Route::get('/profile/edit', [ProfileController::class , 'edit'])->name('profile.edit');
     Route::post('/profile/update', [ProfileController::class , 'update'])->name('profile.update');
+
+    Route::get('/dashboards/employee', [LeaveRequestController::class , 'employeeDashboard'])->name('dashboards.employee');
+
+    // Locum Routes
+    Route::prefix('locum')->name('locum.')->group(function () {
+        Route::get('/', [LocumController::class, 'index'])->name('index');
+        Route::post('/sign-in', [LocumController::class, 'signIn'])->name('sign_in');
+        Route::post('/sign-out', [LocumController::class, 'signOut'])->name('sign_out');
+        Route::post('/employee/sign-in', [LocumController::class, 'employeeSignIn'])->name('employee.sign_in');
+        Route::post('/employee/sign-out', [LocumController::class, 'employeeSignOut'])->name('employee.sign_out');
+        Route::get('/sessions', [LocumController::class, 'sessions'])->name('sessions');
+        Route::get('/report', [LocumController::class, 'monthlyReport'])->name('report');
+    });
 });
 
 //admin verification page 

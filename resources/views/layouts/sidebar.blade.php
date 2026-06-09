@@ -86,8 +86,45 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('admin.audit_trail') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                    <li class="nav-item">                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('admin.locum.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('admin.locum.index') }}">
+                            <i class="fas fa-user-md" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Locum Management</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('admin.locum_rates.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('admin.locum_rates.index') }}">
+                            <i class="fas fa-dollar-sign" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Locum Rates</span>
+                        </a>
+                    </li>
+
+                    @php
+                        $currentMonth = now();
+                        $adminLocumSessionsThisMonth = \App\Models\LocumSession::whereYear('session_date', $currentMonth->year)
+                            ->whereMonth('session_date', $currentMonth->month)
+                            ->get();
+                        $adminLocumSpendThisMonth = $adminLocumSessionsThisMonth->sum(function ($session) {
+                            return $session->total_earnings ?? ($session->hours_worked * ($session->hourly_rate ?? 2000));
+                        });
+                        $adminLocumSessionCount = $adminLocumSessionsThisMonth->count();
+                    @endphp
+                    <li class="nav-item px-3 mt-3">
+                        <div class="card border-0 shadow-sm p-3 bg-white rounded-3">
+                            <div class="d-flex align-items-start justify-content-between mb-2">
+                                <div>
+                                    <small class="text-uppercase text-muted" style="font-size: 0.68rem; letter-spacing: 0.06em;">This month</small>
+                                    <h6 class="mb-1">Locum Spend</h6>
+                                </div>
+                                <span class="badge bg-success">MWK</span>
+                            </div>
+                            <p class="mb-1 fw-bold">{{ number_format($adminLocumSpendThisMonth, 2) }}</p>
+                            <small class="text-muted">{{ $adminLocumSessionCount }} session{{ $adminLocumSessionCount === 1 ? '' : 's' }}</small>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('admin.audit_trail') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
                             href="{{ route('admin.audit_trail') }}">
                             <i class="fas fa-history" style="width: 18px;"></i>
                             <span style="font-size: 0.875rem;">Audit Trail</span>
@@ -143,6 +180,13 @@
                             href="{{ route('notifications') }}">
                             <i class="fas fa-bell" style="width: 18px;"></i>
                             <span style="font-size: 0.875rem;">Notifications</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('locum.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('locum.index') }}">
+                            <i class="fas fa-clock" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Manage Locum</span>
                         </a>
                     </li>
                 @endif

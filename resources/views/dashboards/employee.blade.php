@@ -375,6 +375,29 @@
                 </div>
 
                 <div class="col-lg-4">
+                    <!-- Quick Actions & Recent Activity -->
+                    <div class="section-header d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-slate-800 mb-0">Quick Actions</h5>
+                    </div>
+                    
+                    <!-- Locum Booking Card -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-gradient-primary text-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-user-md fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">Locum Booking</h6>
+                                    <p class="mb-0 small opacity-75">Sign in/out for locum shifts</p>
+                                </div>
+                                <a href="{{ route('locum.index') }}" class="btn btn-light btn-sm rounded-pill px-3">
+                                    <i class="fas fa-arrow-right me-1"></i> Go
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Recent Notifications -->
                     <div class="section-header d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold text-slate-800 mb-0">Recent Activity</h5>

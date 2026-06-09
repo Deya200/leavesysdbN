@@ -55,6 +55,13 @@ class Employee extends Authenticatable
         'carried_over_leave_days',
         'last_password_reset_at',
         'profile_photo',
+        'is_locum',
+        'employment_type',
+        'contract_start_date',
+        'contract_end_date',
+        'activation_token',
+        'activated_at',
+        'locum_notes',
     ];
 
     /**
@@ -79,6 +86,10 @@ class Employee extends Authenticatable
         'system_notifications_enabled' => 'boolean',
         'carried_over_leave_days' => 'integer',
         'last_password_reset_at' => 'datetime',
+        'is_locum' => 'boolean',
+        'contract_start_date' => 'date',
+        'contract_end_date' => 'date',
+        'activated_at' => 'datetime',
     ];
 
 
@@ -180,6 +191,15 @@ class Employee extends Authenticatable
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'EmployeeNumber', 'EmployeeNumber');
+    }
+
+    /**
+     * Relationship: Locum Sessions for the employee
+     * @return HasMany
+     */
+    public function locumSessions(): HasMany
+    {
+        return $this->hasMany(LocumSession::class, 'EmployeeNumber', 'EmployeeNumber');
     }
 
     /**
@@ -290,6 +310,49 @@ class Employee extends Authenticatable
             $admin = auth()->user(); // Get current authenticated user (admin)
         }
         $this->notify(new PasswordResetNotification($token, $admin));
+    }
+
+    /**
+     * Check if locum account is activated
+     * @return bool
+     */
+    public function isLocumActivated(): bool
+    {
+        return $this->is_locum && $this->activated_at !== null;
+    }
+
+    /**
+     * Check if locum account is pending activation
+     * @return bool
+     */
+    public function isLocumPending(): bool
+    {
+        return $this->is_locum && $this->activated_at === null;
+    }
+
+    /**
+     * Generate activation token for locum account
+     * @return string
+     */
+    public function generateActivationToken(): string
+    {
+        $token = bin2hex(random_bytes(32));
+        $this->update(['activation_token' => $token]);
+        return $token;
+    }
+
+    /**
+     * Activate locum account with password
+     * @param string $password
+     * @return bool
+     */
+    public function activateLocumAccount(string $password): bool
+    {
+        return (bool) $this->update([
+            'password' => bcrypt($password),
+            'activated_at' => now(),
+            'activation_token' => null,
+        ]);
     }
 
 }

@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\LeaveRequest;
 use App\Models\Position;
 use App\Models\Grade;
+use App\Models\LocumSession;
 
 class DashboardController extends Controller
 {
@@ -161,10 +162,22 @@ class DashboardController extends Controller
             return ['name' => $dept->DepartmentName, 'avg' => $avgRemaining];
         })->filter(fn($d) => $d['avg'] > 0)->values();
 
+        $currentMonth = now();
+        $locumSessionsThisMonth = LocumSession::whereYear('session_date', $currentMonth->year)
+            ->whereMonth('session_date', $currentMonth->month)
+            ->get();
+
+        $totalLocumSessionsThisMonth = $locumSessionsThisMonth->count();
+        $totalLocumSpendThisMonth = $locumSessionsThisMonth->sum(function ($session) {
+            return $session->total_earnings ?? ($session->hours_worked * ($session->hourly_rate ?? 2000));
+        });
+        $formattedLocumSpendThisMonth = 'MWK ' . number_format($totalLocumSpendThisMonth, 2);
+
         return view('dashboards.admin', compact(
             'leaveRequests',
             'statusBreakdown', 'monthlyVerified', 'monthlyLabels',
-            'deptBalanceStats', 'approvalRate', 'avgDuration'
+            'deptBalanceStats', 'approvalRate', 'avgDuration',
+            'totalLocumSessionsThisMonth', 'formattedLocumSpendThisMonth'
         ));
     }
 }

@@ -20,3 +20,8 @@ Schedule::call(function () {
 Schedule::call(function () {
     app(CarryOverService::class)->processAnnualCarryOver();
 })->yearlyOn(7, 1, '00:00')->name('process-carry-over'); // Run on July 1st
+
+// Calculate monthly locum work on the 26th of each month
+Schedule::command('locum:calculate-monthly')
+    ->monthlyOn(26, '09:00')
+    ->name('calculate-monthly-locum-work');

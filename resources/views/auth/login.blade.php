@@ -777,10 +777,10 @@
                     <form method="POST" action="{{ route('login') }}" id="loginForm">
                         @csrf
 
-                        <!-- Employee Number with Enhanced Icon -->
+                        <!-- Employee Number -->
                         <div class="mb-4">
                             <label for="EmployeeNumber" class="form-label">
-                                <i class="fas fa-id-card"></i> Employee ID
+                                <i class="fas fa-id-card"></i> Employee Number
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
@@ -792,7 +792,7 @@
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <small class="text-muted ms-2">
-                                <i class="fas fa-info-circle me-1"></i>Enter your 6-digit employee ID
+                                <i class="fas fa-info-circle me-1"></i>Enter your employee number to sign in.
                             </small>
                         </div>
 
@@ -884,7 +884,7 @@
             }
 
             // Enhanced form validation with visual feedback
-            const employeeInput = document.getElementById('EmployeeNumber');
+            const loginInput = document.getElementById('EmployeeNumber');
             const passwordInput = document.getElementById('password');
             const loginForm = document.getElementById('loginForm');
             
@@ -903,7 +903,7 @@
                 }
             }
 
-            employeeInput.addEventListener('input', function() {
+            loginInput.addEventListener('input', function() {
                 validateInput(this, 3);
             });
 

@@ -13,6 +13,13 @@ leavesysdbN is a **leave request management system** built using Laravel. It pro
 - 🔹 **Secure authentication with Laravel’s built-in security features**  
 - 🔹 **Data validation & structured database integration**  
 
+## **Why This System Was Developed**
+This system was created to solve a common workplace problem: managing employee leave in a way that is transparent, fair, and operationally efficient. Many organizations still rely on paper forms, emails, or spreadsheets, which often lead to delayed approvals, poor tracking of leave balances, unclear communication, and disruption in staffing.
+
+The system centralizes leave requests, approval workflows, notifications, leave balance tracking, and staff coverage support, making it easier for employees, supervisors, and administrators to manage absence effectively.
+
+For the full business overview and problem statement, see [SYSTEM_BUSINESS_DOCUMENTATION.md](SYSTEM_BUSINESS_DOCUMENTATION.md).
+
 ## **Built With**  
 - 🌐 Laravel  
 - 🛠️ MySQL / PostgreSQL  

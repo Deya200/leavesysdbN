@@ -203,6 +203,24 @@ class Employee extends Authenticatable
     }
 
     /**
+     * Relationship: Shift Assignments for the employee
+     * @return HasMany
+     */
+    public function shiftAssignments(): HasMany
+    {
+        return $this->hasMany(ShiftAssignment::class, 'EmployeeNumber', 'EmployeeNumber');
+    }
+
+    /**
+     * Relationship: Roster Attendance records for the employee
+     * @return HasMany
+     */
+    public function rosterAttendance(): HasMany
+    {
+        return $this->hasMany(RosterAttendance::class, 'EmployeeNumber', 'EmployeeNumber');
+    }
+
+    /**
      * Get the Employee's computed leave days remaining.
      * (This is a computed accessor if you want to show the theoretical remaining days based on the grade.)
      * Excludes archived leave requests from the calculation.

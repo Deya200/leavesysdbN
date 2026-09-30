@@ -105,6 +105,7 @@ class LocumController extends Controller
             'session_date' => today(),
             'notes' => $request->notes,
             'hourly_rate' => 2000, // Default hourly rate
+            'approval_status' => 'pending',
         ]);
 
         return redirect()->back()->with('success', 'Successfully signed in ' . $locumEmployee->FullName . ' for locum work.');
@@ -168,6 +169,7 @@ class LocumController extends Controller
             'sign_in_time' => now(),
             'session_date' => today(),
             'notes' => $request->notes,
+            'approval_status' => 'pending',
         ]);
 
         return redirect()->route('locum.index')->with('success', 'Successfully signed in for locum work.');

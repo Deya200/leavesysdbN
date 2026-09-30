@@ -49,7 +49,7 @@ class LoginController extends Controller
      */
     public function username()
     {
-        return 'EmployeeNumber'; // Use EmployeeNumber instead of email
+        return 'EmployeeNumber';
     }
 
     /**
@@ -60,7 +60,7 @@ class LoginController extends Controller
      */
     protected function credentials(Request $request)
     {
-        return $request->only('EmployeeNumber', 'password'); // ✅ Login via EmployeeNumber
+        return $request->only('EmployeeNumber', 'password');
     }
 
     /**
@@ -73,7 +73,7 @@ class LoginController extends Controller
     {
         return redirect()->back()
             ->withInput($request->only('EmployeeNumber'))
-            ->withErrors(['EmployeeNumber' => 'Invalid Employee Number or password.']);
+            ->withErrors(['EmployeeNumber' => 'Invalid employee number or password.']);
     }
 
     /**

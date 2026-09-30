@@ -56,6 +56,7 @@
                                 <th>Sign Out</th>
                                 <th>Hours</th>
                                 <th>Earnings</th>
+                                <th>Status</th>
                                 <th>Shift</th>
                             </tr>
                         </thead>
@@ -67,6 +68,32 @@
                                     <td>{{ $session->sign_out_time ? $session->sign_out_time->format('H:i') : 'N/A' }}</td>
                                     <td>{{ number_format($session->hours_worked, 2) }} hrs</td>
                                     <td class="fw-bold text-success">{{ $session->getFormattedEarnings() }}</td>
+                                    <td>
+                                        @php
+                                            $statusClass = 'badge bg-secondary';
+                                            if ($session->approval_status === 'approved') {
+                                                $statusClass = 'badge bg-success';
+                                            } elseif ($session->approval_status === 'pending') {
+                                                $statusClass = 'badge bg-warning text-dark';
+                                            } elseif ($session->approval_status === 'rejected') {
+                                                $statusClass = 'badge bg-danger';
+                                            }
+                                        @endphp
+                                        <span class="{{ $statusClass }} text-uppercase">{{ $session->approval_status ?? 'unknown' }}</span>
+                                        @if($session->approval_status === 'pending')
+                                            <div class="mt-2">
+                                                <form action="{{ route('supervisor.locum.sessions.approve', $session) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success mb-1">Approve</button>
+                                                </form>
+                                                <form action="{{ route('supervisor.locum.sessions.reject', $session) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="supervisor_notes" value="Rejected by supervisor">
+                                                    <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </td>
                                     @php $shiftTypeValue = $session->getShiftTypeValue(); @endphp
                                     <td>
                                         <span class="badge {{ $shiftTypeValue === 'day' ? 'bg-warning text-dark' : 'bg-dark' }}">

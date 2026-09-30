@@ -238,6 +238,8 @@ Route::delete('/supervisors/{supervisor}', [SupervisorController::class , 'destr
 // Supervisor Locum Routes
 Route::get('/supervisor/locum', [SupervisorLocumController::class , 'index'])->name('supervisor.locum.index');
 Route::get('/supervisor/locum/{employee}/sessions', [SupervisorLocumController::class , 'employeeSessions'])->name('supervisor.locum.employee-sessions');
+Route::post('/supervisor/locum/sessions/{session}/approve', [SupervisorLocumController::class, 'approveSession'])->name('supervisor.locum.sessions.approve');
+Route::post('/supervisor/locum/sessions/{session}/reject', [SupervisorLocumController::class, 'rejectSession'])->name('supervisor.locum.sessions.reject');
 Route::post('/supervisor/locum/send-emergency', [SupervisorLocumController::class , 'sendEmergencyNotification'])->name('supervisor.locum.send-emergency');
 
 Route::get('/positions', [PositionController::class , 'index'])->name('positions.index');
@@ -297,3 +299,11 @@ Route::get('/leave-requests/{leaveRequest}/admin-reject', [LeaveRequestControlle
 
 Route::get('/leave-report-pdf', [ReportController::class , 'generatePDF'])->name('leave.report.pdf');
 Route::middleware(['auth'])->get('/my-leave-report-pdf', [ReportController::class , 'generateEmployeePDF'])->name('leave.report.employee.pdf');
+
+// Clinical Roster Routes
+Route::middleware(['auth', 'clinical'])->prefix('clinical-rosters')->name('clinical-rosters.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ClinicalRosterController::class, 'index'])->name('index');
+    Route::post('/bulk-store', [\App\Http\Controllers\ClinicalRosterController::class, 'bulkStore'])->name('bulkStore');
+    Route::post('/shift-assignment', [\App\Http\Controllers\ClinicalRosterController::class, 'storeShiftAssignment'])->name('storeShiftAssignment');
+    Route::post('/attendance', [\App\Http\Controllers\ClinicalRosterController::class, 'storeAttendance'])->name('storeAttendance');
+});

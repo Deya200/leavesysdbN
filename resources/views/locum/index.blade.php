@@ -98,6 +98,18 @@
                                 <strong><i class="fas fa-check-circle me-2"></i>Active Session</strong>
                                 <br>You are currently signed in for locum work.
                             </div>
+
+                            @if($currentUserSession->approval_status === 'pending')
+                                <div class="alert alert-warning mb-3">
+                                    <strong><i class="fas fa-hourglass-half me-2"></i>Pending Approval</strong>
+                                    <br>Your current locum session is pending supervisor approval.
+                                </div>
+                            @elseif($currentUserSession->approval_status === 'rejected')
+                                <div class="alert alert-danger mb-3">
+                                    <strong><i class="fas fa-times-circle me-2"></i>Session Rejected</strong>
+                                    <br>Your locum session was rejected by your supervisor.
+                                </div>
+                            @endif
                             <div class="card bg-light border-info mb-3">
                                 <div class="card-body">
                                     <p class="mb-2"><strong>Sign In Time:</strong> <span class="local-time" data-time="{{ $currentUserSession->sign_in_time->toIso8601String() }}"></span></p>

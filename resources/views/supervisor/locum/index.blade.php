@@ -51,6 +51,16 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 bg-warning bg-opacity-10">
+                <div class="card-body text-center">
+                    <i class="fas fa-hourglass-half fa-2x text-warning mb-2"></i>
+                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Pending Approvals</h6>
+                    <h3 class="fw-bold text-warning mb-0">{{ $pendingSessions->count() }}</h3>
+                    <small class="text-muted">Need supervisor review</small>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Employee Summary Table -->
@@ -141,7 +151,9 @@
                                         <th>Sign Out</th>
                                         <th>Hours Worked</th>
                                         <th>Earnings</th>
+                                        <th>Status</th>
                                         <th>Shift</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -166,11 +178,39 @@
                                             </td>
                                             <td>{{ number_format($session->hours_worked, 2) }} hrs</td>
                                             <td class="fw-bold text-success">{{ $session->getFormattedEarnings() }}</td>
+                                            <td>
+                                                @php
+                                                    $statusClass = 'badge bg-secondary';
+                                                    if ($session->approval_status === 'approved') {
+                                                        $statusClass = 'badge bg-success';
+                                                    } elseif ($session->approval_status === 'pending') {
+                                                        $statusClass = 'badge bg-warning text-dark';
+                                                    } elseif ($session->approval_status === 'rejected') {
+                                                        $statusClass = 'badge bg-danger';
+                                                    }
+                                                @endphp
+                                                <span class="{{ $statusClass }} text-uppercase">{{ $session->approval_status ?? 'unknown' }}</span>
+                                            </td>
                                             @php $shiftTypeValue = $session->getShiftTypeValue(); @endphp
                                             <td>
                                                 <span class="badge {{ $shiftTypeValue === 'day' ? 'bg-warning text-dark' : 'bg-dark' }}">
                                                     {{ $session->getShiftType() }}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                @if($session->approval_status === 'pending')
+                                                    <form action="{{ route('supervisor.locum.sessions.approve', $session) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-success mb-1">Approve</button>
+                                                    </form>
+                                                    <form action="{{ route('supervisor.locum.sessions.reject', $session) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="supervisor_notes" value="Rejected by supervisor">
+                                                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                                    </form>
+                                                @else
+                                                    <span class="text-muted">No action</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

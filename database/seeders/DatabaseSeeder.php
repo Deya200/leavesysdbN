@@ -14,8 +14,10 @@ class DatabaseSeeder extends Seeder
     {
         // Call the production data seeder
         $this->call([
-            ProductionDataSeeder::class ,
-            WorkflowTestSeeder::class ,
+            ProductionDataSeeder::class,
+            WardSeeder::class,
+            WorkflowTestSeeder::class,
+            RoleBasedDemoUsersSeeder::class,
         ]);
     }
 }

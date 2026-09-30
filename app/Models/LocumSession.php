@@ -17,6 +17,11 @@ class LocumSession extends Model
         'notes',
         'hourly_rate',
         'total_earnings',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'rejected_at',
+        'supervisor_notes',
     ];
 
     protected $casts = [
@@ -26,6 +31,8 @@ class LocumSession extends Model
         'hours_worked' => 'decimal:2',
         'hourly_rate' => 'decimal:2',
         'total_earnings' => 'decimal:2',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function employee(): BelongsTo

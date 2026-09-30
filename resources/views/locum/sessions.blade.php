@@ -28,6 +28,7 @@
                                         <th>Hours Worked</th>
                                         <th>Rate/Hour</th>
                                         <th>Earnings</th>
+                                        <th>Status</th>
                                         <th>Notes</th>
                                     </tr>
                                 </thead>
@@ -73,6 +74,21 @@
                                                 @else
                                                     N/A
                                                 @endif
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $statusClass = 'bg-secondary';
+                                                    if ($session->approval_status === 'approved') {
+                                                        $statusClass = 'bg-success';
+                                                    } elseif ($session->approval_status === 'pending') {
+                                                        $statusClass = 'bg-warning text-dark';
+                                                    } elseif ($session->approval_status === 'rejected') {
+                                                        $statusClass = 'bg-danger';
+                                                    }
+                                                @endphp
+                                                <span class="badge {{ $statusClass }} text-uppercase">
+                                                    {{ $session->approval_status ?? 'unknown' }}
+                                                </span>
                                             </td>
                                             <td>{{ $session->notes ?: '-' }}</td>
                                         </tr>

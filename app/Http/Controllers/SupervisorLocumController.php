@@ -31,20 +31,24 @@ class SupervisorLocumController extends Controller
             ->get();
 
         // Calculate summary stats
-        $totalSessions = $locumSessions->count();
-        $totalHours = $locumSessions->sum('hours_worked');
-        $totalEarnings = $locumSessions->sum(function ($session) {
+        $approvedSessions = $locumSessions->where('approval_status', 'approved');
+        $pendingSessions = $locumSessions->where('approval_status', 'pending');
+
+        $totalSessions = $approvedSessions->count();
+        $totalHours = $approvedSessions->sum('hours_worked');
+        $totalEarnings = $approvedSessions->sum(function ($session) {
             return $session->calculateEarnings();
         });
 
         // Group by employee for summary table
         $employeeSummaries = $supervisedEmployees->map(function ($employee) use ($locumSessions) {
             $employeeSessions = $locumSessions->where('EmployeeNumber', $employee->EmployeeNumber);
+            $approvedEmployeeSessions = $employeeSessions->where('approval_status', 'approved');
             return [
                 'employee' => $employee,
-                'total_sessions' => $employeeSessions->count(),
-                'total_hours' => $employeeSessions->sum('hours_worked'),
-                'total_earnings' => $employeeSessions->sum(function ($session) {
+                'total_sessions' => $approvedEmployeeSessions->count(),
+                'total_hours' => $approvedEmployeeSessions->sum('hours_worked'),
+                'total_earnings' => $approvedEmployeeSessions->sum(function ($session) {
                     return $session->calculateEarnings();
                 }),
             ];
@@ -56,7 +60,8 @@ class SupervisorLocumController extends Controller
             'totalSessions',
             'totalHours',
             'totalEarnings',
-            'employeeSummaries'
+            'employeeSummaries',
+            'pendingSessions'
         ));
     }
 
@@ -130,5 +135,46 @@ class SupervisorLocumController extends Controller
         }
 
         return redirect()->back()->with('success', 'Emergency notification sent successfully to ' . $recipients->count() . ' employees.');
+    }
+
+    public function approveSession(LocumSession $session)
+    {
+        $supervisor = Auth::user();
+
+        if ($session->employee->SupervisorID !== $supervisor->EmployeeNumber) {
+            abort(403);
+        }
+
+        $session->update([
+            'approval_status' => 'approved',
+            'approved_by' => $supervisor->EmployeeNumber,
+            'approved_at' => now(),
+            'rejected_at' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'Locum session approved successfully.');
+    }
+
+    public function rejectSession(Request $request, LocumSession $session)
+    {
+        $supervisor = Auth::user();
+
+        if ($session->employee->SupervisorID !== $supervisor->EmployeeNumber) {
+            abort(403);
+        }
+
+        $request->validate([
+            'supervisor_notes' => 'nullable|string|max:500',
+        ]);
+
+        $session->update([
+            'approval_status' => 'rejected',
+            'approved_by' => $supervisor->EmployeeNumber,
+            'approved_at' => null,
+            'rejected_at' => now(),
+            'supervisor_notes' => $request->input('supervisor_notes'),
+        ]);
+
+        return redirect()->back()->with('success', 'Locum session rejected.');
     }
 }

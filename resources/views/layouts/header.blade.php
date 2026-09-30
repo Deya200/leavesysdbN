@@ -51,7 +51,7 @@
                         @forelse($headerNotifications ?? [] as $notification)
                             @if(is_object($notification))
                                 <li>
-                                    <div class="dropdown-item px-3 py-3 border-bottom notification-item {{ ($notification->Status ?? '') === 'Unread' ? 'unread' : '' }}" style="transition: background 0.2s ease; cursor: pointer;">
+                                    <div class="dropdown-item px-3 py-3 border-bottom notification-item {{ ($notification->Status ?? '') === 'Unread' ? 'unread' : '' }}" data-notification-url="{{ route('notifications') }}" role="button" style="transition: background 0.2s ease; cursor: pointer;">
                                         <div class="d-flex gap-3">
                                             <div class="flex-shrink-0">
                                                 <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: {{ ($notification->Status ?? '') === 'Unread' ? 'rgba(61, 81, 159, 0.1)' : 'rgba(108, 117, 125, 0.1)' }};">
@@ -413,12 +413,17 @@ function confirmLogout() {
     document.addEventListener('DOMContentLoaded', function() {
 
         // Add click handlers for notification items if needed
-        const notificationItems = document.querySelectorAll('.notification-item');
+        const notificationItems = Array.from(document.querySelectorAll('.notification-item'));
         notificationItems.forEach(item => {
             item.addEventListener('click', function(e) {
-                if (!e.target.closest('form')) {
-                    // Handle notification click (e.g., mark as read and redirect)
-                    console.log('Notification clicked');
+                const target = e.target && e.target.nodeType === Node.TEXT_NODE ? e.target.parentElement : e.target;
+                const closestForm = target && typeof target.closest === 'function' ? target.closest('form') : null;
+                if (!closestForm) {
+                    const notificationItem = target && typeof target.closest === 'function' ? target.closest('.notification-item') : item;
+                    const url = notificationItem?.dataset?.notificationUrl;
+                    if (url) {
+                        window.location.href = url;
+                    }
                 }
             });
         });

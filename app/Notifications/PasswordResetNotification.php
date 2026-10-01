@@ -55,10 +55,10 @@ class PasswordResetNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        $resetUrl = url(config('app.url') . route('password.reset', [
+        $resetUrl = route('password.reset', [
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
-        ], false));
+        ], true);
 
         $adminName = $this->admin ? "{$this->admin->FirstName} {$this->admin->LastName}" : 'System Administrator';
         $resetTime = now()->format('M d, Y \a\t h:i A');

@@ -139,6 +139,14 @@ class LeaveRequest extends Model
     /**
      * Check if this leave request can be appealed
      */
+    public function isAwaitingAdminAction(): bool
+    {
+        return in_array(strtolower((string) $this->RequestStatus), [
+            'pending admin verification',
+            'pending admin approval',
+        ], true);
+    }
+
     public function canBeAppealed(): bool
     {
         if (!$this->can_be_appealed || $this->RequestStatus !== 'Rejected') {

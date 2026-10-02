@@ -66,7 +66,10 @@ class LeaveRequestPolicy
     public function adminApprove(Employee $user, LeaveRequest $leaveRequest)
     {
         return $user->isAdmin()
-            && strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') === 0;
+            && in_array(strtolower((string) $leaveRequest->RequestStatus), [
+                'pending admin verification',
+                'pending admin approval',
+            ], true);
     }
 
     public function supervisorReject(Employee $user, LeaveRequest $leaveRequest)
@@ -94,6 +97,9 @@ class LeaveRequestPolicy
     public function adminReject(Employee $user, LeaveRequest $leaveRequest)
     {
         return $user->isAdmin()
-            && strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') === 0;
+            && in_array(strtolower((string) $leaveRequest->RequestStatus), [
+                'pending admin verification',
+                'pending admin approval',
+            ], true);
     }
 }

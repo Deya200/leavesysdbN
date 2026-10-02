@@ -675,7 +675,7 @@
                             </td>
                             <td class="text-center-cell">
                                 @php
-                                    $canAdminAction = strcasecmp($request->RequestStatus, 'Pending Admin Verification') === 0;
+                                    $canAdminAction = $request->isAwaitingAdminAction();
                                     $canSupAction = strcasecmp($request->RequestStatus, 'Pending Supervisor Approval') === 0;
                                 @endphp
 

@@ -307,14 +307,14 @@
                                         <span class="badge
                                                                             @if($request->RequestStatus === 'Approved') bg-success
                                                                             @elseif($request->RequestStatus === 'Rejected by Admin' || $request->RequestStatus === 'Rejected') bg-danger
-                                                                            @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
+                                                                            @elseif(in_array(strtolower((string) $request->RequestStatus), ['pending admin verification', 'pending admin approval'], true)) bg-primary
                                                                             @else bg-warning text-dark @endif">
                                             {{ ucfirst($request->RequestStatus) }}
                                         </span>
                                     </td>
                                     <td>
                                         @php
-                                            $canAdminAction = strcasecmp($request->RequestStatus, 'Pending Admin Verification') === 0;
+                                            $canAdminAction = $request->isAwaitingAdminAction();
                                             $canSupAction = strcasecmp($request->RequestStatus, 'Pending Supervisor Approval') === 0 && auth()->id() === $request->employee->SupervisorID;
                                         @endphp
 

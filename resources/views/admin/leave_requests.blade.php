@@ -105,13 +105,13 @@
                                         <span class="badge
                                                     @if($request->RequestStatus === 'Approved') bg-success
                                                     @elseif($request->RequestStatus === 'Rejected by Admin') bg-danger
-                                                    @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
+                                                    @elseif(in_array(strtolower((string) $request->RequestStatus), ['pending admin verification', 'pending admin approval'], true)) bg-primary
                                                     @else bg-warning text-dark @endif">
                                             {{ ucfirst($request->RequestStatus) }}
                                         </span>
                                     </td>
                                     <td>
-                                        @if ($request->RequestStatus === 'Pending Admin Verification')
+                                        @if ($request->isAwaitingAdminAction())
                                             <button type="button" class="btn btn-sm btn-success mb-1"
                                                 onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval', 'AdminApprovalNote')">
                                                 Approve

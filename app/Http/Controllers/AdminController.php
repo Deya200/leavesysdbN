@@ -30,7 +30,7 @@ class AdminController extends Controller
 
         $totalEmployees = Employee::count();
         $totalLeaveRequests = LeaveRequest::count();
-        $pendingLeaves = LeaveRequest::where('RequestStatus', 'Pending Admin Verification')->count();
+        $pendingLeaves = LeaveRequest::whereIn('RequestStatus', ['Pending Admin Verification', 'Pending Admin Approval'])->count();
         $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->latest()->get();
 
         $currentMonth = now();
@@ -107,7 +107,7 @@ class AdminController extends Controller
     {
         $leaveRequest = LeaveRequest::findOrFail($leaveRequestId);
 
-        if ($leaveRequest->RequestStatus !== 'Pending Admin Verification') {
+        if (!$leaveRequest->isAwaitingAdminAction()) {
             return redirect()->back()->with('error', 'This leave request is not awaiting admin approval.');
         }
 
@@ -138,7 +138,7 @@ class AdminController extends Controller
 
         $leaveRequest = LeaveRequest::findOrFail($leaveRequestId);
 
-        if ($leaveRequest->RequestStatus !== 'Pending Admin Verification') {
+        if (!$leaveRequest->isAwaitingAdminAction()) {
             return redirect()->back()->with('error', 'This leave request is not pending admin verification.');
         }
 

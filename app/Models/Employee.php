@@ -323,11 +323,21 @@ class Employee extends Authenticatable
      */
     public function sendPasswordResetNotification($token, $admin = null)
     {
-        // Use custom notification with admin info
-        if ($admin === null) {
-            $admin = auth()->user(); // Get current authenticated user (admin)
+        try {
+            // Use custom notification with admin info
+            if ($admin === null) {
+                $admin = auth()->user(); // Get current authenticated user (admin)
+            }
+
+            $this->notify(new PasswordResetNotification($token, $admin));
+        } catch (\Throwable $e) {
+            \Log::warning('Password reset email could not be sent.', [
+                'employee_number' => $this->EmployeeNumber,
+                'email' => $this->email,
+                'admin_number' => $admin?->EmployeeNumber ?? null,
+                'exception' => $e->getMessage(),
+            ]);
         }
-        $this->notify(new PasswordResetNotification($token, $admin));
     }
 
     /**

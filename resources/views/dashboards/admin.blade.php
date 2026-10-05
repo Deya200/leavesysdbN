@@ -20,8 +20,23 @@
         .table {
             background-color: #ffffff;
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .requests-table-card,
+        .requests-table-responsive,
+        .requests-table-card .table {
+            overflow: visible !important;
+        }
+
+        .requests-actions-dropdown .dropdown-menu {
+            z-index: 1080;
+        }
+
+        @media (max-width: 991.98px) {
+            .requests-table-responsive {
+                overflow-x: auto !important;
+            }
         }
 
         .table thead {
@@ -240,13 +255,13 @@
         </div>
 
         <!-- Pending Requests Section -->
-        <div id="requests-section" class="card p-0 border-0 shadow-sm mb-4" style="border-radius: 1rem; overflow: hidden;">
+        <div id="requests-section" class="card requests-table-card p-0 border-0 shadow-sm mb-4" style="border-radius: 1rem;">
             <div class="card-header bg-white border-bottom py-3">
                 <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-list-alt text-primary me-2"></i> Processing Queue</h5>
             </div>
             <div class="card-body p-0">
             @if ($leaveRequests->isNotEmpty())
-                <div class="table-responsive">
+                <div class="table-responsive requests-table-responsive">
                     <table class="table table-bordered align-middle">
                         <thead>
                             <tr>
@@ -291,11 +306,11 @@
                                             $canSupAction = strcasecmp($request->RequestStatus, 'Pending Supervisor Approval') === 0 && auth()->id() === $request->employee->SupervisorID;
                                         @endphp
 
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-secondary dropdown-toggle py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <div class="dropdown requests-actions-dropdown">
+                                            <button class="btn btn-sm btn-secondary dropdown-toggle py-1 px-2" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">
                                                 <i class="fas fa-ellipsis-v me-1"></i> Actions
                                             </button>
-                                            <ul class="dropdown-menu shadow-sm">
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                 <li>
                                                     <button class="dropdown-item" type="button" onclick="fetchAndShowLeaveModal('{{ route('leave_requests.show', $request->LeaveRequestID) }}')">
                                                         <i class="fas fa-eye text-info me-2"></i> View Details

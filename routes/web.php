@@ -20,6 +20,7 @@ LeaveExtensionController,
 LeaveCancellationController,
 ReportController
 };
+use App\Http\Controllers\StaffVoiceController;
 
 //Route::fallback(function () {
 //    return redirect()->route('dashboard')->with('error', 'Page not found.');
@@ -237,6 +238,12 @@ Route::put('/leave-types/{leaveType}', [LeaveTypeController::class , 'update'])-
 Route::delete('/leave-types/{leaveType}', [LeaveTypeController::class , 'destroy'])->name('leave_types.destroy');
 
 Route::get('/leave-requests/{leaveRequest}/edit', [LeaveRequestController::class , 'edit'])->name('leave_requests.edit');
+
+Route::get('/staff-voice', [StaffVoiceController::class, 'index'])->name('staff_voice.index');
+Route::post('/staff-voice', [StaffVoiceController::class, 'store'])->name('staff_voice.store');
+Route::post('/staff-voice/ideas/{entry}/vote', [StaffVoiceController::class, 'voteIdea'])->name('staff_voice.ideas.vote');
+Route::post('/staff-voice/polls/{option}/vote', [StaffVoiceController::class, 'votePoll'])->name('staff_voice.polls.vote');
+Route::put('/staff-voice/{entry}/respond', [StaffVoiceController::class, 'respond'])->name('staff_voice.respond');
 
 });
 

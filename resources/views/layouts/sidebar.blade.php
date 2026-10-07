@@ -130,6 +130,16 @@
                         </a>
                     </li>
                 @endif
+
+                @if(auth()->check())
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-2 text-slate-800 hover-bg-slate-50 transition-all {{ request()->routeIs('staff_voice.*') ? 'bg-primary bg-opacity-10 text-primary fw-bold' : '' }}"
+                            href="{{ route('staff_voice.index') }}">
+                            <i class="fas fa-comments" style="width: 18px;"></i>
+                            <span style="font-size: 0.875rem;">Staff Voice</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </nav>
         

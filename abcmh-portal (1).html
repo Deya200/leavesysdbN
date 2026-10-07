@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ABCMH Community &amp; Staff Voice</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+:root{
+  --ink:#1F332C;
+  --ink-soft:#4C5E56;
+  --paper:#EEF2EC;
+  --surface:#FBFCFA;
+  --pine:#2C6353;
+  --pine-dark:#204A3F;
+  --amber:#D89A48;
+  --amber-soft:#F1DDB9;
+  --line:#D6DED2;
+  --review:#8A9189;
+  --progress:#D89A48;
+  --done:#2C6353;
+  --danger-bg:#FBECEC;
+  --danger-border:#E3A5A5;
+  --danger-text:#7A3030;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; height:100%; background:var(--paper); color:var(--ink); }
+body{ font-family:'Work Sans', sans-serif; }
+.font-display{ font-family:'Fraunces', serif; }
+button, input, select, textarea{ font-family:inherit; }
+button{ cursor:pointer; }
+a{ color:inherit; }
+
+/* Layout */
+.mobile-bar{ display:flex; align-items:center; gap:10px; padding:0.9rem 1.1rem; border-bottom:1px solid var(--line); background:var(--surface); }
+.mobile-bar button{ background:none; border:none; padding:4px; color:var(--pine-dark); }
+.mobile-bar .brand{ font-family:'Fraunces', serif; font-size:1.05rem; font-weight:600; color:var(--pine-dark); }
+
+.overlay{ position:fixed; inset:0; background:rgba(31,51,44,0.35); z-index:30; }
+
+.sidebar{
+  position:fixed; top:0; left:0; bottom:0; width:250px;
+  background:var(--pine-dark); color:#fff;
+  display:flex; flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform 0.2s ease;
+  z-index:40;
+  overflow-y:auto;
+}
+.sidebar.open{ transform:translateX(0); }
+.sidebar-header{ padding:1.5rem 1.25rem 1.1rem; display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid rgba(255,255,255,0.12); }
+.sidebar-header h1{ font-size:1.25rem; font-weight:600; margin:0; line-height:1.25; }
+.sidebar-header p{ margin:0.4rem 0 0; font-size:0.78rem; color:rgba(255,255,255,0.65); line-height:1.4; }
+.sidebar-close{ background:none; border:none; color:rgba(255,255,255,0.7); padding:2px; flex-shrink:0; }
+.sidebar-nav{ flex:1; padding:0.75rem 0.6rem; }
+.nav-item{
+  width:100%; display:flex; align-items:center; gap:10px; text-align:left;
+  padding:0.55rem 0.7rem; margin-bottom:2px; border-radius:6px; border:none;
+  background:transparent; color:rgba(255,255,255,0.78); font-size:0.86rem;
+}
+.nav-item svg{ flex-shrink:0; opacity:0.85; }
+.nav-item.active{ background:rgba(255,255,255,0.14); color:#fff; }
+.nav-item.active svg{ opacity:1; }
+.nav-item span.label{ flex:1; }
+
+.content{ padding-left:0; min-height:100vh; display:flex; flex-direction:column; }
+.main{ width:100%; padding:2.25rem 2rem 2.5rem; box-sizing:border-box; flex:1; display:flex; flex-direction:column; }
+.main.not-home{ display:block; }
+.footer{ padding:1.25rem 2rem 2rem; font-size:0.72rem; color:var(--ink-soft); border-top:1px solid var(--line); }
+
+@media (min-width:900px){
+  .sidebar{ transform:translateX(0); }
+  .content{ padding-left:250px; }
+  .overlay{ display:none !important; }
+  .mobile-bar{ display:none; }
+}
+
+/* Load error */
+.load-error{ background:var(--danger-bg); border:1px solid var(--danger-border); border-radius:8px; padding:0.75rem 1rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+.load-error span{ font-size:0.85rem; color:var(--danger-text); }
+.load-error button{ font-size:0.8rem; background:var(--danger-text); color:#fff; border:none; border-radius:6px; padding:0.35rem 0.8rem; }
+
+/* Home news panel */
+.news-panel{ flex:1; min-height:220px; border:1px solid var(--line); border-radius:10px; margin-bottom:1.75rem; display:flex; flex-direction:column; overflow:hidden; background:var(--surface); }
+.news-panel-header{ display:flex; justify-content:space-between; align-items:center; padding:0.9rem 1.1rem; border-bottom:1px solid var(--line); flex-shrink:0; }
+.news-panel-header .title{ font-family:'Fraunces', serif; font-size:1.05rem; font-weight:600; color:var(--pine-dark); }
+.news-toast{ padding:0.5rem 1.1rem; background:var(--amber-soft); flex-shrink:0; display:flex; align-items:center; gap:8px; font-size:0.8rem; }
+.news-feed{ flex:1; overflow-y:auto; padding:0.75rem 1.1rem; }
+.news-item{ display:flex; gap:10px; padding:0.7rem 0; border-bottom:1px solid var(--line); }
+.news-item:last-child{ border-bottom:none; }
+.news-icon{ flex-shrink:0; width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:var(--paper); }
+.news-icon.event{ background:var(--amber-soft); }
+.news-item-title{ font-family:'Fraunces', serif; font-weight:600; font-size:0.92rem; }
+.news-item-body{ margin:0.25rem 0 0; font-size:0.83rem; color:var(--ink-soft); line-height:1.4; }
+.news-item-meta{ display:block; margin-top:0.35rem; font-size:0.74rem; color:var(--ink-soft); }
+.event-date-badge{ font-size:0.72rem; background:var(--amber-soft); color:var(--pine-dark); padding:0.1rem 0.5rem; border-radius:999px; white-space:nowrap; }
+.news-feed-empty{ height:100%; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--ink-soft); font-size:0.85rem; padding:1.5rem 0; }
+
+/* Home tiles */
+.tiles-intro{ color:var(--ink-soft); font-size:0.9rem; margin-bottom:1.25rem; }
+.tiles-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:1rem; }
+.tile{
+  aspect-ratio:1/1; display:flex; flex-direction:column; justify-content:space-between;
+  text-align:left; padding:1.1rem; background:var(--surface); border:1px solid var(--line);
+  border-top:3px solid var(--pine); border-radius:8px;
+}
+.tile-top{ display:flex; justify-content:space-between; align-items:flex-start; }
+.tile-icon{ width:36px; height:36px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:var(--pine); color:#fff; }
+.tile-title{ display:block; font-family:'Fraunces', serif; font-size:1.05rem; font-weight:600; color:var(--ink); line-height:1.25; }
+.tile-desc{ margin:0.4rem 0 0; font-size:0.8rem; color:var(--ink-soft); line-height:1.4; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+/* Generic view chrome */
+.view-wrap{ max-width:760px; }
+.view-wrap.narrow{ max-width:640px; }
+.view-header{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.75rem; }
+.view-title{ font-family:'Fraunces', serif; font-size:1.4rem; margin:0; color:var(--pine-dark); display:flex; align-items:center; gap:8px; }
+.view-sub{ color:var(--ink-soft); font-size:0.85rem; margin:0.25rem 0 0; }
+
+.btn-primary{ display:flex; align-items:center; gap:6px; background:var(--pine); color:#fff; border:none; border-radius:6px; padding:0.55rem 0.9rem; font-size:0.85rem; }
+.btn-primary.dark{ background:var(--pine-dark); }
+.btn-primary.amber{ background:var(--amber); }
+.btn-primary:disabled{ opacity:0.6; cursor:not-allowed; }
+.btn-ghost{ background:transparent; color:var(--ink-soft); border:1px solid var(--line); border-radius:6px; padding:0.5rem 1rem; font-size:0.85rem; }
+.btn-text{ background:none; border:none; color:var(--pine); font-size:0.78rem; padding:0; }
+
+.toast{ margin-top:1rem; background:var(--amber-soft); border:1px solid var(--amber); border-radius:6px; padding:0.6rem 0.85rem; display:flex; align-items:center; gap:8px; font-size:0.85rem; }
+
+.form-card{ margin-top:1rem; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:1.1rem; }
+.field{ display:block; margin-bottom:0.7rem; }
+.field-label{ display:block; font-size:0.78rem; color:var(--ink-soft); margin-bottom:0.25rem; }
+.input{ width:100%; padding:0.5rem 0.65rem; border-radius:6px; border:1px solid var(--line); font-size:0.88rem; background:#fff; color:var(--ink); }
+textarea.input{ resize:vertical; }
+.checkbox-row{ display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--ink); margin-bottom:0.9rem; }
+.form-actions{ display:flex; gap:8px; margin-top:0.5rem; }
+
+.filter-row{ display:flex; gap:6px; margin-top:1.5rem; flex-wrap:wrap; }
+.pill-btn{ font-size:0.78rem; padding:0.3rem 0.7rem; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--ink-soft); }
+.pill-btn.active{ background:var(--pine); border-color:var(--pine); color:#fff; }
+.pill-btn.dark.active{ background:var(--pine-dark); border-color:var(--pine-dark); }
+
+.list-col{ margin-top:1rem; display:flex; flex-direction:column; gap:0.7rem; }
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:0.9rem 1rem; }
+.card-header-row{ display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+.card-title{ font-family:'Fraunces', serif; margin:0; font-size:1.02rem; }
+.card-body{ margin:0.4rem 0 0; font-size:0.88rem; color:var(--ink-soft); line-height:1.45; }
+.card-meta-row{ display:flex; justify-content:space-between; align-items:center; margin-top:0.7rem; flex-wrap:wrap; gap:6px; }
+.card-meta{ font-size:0.78rem; color:var(--ink-soft); }
+.upvote-btn{ font-size:0.78rem; border:1px solid var(--line); border-radius:6px; background:transparent; padding:0.25rem 0.6rem; color:var(--ink); }
+.upvote-btn.voted{ background:var(--amber-soft); }
+
+.empty-state{ border:1px dashed var(--line); border-radius:8px; padding:1.5rem; text-align:center; color:var(--ink-soft); font-size:0.85rem; }
+
+.status-pill{ font-size:0.72rem; padding:0.2rem 0.6rem; border-radius:999px; color:#fff; letter-spacing:0.01em; white-space:nowrap; display:inline-block; }
+.status-pill.review{ background:var(--review); }
+.status-pill.progress{ background:var(--progress); }
+.status-pill.done{ background:var(--done); }
+
+.tag-pill{ font-size:0.72rem; background:var(--amber-soft); color:var(--pine-dark); padding:0.15rem 0.55rem; border-radius:999px; }
+.tag-pill.paper{ background:var(--paper); }
+.soon-pill{ font-size:0.65rem; color:var(--ink-soft); border:1px solid var(--line); border-radius:4px; padding:0.05rem 0.4rem; }
+
+/* Recognition */
+.shoutout-card{ border-left:3px solid var(--amber); }
+
+/* Polls */
+.poll-option-row{ display:flex; gap:6px; margin-bottom:6px; }
+.poll-remove-btn{ background:none; border:1px solid var(--line); border-radius:6px; padding:0 0.5rem; color:var(--ink-soft); }
+.poll-option-btn{ text-align:left; padding:0.5rem 0.7rem; border-radius:6px; border:1px solid var(--line); background:#fff; font-size:0.85rem; color:var(--ink); width:100%; margin-bottom:6px; display:block; }
+.poll-result-bar{ position:relative; border-radius:6px; overflow:hidden; border:1px solid var(--line); background:#fff; margin-bottom:6px; }
+.poll-result-fill{ position:absolute; top:0; left:0; bottom:0; background:var(--amber-soft); }
+.poll-result-row{ position:relative; display:flex; justify-content:space-between; padding:0.5rem 0.7rem; font-size:0.85rem; }
+
+/* Queries */
+.reply-box{ margin-top:0.7rem; padding:0.6rem 0.75rem; background:var(--paper); border-radius:6px; border-left:3px solid var(--pine); }
+.reply-row{ display:flex; gap:6px; margin-top:0.6rem; }
+
+/* Confidential flows */
+.tab-row{ display:flex; gap:6px; margin-bottom:1.25rem; }
+.tab-btn{ font-size:0.82rem; padding:0.4rem 0.85rem; border-radius:6px; border:1px solid var(--line); background:transparent; color:var(--ink-soft); }
+.tab-btn.active{ background:var(--pine); border-color:var(--pine); color:#fff; }
+.tab-btn.dark.active{ background:var(--pine-dark); border-color:var(--pine-dark); }
+.confirm-box{ background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:1.25rem; text-align:center; }
+.ref-code{ font-family:'Fraunces', serif; font-size:1.5rem; font-weight:700; color:var(--pine-dark); letter-spacing:0.05em; margin:0.5rem 0; }
+.copy-btn{ font-size:0.75rem; border:1px solid var(--line); background:transparent; color:var(--ink-soft); border-radius:6px; padding:0.3rem 0.7rem; margin-top:0.4rem; }
+.copy-btn.copied{ background:var(--amber-soft); }
+.lookup-row{ display:flex; gap:6px; margin-bottom:1rem; }
+.locked-msg{ font-size:0.85rem; color:var(--pine-dark); }
+.reviewer-panel{ margin-top:1rem; padding-top:0.85rem; border-top:1px dashed var(--line); }
+.reviewer-label{ display:flex; align-items:center; gap:6px; font-size:0.78rem; color:var(--ink-soft); margin-bottom:0.5rem; }
+
+::-webkit-scrollbar{ width:8px; }
+::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Constants ---------- */
+const DEPARTMENTS = ["Nursing","Administration","Finance","IT","Facilities & Maintenance","Pharmacy","Laboratory","Kitchen & Catering","Social Welfare Committee","Other"];
+const VALUES = ["Compassion","Integrity","Teamwork","Excellence"];
+const RECIPIENTS = ["HR","Finance","Payroll","Administration","Management"];
+const GRIEVANCE_STATUSES = ["Submitted","Under Review","In Mediation","Resolved"];
+const REPORT_STATUSES = ["Submitted","Under Review","Resolved"];
+const HELP_STATUSES = ["Submitted","Contact Arranged","Ongoing Support","Closed"];
+const REPORT_CATEGORIES = ["Theft or fraud","Corruption","Diversion of hospital resources","Abuse","Concealed patient-safety risk","Other serious wrongdoing"];
+const HELP_CATEGORIES = ["Workload or stress","Conflict outside work affecting me","Health & wellbeing","Financial hardship","Family or caregiving","Other personal difficulty"];
+
+const MENU = [
+  { id:"idea", title:"Share an idea", desc:"Suggest something that could make ABCMH better.", icon:"lightbulb" },
+  { id:"recognise", title:"Recognise a colleague", desc:"Give a shout-out linked to one of our values.", icon:"heart" },
+  { id:"poll", title:"Join a poll or activity", desc:"Have your say in community consultations.", icon:"barchart" },
+  { id:"ask", title:"Ask a question or give feedback", desc:"Send a question or feedback to HR, Finance, Payroll or Admin.", icon:"message" },
+  { id:"help", title:"Seek confidential help", desc:"Talk through a workplace difficulty, privately.", icon:"lifebuoy" },
+  { id:"grievance", title:"Raise a named grievance", desc:"Request mediation for a conflict with a colleague. You'll be identified to HR; it stays confidential from the wider hospital.", icon:"users" },
+  { id:"report", title:"Report serious wrongdoing", desc:"Theft, fraud, corruption, abuse or concealed patient-safety risks. Anonymous, and goes straight to the Hospital Director.", icon:"shieldalert" },
+];
+
+const STORAGE_KEYS = {
+  ideas:"ideas-list", shoutouts:"shoutouts-list", posts:"community-posts", polls:"polls-list",
+  queries:"queries-list", grievances:"grievances-list", reports:"reports-list", help:"help-list"
+};
+
+const STATUS_TIER = {
+  "Submitted":"review", "Under Review":"review",
+  "In Progress":"progress", "In Mediation":"progress", "Contact Arranged":"progress", "Ongoing Support":"progress",
+  "Implemented":"done", "Resolved":"done", "Closed":"done"
+};
+
+/* ---------- Icons (inline SVG, monoline) ---------- */
+function icon(name, size){
+  size = size || 16;
+  const paths = {
+    home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+    lightbulb: '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.5h6c0-1.1.4-1.9 1-2.5A6 6 0 0 0 12 3z"/>',
+    heart: '<path d="M12 21s-7-4.6-9.5-9C.8 8.4 2 5 5.3 5c1.9 0 3.2 1 3.7 2 .5-1 1.8-2 3.7-2C16 5 17.2 8.4 21.5 12c-2.5 4.4-9.5 9-9.5 9z"/>',
+    barchart: '<rect x="4" y="10" width="3" height="10"/><rect x="10.5" y="6" width="3" height="14"/><rect x="17" y="13" width="3" height="7"/>',
+    message: '<path d="M4 4h16v12H9l-5 4V4z"/>',
+    lifebuoy: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><line x1="4.9" y1="4.9" x2="9" y2="9"/><line x1="19.1" y1="4.9" x2="15" y2="9"/><line x1="4.9" y1="19.1" x2="9" y2="15"/><line x1="19.1" y1="19.1" x2="15" y2="15"/>',
+    users: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.2c2.5.4 4.5 2.5 4.5 5.8"/>',
+    shieldalert: '<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="16.6" r="0.9" fill="currentColor" stroke="none"/>',
+    plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    check: '<polyline points="4,12 9,17 20,6"/>',
+    menu: '<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>',
+    x: '<line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/>',
+    newspaper: '<rect x="3" y="5" width="14" height="14" rx="1"/><line x1="6" y1="9" x2="14" y2="9"/><line x1="6" y1="12" x2="14" y2="12"/><line x1="6" y1="15" x2="11" y2="15"/><path d="M17 8h3v9a2 2 0 0 1-2 2h-1"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/>',
+    trash: '<polyline points="4,7 20,7"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/><path d="M9 7V4h6v3"/>',
+    search: '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.2" y2="16.2"/>',
+    lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
+  };
+  const d = paths[name] || "";
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+}
+
+/* ---------- Helpers ---------- */
+function esc(s){
+  if (s === null || s === undefined) return "";
+  return String(s).replace(/[&<>"']/g, function(c){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+  });
+}
+
+function timeAgo(ts){
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return mins + "m ago";
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + "h ago";
+  const days = Math.floor(hrs / 24);
+  return days + "d ago";
+}
+
+function formatEventDate(dateStr){
+  if (!dateStr) return "";
+  const d = new Date(dateStr + "T00:00:00");
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString(undefined, { day:"numeric", month:"short", year:"numeric" });
+}
+
+function genRefCode(prefix){
+  // 7 chars from a 32-symbol alphabet (no ambiguous 0/O/1/I/L) — deliberately long
+  // so reference codes can't be brute-forced, since they're the only access
+  // control this prototype has.
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 7; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return prefix + "-" + code.slice(0,4) + "-" + code.slice(4);
+}
+
+function statusPillHtml(status){
+  const tier = STATUS_TIER[status] || "review";
+  return '<span class="status-pill '+tier+'">'+esc(status)+"</span>";
+}
+
+/* ---------- State ---------- */
+const state = {
+  view: "home",
+  mobileOpen: false,
+  loading: true,
+  loadError: false,
+
+  ideas: [], shoutouts: [], posts: [], polls: [], queries: [], grievances: [], reports: [], help: [],
+
+  votedIdeaIds: new Set(),
+  votedPollIds: new Set(),
+
+  showIdeaForm: false, ideaFilter: "All",
+  showShoutForm: false,
+  showPollForm: false,
+  showQueryForm: false, queryFilter: "All", openReplyForId: null,
+  showNewsForm: false, justPostedNews: false,
+
+  justSubmittedIdea: false, justSubmittedShout: false, justSubmittedPoll: false, justSubmittedQuery: false,
+
+  grievanceMode: "submit", grievanceSubmittedCode: null, grievanceLookupResult: undefined, grievanceFailedAttempts: 0, grievanceLockedUntil: 0, grievanceReviewStatus: "", grievanceReviewResponse: "",
+  reportMode: "submit", reportSubmittedCode: null, reportLookupResult: undefined, reportFailedAttempts: 0, reportLockedUntil: 0, reportReviewStatus: "", reportReviewResponse: "",
+  helpMode: "submit", helpSubmittedCode: null, helpLookupResult: undefined, helpFailedAttempts: 0, helpLockedUntil: 0, helpReviewStatus: "", helpReviewResponse: ""
+};
+
+/* ---------- Storage ---------- */
+async function loadAll(){
+  state.loading = true;
+  state.loadError = false;
+  try {
+    const entries = Object.entries(STORAGE_KEYS);
+    const results = await Promise.allSettled(entries.map(function(e){ return window.storage.get(e[1], true); }));
+    results.forEach(function(r, i){
+      const key = entries[i][0];
+      if (r.status === "fulfilled" && r.value) {
+        try { state[key] = JSON.parse(r.value.value); } catch(e){ state[key] = []; }
+      } else {
+        state[key] = [];
+      }
+    });
+  } catch(e){
+    console.error("Failed to load portal data", e);
+    state.loadError = true;
+  }
+  state.loading = false;
+}
+
+async function saveCollection(key){
+  try {
+    await window.storage.set(STORAGE_KEYS[key], JSON.stringify(state[key]), true);
+  } catch(e){
+    console.error("Failed to save " + key, e);
+  }
+}
+
+function copyToClipboard(text){
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).catch(function(){});
+  }
+  return Promise.resolve();
+}
+
+/* ---------- Render: shell ---------- */
+function render(){
+  const root = document.getElementById("root");
+  root.innerHTML =
+    renderMobileBar() +
+    (state.mobileOpen ? '<div class="overlay" data-action="close-mobile"></div>' : "") +
+    renderSidebar() +
+    '<div class="content">' +
+      '<main class="main' + (state.view === "home" ? "" : " not-home") + '">' +
+        renderLoadError() +
+        renderMainView() +
+      "</main>" +
+      '<footer class="footer">Prototype for internal review &mdash; not yet connected to a secure backend. Please don\'t submit real grievance, whistleblowing or confidential-help cases here until this is deployed with proper authentication and access controls.</footer>' +
+    "</div>";
+}
+
+function renderMobileBar(){
+  return '<div class="mobile-bar">' +
+    '<button data-action="open-mobile" aria-label="Open menu">' + icon("menu", 20) + "</button>" +
+    '<span class="brand">ABCMH Community</span>' +
+  "</div>";
+}
+
+function renderLoadError(){
+  if (!state.loadError) return "";
+  return '<div class="load-error"><span>Couldn\'t load the portal\'s data. Check your connection and try again.</span>' +
+    '<button data-action="retry-load">Retry</button></div>';
+}
+
+function activeNavId(){
+  return state.view;
+}
+
+function renderSidebar(){
+  const items = [{ id:"home", title:"Home", icon:"home" }].concat(MENU);
+  const navHtml = items.map(function(item){
+    const isActive = activeNavId() === item.id;
+    return '<button class="nav-item' + (isActive ? " active" : "") + '" data-action="nav" data-view="' + item.id + '">' +
+      icon(item.icon, 16) +
+      '<span class="label">' + esc(item.title) + "</span>" +
+    "</button>";
+  }).join("");
+
+  return '<aside class="sidebar' + (state.mobileOpen ? " open" : "") + '">' +
+    '<div class="sidebar-header">' +
+      "<div>" +
+        '<h1 class="font-display">ABCMH Community &amp; Staff Voice</h1>' +
+        "<p>Heard for ideas, not only problems.</p>" +
+      "</div>" +
+      '<button class="sidebar-close" data-action="close-mobile" aria-label="Close menu">' + icon("x", 18) + "</button>" +
+    "</div>" +
+    '<nav class="sidebar-nav">' + navHtml + "</nav>" +
+  "</aside>";
+}
+
+function renderMainView(){
+  switch(state.view){
+    case "home": return renderHome();
+    case "idea": return renderIdeas();
+    case "recognise": return renderRecognition();
+    case "poll": return renderPolls();
+    case "ask": return renderQueries();
+    case "grievance": return renderGrievance();
+    case "report": return renderReport();
+    case "help": return renderHelp();
+    default: return renderHome();
+  }
+}
+
+/* ---------- Home ---------- */
+function renderHome(){
+  return renderNewsPanel() + renderTiles();
+}
+
+function renderNewsPanel(){
+  const toast = state.justPostedNews ? '<div class="news-toast">' + icon("check", 14) + " Posted.</div>" : "";
+  const formHtml = state.showNewsForm ? renderNewsForm() : "";
+  let feedHtml;
+  if (state.loading) {
+    feedHtml = '<p style="color:var(--ink-soft);font-size:0.85rem;">Loading&hellip;</p>';
+  } else if (state.posts.length === 0) {
+    feedHtml = '<div class="news-feed-empty">Nothing posted yet &mdash; share the first community update or upcoming event.</div>';
+  } else {
+    feedHtml = state.posts.map(function(p){
+      const iconName = p.isEvent ? "calendar" : "newspaper";
+      const badge = (p.isEvent && p.eventDate) ? '<span class="event-date-badge">' + esc(formatEventDate(p.eventDate)) + "</span>" : "";
+      return '<div class="news-item">' +
+        '<div class="news-icon' + (p.isEvent ? " event" : "") + '">' + icon(iconName, 15) + "</div>" +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap;">' +
+            '<span class="news-item-title">' + esc(p.title) + "</span>" + badge +
+          "</div>" +
+          (p.body ? '<p class="news-item-body">' + esc(p.body) + "</p>" : "") +
+          '<span class="news-item-meta">' + esc(p.author) + " &middot; " + timeAgo(p.timestamp) + "</span>" +
+        "</div>" +
+      "</div>";
+    }).join("");
+  }
+
+  return '<div class="news-panel">' +
+    '<div class="news-panel-header">' +
+      '<span class="title">Community news &amp; upcoming events</span>' +
+      '<button class="btn-primary' + (state.showNewsForm ? " btn-ghost" : "") + '" data-action="toggle-news-form" style="' + (state.showNewsForm ? "background:transparent;color:var(--ink-soft);border:1px solid var(--line);" : "") + '">' +
+        (state.showNewsForm ? "Cancel" : icon("plus", 14) + " Post update") +
+      "</button>" +
+    "</div>" +
+    toast +
+    formHtml +
+    '<div class="news-feed">' + feedHtml + "</div>" +
+  "</div>";
+}
+
+function renderNewsForm(){
+  return '<form class="form-card" data-form="news" style="margin-top:0;border-radius:0;border-left:none;border-right:none;border-top:none;">' +
+    '<div style="display:flex;gap:6px;margin-bottom:0.7rem;">' +
+      '<button type="button" class="pill-btn active" data-action="news-type" data-type="news" id="newsTypeNewsBtn">News update</button>' +
+      '<button type="button" class="pill-btn" data-action="news-type" data-type="event" id="newsTypeEventBtn">Upcoming event</button>' +
+    "</div>" +
+    '<input type="hidden" name="isEvent" id="newsIsEvent" value="false" />' +
+    field("Your name", '<input class="input" name="author" required placeholder="e.g. Grace Banda" />') +
+    field("Title", '<input class="input" name="title" required placeholder="e.g. Blood drive next Friday" />') +
+    '<div id="newsEventDateField" style="display:none;">' +
+      field("Event date", '<input class="input" type="date" name="eventDate" />') +
+    "</div>" +
+    field("Details", '<textarea class="input" name="body" rows="2" placeholder="What\'s happening?"></textarea>') +
+    '<button type="submit" class="btn-primary">Post</button>' +
+  "</form>";
+}
+
+function renderTiles(){
+  const tiles = MENU.map(function(item){
+    return '<button class="tile" data-action="nav" data-view="' + item.id + '">' +
+      '<div class="tile-top"><div class="tile-icon">' + icon(item.icon, 18) + "</div></div>" +
+      "<div>" +
+        '<span class="tile-title">' + esc(item.title) + "</span>" +
+        '<p class="tile-desc">' + esc(item.desc) + "</p>" +
+      "</div>" +
+    "</button>";
+  }).join("");
+  return '<p class="tiles-intro">What would you like to do today?</p><div class="tiles-grid">' + tiles + "</div>";
+}
+
+/* ---------- Field helper ---------- */
+function field(label, inputHtml){
+  return '<label class="field"><span class="field-label">' + esc(label) + "</span>" + inputHtml + "</label>";
+}
+
+/* ---------- Ideas ---------- */
+function renderIdeas(){
+  const toast = state.justSubmittedIdea ? '<div class="toast">' + icon("check", 15) + " Idea posted &mdash; thank you.</div>" : "";
+  const formHtml = state.showIdeaForm ? renderIdeaForm() : "";
+  const filters = ["All"].concat(["Under Review","In Progress","Implemented"]);
+  const filterHtml = filters.map(function(f){
+    return '<button class="pill-btn' + (state.ideaFilter === f ? " active" : "") + '" data-action="idea-filter" data-filter="' + esc(f) + '">' + esc(f) + "</button>";
+  }).join("");
+
+  let list = state.ideas;
+  if (state.ideaFilter !== "All") list = list.filter(function(i){ return i.status === state.ideaFilter; });
+
+  let listHtml;
+  if (state.loading) listHtml = '<p style="color:var(--ink-soft);font-size:0.85rem;">Loading ideas&hellip;</p>';
+  else if (list.length === 0) listHtml = '<div class="empty-state">No ideas here yet. Be the first to post one.</div>';
+  else listHtml = list.map(function(idea){
+    const voted = state.votedIdeaIds.has(idea.id);
+    return '<div class="card">' +
+      '<div class="card-header-row"><h3 class="card-title">' + esc(idea.title) + "</h3>" + statusPillHtml(idea.status) + "</div>" +
+      (idea.description ? '<p class="card-body">' + esc(idea.description) + "</p>" : "") +
+      '<div class="card-meta-row">' +
+        '<span class="card-meta">' + esc(idea.author) + " &middot; " + esc(idea.department) + " &middot; " + timeAgo(idea.timestamp) + "</span>" +
+        '<button class="upvote-btn' + (voted ? " voted" : "") + '" data-action="idea-upvote" data-id="' + idea.id + '"' + (voted ? " disabled" : "") + '>&#128077; ' + idea.votes + "</button>" +
+      "</div>" +
+    "</div>";
+  }).join("");
+
+  return '<div class="view-wrap">' +
+    '<div class="view-header"><div>' +
+      '<h2 class="view-title">Ideas &amp; suggestions</h2>' +
+      '<p class="view-sub">Ideas are posted under your name so people can follow up and give credit where it\'s due.</p>' +
+    "</div>" +
+    '<button class="btn-primary" data-action="toggle-idea-form">' + (state.showIdeaForm ? "Cancel" : icon("plus",15) + " New idea") + "</button>" +
+    "</div>" +
+    toast + formHtml +
+    '<div class="filter-row">' + filterHtml + "</div>" +
+    '<div class="list-col">' + listHtml + "</div>" +
+  "</div>";
+}
+
+function renderIdeaForm(){
+  const deptOptions = DEPARTMENTS.map(function(d){ return '<option value="' + esc(d) + '">' + esc(d) + "</option>"; }).join("");
+  return '<form class="form-card" data-form="idea">' +
+    field("Your name", '<input class="input" name="author" required placeholder="e.g. Grace Banda" />') +
+    field("Department", '<select class="input" name="department">' + deptOptions + "</select>") +
+    field("Idea title", '<input class="input" name="title" required placeholder="Sum it up in a few words" />') +
+    field("Tell us more", '<textarea class="input" name="description" rows="3" placeholder="What\'s the idea, and what would it improve?"></textarea>') +
+    '<div class="form-actions"><button type="submit" class="btn-primary">Post idea</button><button type="button" class="btn-ghost" data-action="toggle-idea-form">Cancel</button></div>' +
+  "</form>";
+}
+
+/* ---------- Recognition ---------- */
+function renderRecognition(){
+  const toast = state.justSubmittedShout ? '<div class="toast">' + icon("check",15) + " Shout-out posted.</div>" : "";
+  const formHtml = state.showShoutForm ? renderShoutForm() : "";
+
+  let listHtml;
+  if (state.loading) listHtml = '<p style="color:var(--ink-soft);font-size:0.85rem;">Loading shout-outs&hellip;</p>';
+  else if (state.shoutouts.length === 0) listHtml = '<div class="empty-state">No shout-outs yet. Recognise someone who\'s earned it.</div>';
+  else listHtml = state.shoutouts.map(function(s){
+    return '<div class="card shoutout-card">' +
+      '<div class="card-header-row" style="align-items:baseline;"><h3 class="card-title">To ' + esc(s.to) + '</h3><span class="tag-pill">' + esc(s.value) + "</span></div>" +
+      '<p class="card-body">' + esc(s.message) + "</p>" +
+      '<span class="card-meta" style="display:block;margin-top:0.6rem;">from ' + esc(s.from) + " &middot; " + timeAgo(s.timestamp) + "</span>" +
+    "</div>";
+  }).join("");
+
+  return '<div class="view-wrap">' +
+    '<div class="view-header"><div>' +
+      '<h2 class="view-title">Shout-outs</h2>' +
+      '<p class="view-sub">Recognise a colleague or team for living out one of ABCMH\'s values.<span style="display:block;font-size:0.78rem;margin-top:2px;">(Values shown are placeholders &mdash; swap in the real list later.)</span></p>' +
+    "</div>" +
+    '<button class="btn-primary amber" data-action="toggle-shout-form">' + (state.showShoutForm ? "Cancel" : icon("plus",15) + " Give a shout-out") + "</button>" +
+    "</div>" +
+    toast + formHtml +
+    '<div class="list-col" style="margin-top:1.5rem;">' + listHtml + "</div>" +
+  "</div>";
+}
+
+function renderShoutForm(){
+  const valueOptions = VALUES.map(function(v){ return '<option value="' + esc(v) + '">' + esc(v) + "</option>"; }).join("");
+  return '<form class="form-card" data-form="shout">' +
+    field("Your name", '<input class="input" name="from" required placeholder="e.g. Grace Banda" />') +
+    field("Who are you recognising?", '<input class="input" name="to" required placeholder="A colleague or a whole team" />') +
+    field("Which value does this reflect?", '<select class="input" name="value">' + valueOptions + "</select>") +
+    field("Message", '<textarea class="input" name="message" rows="3" required placeholder="What did they do?"></textarea>') +
+    '<div class="form-actions"><button type="submit" class="btn-primary amber">Post shout-out</button><button type="button" class="btn-ghost" data-action="toggle-shout-form">Cancel</button></div>' +
+  "</form>";
+}
+
+/* ---------- Polls ---------- */
+function renderPolls(){
+  const toast = state.justSubmittedPoll ? '<div class="toast">' + icon("check",15) + " Poll posted.</div>" : "";
+  const formHtml = state.showPollForm ? renderPollForm() : "";
+
+  let listHtml;
+  if (state.loading) listHtml = '<p style="color:var(--ink-soft);font-size:0.85rem;">Loading polls&hellip;</p>';
+  else if (state.polls.length === 0) listHtml = '<div class="empty-state">No polls yet. Start the first community consultation.</div>';
+  else listHtml = state.polls.map(function(poll){
+    const totalVotes = poll.options.reduce(function(sum,o){ return sum + o.votes; }, 0);
+    const voted = state.votedPollIds.has(poll.id);
+    const closed = poll.closesAt && new Date(poll.closesAt + "T23:59:59").getTime() < Date.now();
+    const showResults = voted || closed;
+
+    const optionsHtml = poll.options.map(function(opt){
+      const pct = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+      if (!showResults) {
+        return '<button class="poll-option-btn" data-action="poll-vote" data-poll="' + poll.id + '" data-option="' + opt.id + '">' + esc(opt.text) + "</button>";
+      }
+      return '<div class="poll-result-bar"><div class="poll-result-fill" style="width:' + pct + '%;"></div>' +
+        '<div class="poll-result-row"><span>' + esc(opt.text) + "</span><span style=\"color:var(--ink-soft);\">" + pct + "% (" + opt.votes + ")</span></div>" +
+      "</div>";
+    }).join("");
+
+    const closedTag = closed ? '<span class="soon-pill">closed</span>' : "";
+    const closesLine = poll.closesAt ? '<span style="font-size:0.72rem;color:var(--ink-soft);">' + (closed ? "Closed" : "Closes") + " " + esc(formatEventDate(poll.closesAt)) + "</span>" : "";
+
+    return '<div class="card">' +
+      '<div class="card-header-row"><h3 class="card-title" style="display:flex;align-items:center;gap:8px;">' + icon("barchart",16) + " " + esc(poll.question) + "</h3>" + closedTag + "</div>" +
+      '<div style="margin-top:0.65rem;">' + optionsHtml + "</div>" +
+      '<div class="card-meta-row">' +
+        '<span class="card-meta">' + esc(poll.author) + " &middot; " + timeAgo(poll.timestamp) + " &middot; " + totalVotes + " vote" + (totalVotes === 1 ? "" : "s") + "</span>" +
+        closesLine +
+      "</div>" +
+    "</div>";
+  }).join("");
+
+  return '<div class="view-wrap">' +
+    '<div class="view-header"><div>' +
+      '<h2 class="view-title">Polls &amp; community activities</h2>' +
+      '<p class="view-sub">Have your say &mdash; vote once per poll. Results show as soon as you\'ve voted.</p>' +
+    "</div>" +
+    '<button class="btn-primary" data-action="toggle-poll-form">' + (state.showPollForm ? "Cancel" : icon("plus",15) + " New poll") + "</button>" +
+    "</div>" +
+    toast + formHtml +
+    '<div class="list-col">' + listHtml + "</div>" +
+  "</div>";
+}
+
+function renderPollForm(){
+  return '<form class="form-card" data-form="poll">' +
+    field("Your name", '<input class="input" name="author" required placeholder="e.g. Grace Banda" />') +
+    field("Question", '<input class="input" name="question" required placeholder="What do you want to ask?" />') +
+    '<label class="field"><span class="field-label">Options (2&ndash;6)</span>' +
+      '<div id="pollOptionsContainer">' +
+        '<div class="poll-option-row"><input class="input" name="option" placeholder="Option 1" /></div>' +
+        '<div class="poll-option-row"><input class="input" name="option" placeholder="Option 2" /></div>' +
+      "</div>" +
+      '<button type="button" class="btn-text" data-action="poll-add-option">+ Add option</button>' +
+    "</label>" +
+    field("Closes on (optional)", '<input class="input" type="date" name="closesAt" />') +
+    '<div class="form-actions"><button type="submit" class="btn-primary">Post poll</button><button type="button" class="btn-ghost" data-action="toggle-poll-form">Cancel</button></div>' +
+  "</form>";
+}
+
+/* ---------- Queries ---------- */
+function renderQueries(){
+  const toast = state.justSubmittedQuery ? '<div class="toast">' + icon("check",15) + " Sent.</div>" : "";
+  const formHtml = state.showQueryForm ? renderQueryForm() : "";
+  const filters = ["All"].concat(RECIPIENTS);
+  const filterHtml = filters.map(function(f){
+    return '<button class="pill-btn' + (state.queryFilter === f ? " active" : "") + '" data-action="query-filter" data-filter="' + esc(f) + '">' + esc(f) + "</button>";
+  }).join("");
+
+  let list = state.queries;
+  if (state.queryFilter !== "All") list = list.filter(function(q){ return q.recipient === state.queryFilter; });
+
+  let listHtml;
+  if (state.loading) listHtml = '<p style="color:var(--ink-soft);font-size:0.85rem;">Loading&hellip;</p>';
+  else if (list.length === 0) listHtml = '<div class="empty-state">Nothing here yet.</div>';
+  else listHtml = list.map(function(q){
+    const answered = !!q.reply;
+    const replyHtml = answered
+      ? '<div class="reply-box"><p style="margin:0;font-size:0.85rem;">' + esc(q.reply.text) + '</p><span style="display:block;margin-top:0.3rem;font-size:0.72rem;color:var(--ink-soft);">' + esc(q.recipient) + " &middot; " + timeAgo(q.reply.timestamp) + "</span></div>"
+      : (state.openReplyForId === q.id
+          ? '<div class="reply-row"><input class="input" style="flex:1;" id="replyInput-' + q.id + '" placeholder="Reply as ' + esc(q.recipient) + '&hellip;" /><button class="btn-primary" data-action="query-send-reply" data-id="' + q.id + '">Send</button></div>'
+          : '<button class="btn-text" data-action="query-open-reply" data-id="' + q.id + '">Reply as ' + esc(q.recipient) + "</button>");
+    return '<div class="card">' +
+      '<div class="card-header-row"><span class="tag-pill paper">To ' + esc(q.recipient) + '</span><span class="status-pill ' + (answered ? "done" : "review") + '">' + (answered ? "Answered" : "Awaiting response") + "</span></div>" +
+      '<p style="margin:0.5rem 0 0;font-size:0.9rem;color:var(--ink);line-height:1.45;">' + esc(q.message) + "</p>" +
+      '<span class="card-meta" style="display:block;margin-top:0.5rem;">' + esc(q.author) + " &middot; " + timeAgo(q.timestamp) + "</span>" +
+      '<div style="margin-top:0.6rem;">' + replyHtml + "</div>" +
+    "</div>";
+  }).join("");
+
+  return '<div class="view-wrap">' +
+    '<div class="view-header"><div>' +
+      '<h2 class="view-title">Ask a question or give feedback</h2>' +
+      '<p class="view-sub">Send a question or feedback straight to HR, Finance, Payroll, Administration or Management.</p>' +
+    "</div>" +
+    '<button class="btn-primary" data-action="toggle-query-form">' + (state.showQueryForm ? "Cancel" : icon("plus",15) + " New question or feedback") + "</button>" +
+    "</div>" +
+    toast + formHtml +
+    '<div class="filter-row">' + filterHtml + "</div>" +
+    '<div class="list-col">' + listHtml + "</div>" +
+  "</div>";
+}
+
+function renderQueryForm(){
+  const recipientOptions = RECIPIENTS.map(function(r){ return '<option value="' + esc(r) + '">' + esc(r) + "</option>"; }).join("");
+  return '<form class="form-card" data-form="query">' +
+    field("Your name", '<input class="input" name="author" required placeholder="e.g. Grace Banda" />') +
+    field("Send to", '<select class="input" name="recipient">' + recipientOptions + "</select>") +
+    field("Your question or feedback", '<textarea class="input" name="message" rows="3" required placeholder="What\'s on your mind?"></textarea>') +
+    '<div class="form-actions"><button type="submit" class="btn-primary">Send</button><button type="button" class="btn-ghost" data-action="toggle-query-form">Cancel</button></div>' +
+  "</form>";
+}
+
+/* ---------- Grievance ---------- */
+function renderGrievance(){
+  const modeTabs =
+    '<div class="tab-row">' +
+      '<button class="tab-btn' + (state.grievanceMode === "submit" ? " active" : "") + '" data-action="grievance-mode" data-mode="submit">Submit a grievance</button>' +
+      '<button class="tab-btn' + (state.grievanceMode === "status" ? " active" : "") + '" data-action="grievance-mode" data-mode="status">Check status of a case</button>' +
+    "</div>";
+
+  let body = "";
+  if (state.grievanceMode === "submit") {
+    body = state.grievanceSubmittedCode ? renderConfirmBox(state.grievanceSubmittedCode, "Your grievance has been sent to HR.", "Save this reference number &mdash; you'll need it to check the status. HR will contact you directly.") : renderGrievanceForm();
+  } else {
+    body = renderConfidentialLookup({
+      prefix: "GR", placeholder: "Reference number, e.g. GR-4F8K-J2Q", locked: state.grievanceLockedUntil > Date.now(),
+      notFoundMsg: "No matching case found &mdash; check your reference number.",
+      result: state.grievanceLookupResult, statuses: GRIEVANCE_STATUSES, reviewLabel: "HR case notes (for whoever holds this reference number)",
+      responderName: "HR", kind: "grievance"
+    });
+  }
+
+  return '<div class="view-wrap narrow">' +
+    '<h2 class="view-title">Raise a named grievance</h2>' +
+    '<p class="view-sub" style="margin-bottom:1.25rem;">For a conflict or difficulty with a colleague. You\'re identified to HR so a fair resolution process is possible &mdash; it stays confidential from the wider hospital.</p>' +
+    modeTabs + body +
+  "</div>";
+}
+
+function renderGrievanceForm(){
+  const deptOptions = DEPARTMENTS.map(function(d){ return '<option value="' + esc(d) + '">' + esc(d) + "</option>"; }).join("");
+  return '<form class="form-card" data-form="grievance" style="margin-top:0;">' +
+    field("Your name", '<input class="input" name="author" required placeholder="e.g. Grace Banda" />') +
+    field("Your department", '<select class="input" name="department">' + deptOptions + "</select>") +
+    field("Who is this about?", '<input class="input" name="aboutPerson" placeholder="Colleague\'s name or team" />') +
+    field("What happened?", '<textarea class="input" name="description" rows="4" required placeholder="Describe the situation and how it\'s affected you"></textarea>') +
+    '<label class="checkbox-row"><input type="checkbox" name="wantsMediation" /> I\'d like to request mediation</label>' +
+    '<button type="submit" class="btn-primary">Send to HR</button>' +
+  "</form>";
+}
+
+/* ---------- Report ---------- */
+function renderReport(){
+  const modeTabs =
+    '<div class="tab-row">' +
+      '<button class="tab-btn dark' + (state.reportMode === "submit" ? " active" : "") + '" data-action="report-mode" data-mode="submit">Submit a report</button>' +
+      '<button class="tab-btn dark' + (state.reportMode === "status" ? " active" : "") + '" data-action="report-mode" data-mode="status">Check status of a report</button>' +
+    "</div>";
+
+  let body = "";
+  if (state.reportMode === "submit") {
+    body = state.reportSubmittedCode ? renderConfirmBox(state.reportSubmittedCode, "Your report has been sent to the Hospital Director.", "Save this reference number &mdash; it's the only way to check the status, since no name is attached to your report.") : renderReportForm();
+  } else {
+    body = renderConfidentialLookup({
+      prefix: "WB", placeholder: "Reference number, e.g. WB-4F8K-J2Q", locked: state.reportLockedUntil > Date.now(),
+      notFoundMsg: "No matching report found &mdash; check your reference number.",
+      result: state.reportLookupResult, statuses: REPORT_STATUSES, reviewLabel: "Hospital Director's case notes (for whoever holds this reference number)",
+      responderName: "Hospital Director's office", kind: "report", dark: true
+    });
+  }
+
+  return '<div class="view-wrap narrow">' +
+    '<h2 class="view-title">' + icon("shieldalert",20) + ' Report serious wrongdoing</h2>' +
+    '<p class="view-sub" style="margin-bottom:1.25rem;">For theft, fraud, corruption, diversion of hospital resources, abuse, or concealed patient-safety risks. This goes straight to the Hospital Director, outside the normal management line. Anonymous by default &mdash; leave contact details only if you\'re open to follow-up.<br />This isn\'t the place for a personal conflict with a colleague &mdash; use "Raise a named grievance" for that instead.</p>' +
+    modeTabs + body +
+  "</div>";
+}
+
+function renderReportForm(){
+  const catOptions = REPORT_CATEGORIES.map(function(c){ return '<option value="' + esc(c) + '">' + esc(c) + "</option>"; }).join("");
+  return '<form class="form-card" data-form="report" style="margin-top:0;">' +
+    field("Category", '<select class="input" name="category">' + catOptions + "</select>") +
+    field("What happened?", '<textarea class="input" name="description" rows="4" required placeholder="Include what, where, when and who\'s involved, as far as you know"></textarea>') +
+    field("Contact info (optional)", '<input class="input" name="contact" placeholder="Only if you\'re open to being contacted for follow-up" />') +
+    '<button type="submit" class="btn-primary dark">Send to Hospital Director</button>' +
+  "</form>";
+}
+
+/* ---------- Help ---------- */
+function renderHelp(){
+  const modeTabs =
+    '<div class="tab-row">' +
+      '<button class="tab-btn' + (state.helpMode === "submit" ? " active" : "") + '" data-action="help-mode" data-mode="submit">Reach out</button>' +
+      '<button class="tab-btn' + (state.helpMode === "status" ? " active" : "") + '" data-action="help-mode" data-mode="status">Check status</button>' +
+    "</div>";
+
+  let body = "";
+  if (state.helpMode === "submit") {
+    body = state.helpSubmittedCode ? renderConfirmBox(state.helpSubmittedCode, "HR has received this in confidence.", "Save this reference number to check the status. Someone from HR will reach out to arrange a time to talk.") : renderHelpForm();
+  } else {
+    body = renderConfidentialLookup({
+      prefix: "CH", placeholder: "Reference number, e.g. CH-4F8K-J2Q", locked: state.helpLockedUntil > Date.now(),
+      notFoundMsg: "No matching request found &mdash; check your reference number.",
+      result: state.helpLookupResult, statuses: HELP_STATUSES, reviewLabel: "HR notes (for whoever holds this reference number)",
+      responderName: "HR", kind: "help"
+    });
+  }
+
+  return '<div class="view-wrap narrow">' +
+    '<h2 class="view-title">' + icon("lifebuoy",20) + ' Seek confidential help</h2>' +
+    '<p class="view-sub" style="margin-bottom:1.25rem;">A private, supportive space to talk through a workplace difficulty &mdash; workload, stress, health, family or financial pressure, or anything else affecting you at work. This isn\'t a formal complaint; it goes to HR in confidence so someone can reach out and support you.</p>' +
+    modeTabs + body +
+  "</div>";
+}
+
+function renderHelpForm(){
+  const deptOptions = DEPARTMENTS.map(function(d){ return '<option value="' + esc(d) + '">' + esc(d) + "</option>"; }).join("");
+  const catOptions = HELP_CATEGORIES.map(function(c){ return '<option value="' + esc(c) + '">' + esc(c) + "</option>"; }).join("");
+  return '<form class="form-card" data-form="help" style="margin-top:0;">' +
+    field("Your name", '<input class="input" name="author" required placeholder="e.g. Grace Banda" />') +
+    field("Your department", '<select class="input" name="department">' + deptOptions + "</select>") +
+    field("What's this about?", '<select class="input" name="category">' + catOptions + "</select>") +
+    field("Tell us a bit more", '<textarea class="input" name="description" rows="4" required placeholder="Share as much or as little as you\'re comfortable with"></textarea>') +
+    field("Best way to reach you (optional)", '<input class="input" name="contact" placeholder="Phone, email, or preferred time" />') +
+    '<button type="submit" class="btn-primary">Send to HR in confidence</button>' +
+  "</form>";
+}
+
+/* ---------- Shared confidential-flow renderers ---------- */
+function renderConfirmBox(code, headline, note){
+  return '<div class="confirm-box">' +
+    icon("check", 22) +
+    '<p style="margin:0.6rem 0 0.3rem;font-size:0.9rem;color:var(--ink);">' + esc(headline) + "</p>" +
+    '<div class="ref-code">' + esc(code) + "</div>" +
+    '<p style="font-size:0.8rem;color:var(--ink-soft);max-width:400px;margin:0 auto;">' + note + "</p>" +
+    '<button class="copy-btn" data-action="copy-code" data-code="' + esc(code) + '">Copy reference number</button><br />' +
+    '<button class="btn-ghost" style="margin-top:0.6rem;" data-action="confirm-reset" data-kind="' + (code[0] === "G" ? "grievance" : code[0] === "W" ? "report" : "help") + '">Submit another</button>' +
+  "</div>";
+}
+
+function renderConfidentialLookup(opts){
+  let inner = '<form class="lookup-row" data-lookup="' + opts.kind + '">' +
+    '<input class="input" style="flex:1;" name="code" placeholder="' + esc(opts.placeholder) + '"' + (opts.locked ? " disabled" : "") + " />" +
+    '<button type="submit" class="btn-primary' + (opts.dark ? " dark" : "") + '"' + (opts.locked ? " disabled" : "") + ">" + icon("search",14) + " Look up</button>" +
+  "</form>";
+
+  if (opts.locked) {
+    inner += '<p class="locked-msg">Too many failed attempts &mdash; please wait about 30 seconds before trying again.</p>';
+  } else if (opts.result === null) {
+    inner += '<p style="font-size:0.85rem;color:var(--ink-soft);">' + opts.notFoundMsg + "</p>";
+  }
+
+  if (opts.result) {
+    const r = opts.result;
+    const metaLine = opts.kind === "grievance"
+      ? "Submitted " + timeAgo(r.timestamp) + (r.wantsMediation ? " &middot; mediation requested" : "")
+      : opts.kind === "report"
+        ? esc(r.category) + " &middot; submitted " + timeAgo(r.timestamp)
+        : esc(r.category) + " &middot; submitted " + timeAgo(r.timestamp);
+
+    const responseHtml = r.response
+      ? '<div class="reply-box"><p style="margin:0;font-size:0.85rem;">' + esc(r.response.text) + '</p><span style="display:block;margin-top:0.3rem;font-size:0.72rem;color:var(--ink-soft);">' + esc(opts.responderName) + " &middot; " + timeAgo(r.response.timestamp) + "</span></div>"
+      : "";
+
+    const statusOptions = opts.statuses.map(function(s){
+      return '<option value="' + esc(s) + '"' + (s === r.status ? " selected" : "") + ">" + esc(s) + "</option>";
+    }).join("");
+
+    inner += '<div class="card">' +
+      '<div class="card-header-row" style="align-items:center;"><span class="font-display" style="font-weight:600;">' + esc(r.refCode) + "</span>" + statusPillHtml(r.status) + "</div>" +
+      '<p style="font-size:0.85rem;color:var(--ink-soft);margin:0.5rem 0 0;">' + metaLine + "</p>" +
+      responseHtml +
+      '<div class="reviewer-panel">' +
+        '<span class="reviewer-label">' + icon("lock",12) + " " + opts.reviewLabel + "</span>" +
+        field("Status", '<select class="input" id="reviewStatus-' + opts.kind + '">' + statusOptions + "</select>") +
+        field("Note" + (opts.kind === "report" ? " (visible to whoever holds the code)" : opts.kind === "grievance" ? " to submitter" : " to the person"), '<textarea class="input" id="reviewResponse-' + opts.kind + '" rows="2">' + esc(r.response ? r.response.text : "") + "</textarea>") +
+        '<button class="btn-ghost" data-action="save-review" data-kind="' + opts.kind + '" data-code="' + esc(r.refCode) + '">Save update</button>' +
+      "</div>" +
+    "</div>";
+  }
+
+  return inner;
+}
+
+/* ---------- Mutations ---------- */
+function addIdea(data){
+  state.ideas = [Object.assign({}, data, { id:"idea_"+Date.now(), status:"Under Review", votes:0, timestamp:Date.now() }), ...state.ideas];
+  saveCollection("ideas");
+}
+function upvoteIdea(id){
+  if (state.votedIdeaIds.has(id)) return;
+  state.ideas = state.ideas.map(function(i){ return i.id === id ? Object.assign({}, i, { votes: i.votes + 1 }) : i; });
+  state.votedIdeaIds.add(id);
+  saveCollection("ideas");
+}
+function addShoutout(data){
+  state.shoutouts = [Object.assign({}, data, { id:"so_"+Date.now(), timestamp:Date.now() }), ...state.shoutouts];
+  saveCollection("shoutouts");
+}
+function addPost(data){
+  state.posts = [Object.assign({}, data, { id:"post_"+Date.now(), timestamp:Date.now() }), ...state.posts];
+  saveCollection("posts");
+}
+function addPoll(data){
+  const options = data.options.map(function(text, i){ return { id:"opt_"+i, text: text, votes: 0 }; });
+  state.polls = [Object.assign({}, data, { id:"poll_"+Date.now(), timestamp:Date.now(), options: options }), ...state.polls];
+  saveCollection("polls");
+}
+function votePoll(pollId, optionId){
+  if (state.votedPollIds.has(pollId)) return;
+  state.polls = state.polls.map(function(p){
+    if (p.id !== pollId) return p;
+    return Object.assign({}, p, { options: p.options.map(function(o){ return o.id === optionId ? Object.assign({}, o, { votes: o.votes + 1 }) : o; }) });
+  });
+  state.votedPollIds.add(pollId);
+  saveCollection("polls");
+}
+function addQuery(data){
+  state.queries = [Object.assign({}, data, { id:"query_"+Date.now(), timestamp:Date.now(), reply:null }), ...state.queries];
+  saveCollection("queries");
+}
+function replyQuery(id, text){
+  state.queries = state.queries.map(function(q){ return q.id === id ? Object.assign({}, q, { reply:{ text:text, timestamp:Date.now() } }) : q; });
+  saveCollection("queries");
+}
+function addGrievance(data){
+  const refCode = genRefCode("GR");
+  state.grievances = [Object.assign({}, data, { id:"griev_"+Date.now(), refCode:refCode, status:"Submitted", response:null, timestamp:Date.now() }), ...state.grievances];
+  saveCollection("grievances");
+  return refCode;
+}
+function updateGrievance(refCode, updates){
+  state.grievances = state.grievances.map(function(g){ return g.refCode === refCode ? Object.assign({}, g, updates) : g; });
+  saveCollection("grievances");
+}
+function addReport(data){
+  const refCode = genRefCode("WB");
+  state.reports = [Object.assign({}, data, { id:"report_"+Date.now(), refCode:refCode, status:"Submitted", response:null, timestamp:Date.now() }), ...state.reports];
+  saveCollection("reports");
+  return refCode;
+}
+function updateReport(refCode, updates){
+  state.reports = state.reports.map(function(r){ return r.refCode === refCode ? Object.assign({}, r, updates) : r; });
+  saveCollection("reports");
+}
+function addHelpRequest(data){
+  const refCode = genRefCode("CH");
+  state.help = [Object.assign({}, data, { id:"help_"+Date.now(), refCode:refCode, status:"Submitted", response:null, timestamp:Date.now() }), ...state.help];
+  saveCollection("help");
+  return refCode;
+}
+function updateHelpRequest(refCode, updates){
+  state.help = state.help.map(function(h){ return h.refCode === refCode ? Object.assign({}, h, updates) : h; });
+  saveCollection("help");
+}
+
+/* ---------- Lookup + lockout helper ---------- */
+function doLookup(kind, collection, code){
+  const failedKey = kind + "FailedAttempts";
+  const lockKey = kind + "LockedUntil";
+  const resultKey = kind + "LookupResult";
+  if (state[lockKey] > Date.now()) return;
+  const found = collection.find(function(r){ return r.refCode.toUpperCase() === code.trim().toUpperCase(); });
+  state[resultKey] = found || null;
+  if (found) {
+    state[failedKey] = 0;
+  } else {
+    const next = state[failedKey] + 1;
+    if (next >= 5) { state[lockKey] = Date.now() + 30000; state[failedKey] = 0; }
+    else { state[failedKey] = next; }
+  }
+}
+
+/* ---------- Event delegation ---------- */
+function setupEvents(){
+  const root = document.getElementById("root");
+
+  root.addEventListener("click", function(e){
+    const t = e.target.closest("[data-action]");
+    if (!t) return;
+    const action = t.getAttribute("data-action");
+
+    if (action === "nav") {
+      state.view = t.getAttribute("data-view");
+      state.mobileOpen = false;
+      render();
+    } else if (action === "open-mobile") {
+      state.mobileOpen = true; render();
+    } else if (action === "close-mobile") {
+      state.mobileOpen = false; render();
+    } else if (action === "retry-load") {
+      loadAll().then(render);
+    } else if (action === "toggle-news-form") {
+      state.showNewsForm = !state.showNewsForm; render();
+    } else if (action === "news-type") {
+      const type = t.getAttribute("data-type");
+      document.getElementById("newsIsEvent").value = (type === "event") ? "true" : "false";
+      document.getElementById("newsTypeNewsBtn").classList.toggle("active", type !== "event");
+      document.getElementById("newsTypeEventBtn").classList.toggle("active", type === "event");
+      document.getElementById("newsEventDateField").style.display = (type === "event") ? "" : "none";
+    } else if (action === "toggle-idea-form") {
+      state.showIdeaForm = !state.showIdeaForm; render();
+    } else if (action === "idea-filter") {
+      state.ideaFilter = t.getAttribute("data-filter"); render();
+    } else if (action === "idea-upvote") {
+      upvoteIdea(t.getAttribute("data-id")); render();
+    } else if (action === "toggle-shout-form") {
+      state.showShoutForm = !state.showShoutForm; render();
+    } else if (action === "toggle-poll-form") {
+      state.showPollForm = !state.showPollForm; render();
+    } else if (action === "poll-add-option") {
+      const container = document.getElementById("pollOptionsContainer");
+      const rows = container.querySelectorAll(".poll-option-row");
+      if (rows.length >= 6) return;
+      const div = document.createElement("div");
+      div.className = "poll-option-row";
+      div.innerHTML = '<input class="input" name="option" placeholder="Option ' + (rows.length + 1) + '" />' +
+        '<button type="button" class="poll-remove-btn" data-action="poll-remove-option">' + icon("trash",14) + "</button>";
+      container.appendChild(div);
+      if (rows.length === 1) {
+        // now 2->3, ensure remove buttons appear on all rows once count > 2
+      }
+      refreshPollRemoveButtons(container);
+    } else if (action === "poll-remove-option") {
+      const container = document.getElementById("pollOptionsContainer");
+      const rows = container.querySelectorAll(".poll-option-row");
+      if (rows.length <= 2) return;
+      t.closest(".poll-option-row").remove();
+      refreshPollRemoveButtons(container);
+    } else if (action === "poll-vote") {
+      votePoll(t.getAttribute("data-poll"), t.getAttribute("data-option")); render();
+    } else if (action === "toggle-query-form") {
+      state.showQueryForm = !state.showQueryForm; render();
+    } else if (action === "query-filter") {
+      state.queryFilter = t.getAttribute("data-filter"); render();
+    } else if (action === "query-open-reply") {
+      state.openReplyForId = t.getAttribute("data-id"); render();
+      const input = document.getElementById("replyInput-" + state.openReplyForId);
+      if (input) input.focus();
+    } else if (action === "query-send-reply") {
+      const id = t.getAttribute("data-id");
+      const input = document.getElementById("replyInput-" + id);
+      const text = input ? input.value.trim() : "";
+      if (!text) return;
+      replyQuery(id, text);
+      state.openReplyForId = null;
+      render();
+    } else if (action === "copy-code") {
+      copyToClipboard(t.getAttribute("data-code"));
+      t.textContent = "Copied!";
+      t.classList.add("copied");
+      setTimeout(function(){ t.textContent = "Copy reference number"; t.classList.remove("copied"); }, 1800);
+    } else if (action === "confirm-reset") {
+      const kind = t.getAttribute("data-kind");
+      if (kind === "grievance") state.grievanceSubmittedCode = null;
+      if (kind === "report") state.reportSubmittedCode = null;
+      if (kind === "help") state.helpSubmittedCode = null;
+      render();
+    } else if (action === "grievance-mode") {
+      state.grievanceMode = t.getAttribute("data-mode"); render();
+    } else if (action === "report-mode") {
+      state.reportMode = t.getAttribute("data-mode"); render();
+    } else if (action === "help-mode") {
+      state.helpMode = t.getAttribute("data-mode"); render();
+    } else if (action === "save-review") {
+      const kind = t.getAttribute("data-kind");
+      const code = t.getAttribute("data-code");
+      const statusEl = document.getElementById("reviewStatus-" + kind);
+      const responseEl = document.getElementById("reviewResponse-" + kind);
+      const status = statusEl.value;
+      const text = responseEl.value.trim();
+      const updates = { status: status };
+      if (kind === "grievance") {
+        const current = state.grievanceLookupResult;
+        updates.response = text ? { text: text, timestamp: Date.now() } : current.response;
+        updateGrievance(code, updates);
+        state.grievanceLookupResult = Object.assign({}, current, updates);
+      } else if (kind === "report") {
+        const current = state.reportLookupResult;
+        updates.response = text ? { text: text, timestamp: Date.now() } : current.response;
+        updateReport(code, updates);
+        state.reportLookupResult = Object.assign({}, current, updates);
+      } else if (kind === "help") {
+        const current = state.helpLookupResult;
+        updates.response = text ? { text: text, timestamp: Date.now() } : current.response;
+        updateHelpRequest(code, updates);
+        state.helpLookupResult = Object.assign({}, current, updates);
+      }
+      render();
+    }
+  });
+
+  root.addEventListener("submit", function(e){
+    const form = e.target;
+
+    if (form.matches('[data-form="news"]')) {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const isEvent = document.getElementById("newsIsEvent").value === "true";
+      const title = (fd.get("title") || "").trim();
+      const author = (fd.get("author") || "").trim();
+      if (!title || !author) return;
+      addPost({ title: title, author: author, body: (fd.get("body") || "").trim(), isEvent: isEvent, eventDate: fd.get("eventDate") || "" });
+      state.showNewsForm = false;
+      state.justPostedNews = true;
+      render();
+      setTimeout(function(){ state.justPostedNews = false; render(); }, 3000);
+
+    } else if (form.matches('[data-form="idea"]')) {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const author = (fd.get("author") || "").trim();
+      const title = (fd.get("title") || "").trim();
+      if (!author || !title) return;
+      addIdea({ author: author, title: title, department: fd.get("department"), description: (fd.get("description") || "").trim() });
+      state.showIdeaForm = false;
+      state.justSubmittedIdea = true;
+      render();
+      setTimeout(function(){ state.justSubmittedIdea = false; render(); }, 3000);
+
+    } else if (form.matches('[data-form="shout"]')) {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const from = (fd.get("from") || "").trim();
+      const to = (fd.get("to") || "").trim();
+      const message = (fd.get("message") || "").trim();
+      if (!from || !to || !message) return;
+      addShoutout({ from: from, to: to, value: fd.get("value"), message: message });
+      state.showShoutForm = false;
+      state.justSubmittedShout = true;
+      render();
+      setTimeout(function(){ state.justSubmittedShout = false; render(); }, 3000);
+
+    } else if (form.matches('[data-form="poll"]')) {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const author = (fd.get("author") || "").trim();
+      const question = (fd.get("question") || "").trim();
+      const options = fd.getAll("option").map(function(o){ return o.trim(); }).filter(Boolean);
+      if (!author || !question || options.length < 2) return;
+      addPoll({ author: author, question: question, options: options, closesAt: fd.get("closesAt") || "" });
+      state.showPollForm = false;
+      state.justSubmittedPoll = true;
+      render();
+      setTimeout(function(){ state.justSubmittedPoll = false; render(); }, 3000);
+
+    } else if (form.matches('[data-form="query"]')) {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const author = (fd.get("author") || "").trim();
+      const message = (fd.get("message") || "").trim();
+      if (!author || !message) return;
+      addQuery({ author: author, recipient: fd.get("recipient"), message: message });
+      state.showQueryForm = false;
+      state.justSubmittedQuery = true;
+      render();
+      setTimeout(function(){ state.justSubmittedQuery = false; render(); }, 3000);
+
+    } else if (form.matches('[data-form="grievance"]')) {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const author = (fd.get("author") || "").trim();
+      const description = (fd.get("description") || "").trim();
+      if (!author || !description) return;
+      const code = addGrievance({ author: author, department: fd.get("department"), aboutPerson: (fd.get("aboutPerson") || "").trim(), description: description, wantsMediation: fd.get("wantsMediation") === "on" });
+      state.grievanceSubmittedCode = code;
+      render();
+
+    } else if (form.matches('[data-form="report"]')) {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const description = (fd.get("description") || "").trim();
+      if (!description) return;
+      const code = addReport({ category: fd.get("category"), description: description, contact: (fd.get("contact") || "").trim() });
+      state.reportSubmittedCode = code;
+      render();
+
+    } else if (form.matches('[data-form="help"]')) {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const author = (fd.get("author") || "").trim();
+      const description = (fd.get("description") || "").trim();
+      if (!author || !description) return;
+      const code = addHelpRequest({ author: author, department: fd.get("department"), category: fd.get("category"), description: description, contact: (fd.get("contact") || "").trim() });
+      state.helpSubmittedCode = code;
+      render();
+
+    } else if (form.matches("[data-lookup]")) {
+      e.preventDefault();
+      const kind = form.getAttribute("data-lookup");
+      const code = form.querySelector('[name="code"]').value;
+      const collectionMap = { grievance: state.grievances, report: state.reports, help: state.help };
+      doLookup(kind, collectionMap[kind], code);
+      render();
+    }
+  });
+}
+
+function refreshPollRemoveButtons(container){
+  const rows = container.querySelectorAll(".poll-option-row");
+  rows.forEach(function(row){
+    let btn = row.querySelector(".poll-remove-btn");
+    if (rows.length > 2 && !btn) {
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "poll-remove-btn";
+      btn.setAttribute("data-action", "poll-remove-option");
+      btn.innerHTML = icon("trash", 14);
+      row.appendChild(btn);
+    } else if (rows.length <= 2 && btn) {
+      btn.remove();
+    }
+  });
+}
+
+/* ---------- Init ---------- */
+setupEvents();
+render();
+loadAll().then(render);
+
+})();
+</script>
+</body>
+</html>

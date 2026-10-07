@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Employee;
+use App\Models\Department;
 use App\Models\LeaveRequest;
 use App\Models\Role;
+use App\Models\AuditLog;
+use App\Models\LocumSession;
 use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
@@ -30,12 +33,61 @@ class AdminController extends Controller
         $pendingLeaves = LeaveRequest::where('RequestStatus', 'Pending Admin Verification')->count();
         $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->latest()->get();
 
+        $currentMonth = now();
+        $locumSessionsThisMonth = LocumSession::whereYear('session_date', $currentMonth->year)
+            ->whereMonth('session_date', $currentMonth->month)
+            ->get();
+
+        $totalLocumSessionsThisMonth = $locumSessionsThisMonth->count();
+        $totalLocumSpendThisMonth = $locumSessionsThisMonth->sum(function ($session) {
+            return $session->total_earnings ?? ($session->hours_worked * ($session->hourly_rate ?? 2000));
+        });
+        $formattedLocumSpendThisMonth = 'MWK ' . number_format($totalLocumSpendThisMonth, 2);
+
+        $totalRequests = LeaveRequest::count();
+        $totalApproved = LeaveRequest::where('RequestStatus', 'Approved')->count();
+        $approvalRate = $totalRequests > 0 ? round(($totalApproved / $totalRequests) * 100, 1) : 0;
+        $avgDuration = round((float) LeaveRequest::where('RequestStatus', 'Approved')->avg('TotalDays'), 1);
+
+        $statusBreakdown = [
+            'Approved' => $totalApproved,
+            'Rejected' => LeaveRequest::where('RequestStatus', 'like', '%Rejected%')->count(),
+            'Pending' => LeaveRequest::where('RequestStatus', 'like', '%Pending%')->count(),
+        ];
+
+        $monthlyVerified = [];
+        $monthlyLabels = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $d = now()->subMonths($i);
+            $monthlyLabels[] = $d->format('M Y');
+            $monthlyVerified[] = LeaveRequest::whereYear('updated_at', $d->year)
+                ->whereMonth('updated_at', $d->month)
+                ->whereIn('RequestStatus', ['Approved', 'Rejected by Admin'])
+                ->count();
+        }
+
+        $deptBalanceStats = Department::all()->map(function ($dept) {
+            $employees = Employee::with('grade')->where('DepartmentID', $dept->DepartmentID)->get();
+            $avgRemaining = $employees->isNotEmpty()
+                ? round($employees->avg(fn($e) => $e->leave_days_remaining), 1)
+                : 0;
+            return ['name' => $dept->DepartmentName, 'avg' => $avgRemaining];
+        })->filter(fn($d) => $d['avg'] > 0)->values();
+
         return view('dashboards.admin', compact(
             'employee',
             'totalEmployees',
             'totalLeaveRequests',
             'pendingLeaves',
-            'leaveRequests'
+            'leaveRequests',
+            'totalLocumSessionsThisMonth',
+            'formattedLocumSpendThisMonth',
+            'statusBreakdown',
+            'monthlyVerified',
+            'monthlyLabels',
+            'deptBalanceStats',
+            'approvalRate',
+            'avgDuration'
         ));
     }
 
@@ -64,6 +116,13 @@ class AdminController extends Controller
             'AdminApproval' => true,
         ]);
 
+        AuditLog::record(
+            Auth::user()->EmployeeNumber,
+            'Approved leave request',
+            'leave_requests',
+            $leaveRequest->LeaveRequestID
+        );
+
         return redirect()->back()->with('success', 'Leave request approved successfully.');
     }
 
@@ -89,6 +148,13 @@ class AdminController extends Controller
             'RejectionReason' => $request->RejectionReason,
         ]);
 
+        AuditLog::record(
+            Auth::user()->EmployeeNumber,
+            'Rejected leave request',
+            'leave_requests',
+            $leaveRequest->LeaveRequestID
+        );
+
         return redirect()->back()->with('success', 'Leave request rejected.');
     }
 
@@ -113,6 +179,13 @@ class AdminController extends Controller
         $employee = Employee::where('EmployeeNumber', $employeeNumber)->firstOrFail();
         $employee->update(['role_id' => $request->role_id]);
 
+        AuditLog::record(
+            Auth::user()->EmployeeNumber,
+            "Assigned role {$request->role_id} to employee {$employee->EmployeeNumber}",
+            'employees',
+            intval($employee->EmployeeNumber)
+        );
+
         return redirect()->back()->with('success', 'Role assigned successfully.');
     }
 
@@ -123,5 +196,43 @@ class AdminController extends Controller
     {
         $leaveRequests = LeaveRequest::with(['employee', 'leaveType'])->get();
         return view('admin.leave_requests', compact('leaveRequests'));
+    }
+
+    /**
+     * Audit trail listing for admins.
+     */
+    public function auditTrail(Request $request)
+    {
+        if (auth()->user()->role_id !== 1) {
+            return redirect()->back()->with('error', 'You do not have permission to access audit logs.');
+        }
+
+        $query = AuditLog::with('employee')
+            ->orderByDesc('timestamp');
+
+        // Apply filters
+        if ($request->filled('date_from')) {
+            $query->whereDate('timestamp', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('timestamp', '<=', $request->date_to);
+        }
+
+        if ($request->filled('action')) {
+            $query->where('action', 'like', '%' . $request->action . '%');
+        }
+
+        if ($request->filled('employee_number')) {
+            $query->where('EmployeeNumber', $request->employee_number);
+        }
+
+        if ($request->filled('table_name')) {
+            $query->where('table_name', $request->table_name);
+        }
+
+        $auditLogs = $query->paginate(25)->appends($request->query());
+
+        return view('admin.audit_trail', compact('auditLogs'));
     }
 }

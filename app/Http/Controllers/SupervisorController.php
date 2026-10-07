@@ -130,6 +130,11 @@ class SupervisorController extends Controller
         $teamBalanceLabels = $employeesUnderSupervisor->pluck('FirstName')->toArray();
         $teamBalanceData   = $employeesUnderSupervisor->map(fn($e) => $e->leave_days_remaining)->toArray();
 
+        // Unread notifications count
+        $unreadNotifications = \App\Models\Notification::where('EmployeeNumber', $supervisor->EmployeeNumber)
+            ->where('Status', 'Unread')
+            ->count();
+
         return view('dashboards.supervisor', compact(
             'leaveRequests',
             'pendingSupervisorRequests',
@@ -147,6 +152,7 @@ class SupervisorController extends Controller
             'personalLeaveBalance',
             'personalRecentRequests',
             'supervisor',
+            'unreadNotifications',
             // Analytics
             'teamMonthlyLabels',
             'teamMonthlyApproved',

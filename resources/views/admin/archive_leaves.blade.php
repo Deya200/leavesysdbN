@@ -243,7 +243,7 @@
             </div>
         @else
             <div class="card archive-card text-center py-5">
-                <i class="fas fa-inbox text-muted" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <i class="fas fa-inbox text-muted fs-1 mb-3"></i>
                 <h5 class="text-muted">No Leave Requests to Archive</h5>
                 <p class="text-muted">All leave requests for {{ $selectedYear }} have been archived or are still pending.</p>
             </div>

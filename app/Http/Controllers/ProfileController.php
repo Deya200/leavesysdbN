@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Employee;
 
 class ProfileController extends Controller
 {
@@ -45,7 +45,10 @@ class ProfileController extends Controller
         $request->validate($rules);
 
         if ($isAdmin) {
-            $user->name = $request->name;
+            // Assuming name is full name, split into FirstName and LastName
+            $nameParts = explode(' ', $request->name, 2);
+            $user->FirstName = $nameParts[0];
+            $user->LastName = $nameParts[1] ?? '';
             $user->email = $request->email;
         }
 

@@ -3,7 +3,7 @@
 @section('title', 'Admin Dashboard')
 
 @section('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="{{ asset('css/animate.min.css') }}" />
 
     <style>
         .dashboard-container {
@@ -418,7 +418,7 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/chart.min.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ── Monthly Trend Chart ──

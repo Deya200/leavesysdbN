@@ -29,47 +29,20 @@ class RegisterController extends Controller
      */
     public function register(Request $request)
     {
-        // Validate the input data
-        $validatedData = $this->validator($request->all())->validate();
+        $request->validate([
+            'name'           => 'required|string|max:255',
+            'EmployeeNumber' => 'required|string|max:255|unique:users',
+            'email'          => 'required|email|max:255',
+            'password'       => 'required|string|min:8|confirmed',
+            'gender'         => 'required|string|in:Male,Female',
+            'profile_photo'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-        // Create a new user record in the 'users' table
-        $user = $this->create($validatedData);
-
-        // Log in the newly created user
+        $user = $this->create($request->all());
         auth()->login($user);
 
-        // Redirect to the Employee Dashboard with a success message
         return redirect()->route('dashboards.employee')
                          ->with('success', 'Registration successful! Welcome to your dashboard.');
-    }
-
-    /**
-     * Validate the registration input data.
-     *
-     * @param array $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'name'           => ['required', 'string', 'max:255'],
-            'EmployeeNumber' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:users',
-                function ($attribute, $value, $fail) {
-                    // Ensure the EmployeeNumber exists in the 'employees' table
-                    if (! Employee::where('EmployeeNumber', $value)->exists()) {
-                        $fail('The selected Employee Number does not exist in our records.');
-                    }
-                },
-            ],
-            'email'          => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
-            'password'       => ['required', 'string', 'min:8', 'confirmed'],
-            'gender'         => ['required', 'string', 'in:Male,Female'], // ✅ Gender validation is now properly enforced
-            'profile_photo'  => ['nullable', 'image', 'max:2048'],
-        ]);
     }
 
     /**
@@ -80,23 +53,22 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        // ✅ Handle profile photo upload if provided
+        // Handle profile photo upload if provided
         $photoPath = null;
-        if (request()->hasFile('profile_photo')) {
-            $file = request()->file('profile_photo');
+        if (isset($data['profile_photo']) && $data['profile_photo']) {
+            $file = $data['profile_photo'];
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->storeAs('profile_photos', $filename, 'public');
             $photoPath = $filename;
         }
 
-        // ✅ Ensure gender is stored correctly as a VARCHAR string
         return User::create([
             'name'           => $data['name'],
             'EmployeeNumber' => $data['EmployeeNumber'],
-            'email'          => $data['email'] ?? null,
+            'email'          => $data['email'],
             'password'       => Hash::make($data['password']),
-            'gender'         => $data['gender'], // ✅ Now correctly storing "Male" or "Female"
-            'role_id'        => 3, // Default to Employee role (role_id=3)
+            'gender'         => $data['gender'],
+            'role_id'        => 3,
             'profile_photo'  => $photoPath,
         ]);
     }

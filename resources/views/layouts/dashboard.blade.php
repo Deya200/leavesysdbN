@@ -6,22 +6,35 @@
     <h1 class="text-center mb-4">Welcome to Your Dashboard</h1>
 
     <!-- Dashboard Boxes -->
-    <div class="row">
+    <div class="row g-4">
         <!-- Leave Requests Box -->
         <div class="col-md-4">
-            <div class="card card-primary text-center">
+            <div class="card card-primary text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-calendar-alt fa-2x mb-3"></i>
                     <h5 class="card-title">Leave Requests</h5>
                     <p class="card-text">Manage your leave requests here.</p>
-                    <a href="{{ route('leave_requests.index') }}" class="btn btn-light">View</a> <!-- Corrected route -->
+                    <a href="{{ route('leave_requests.index') }}" class="btn btn-light">View</a>
                 </div>
             </div>
         </div>
 
+        @if(auth()->check() && auth()->user()->department && strtolower(auth()->user()->department->DepartmentName) === 'clinical')
+            <div class="col-md-4">
+                <div class="card border-info text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-hospital-user fa-2x mb-3 text-info"></i>
+                        <h5 class="card-title">Clinical Roster</h5>
+                        <p class="card-text">View daily shifts, ward coverage, and attendance.</p>
+                        <a href="{{ route('clinical-rosters.index') }}" class="btn btn-info text-white">Open</a>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Profile Box -->
         <div class="col-md-4">
-            <div class="card card-secondary text-center">
+            <div class="card card-secondary text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-user fa-2x mb-3"></i>
                     <h5 class="card-title">Profile</h5>
@@ -33,7 +46,7 @@
 
         <!-- Notifications Box -->
         <div class="col-md-4">
-            <div class="card card-accent text-center">
+            <div class="card card-accent text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-bell fa-2x mb-3"></i>
                     <h5 class="card-title">Notifications</h5>

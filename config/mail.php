@@ -39,13 +39,17 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME', 'tls'),
+            'scheme' => env('MAIL_SCHEME', 'smtp'),
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            'encryption' => match (strtolower((string) env('MAIL_ENCRYPTION', 'tls'))) {
+                'smtps', 'ssl' => 'ssl',
+                'tls', 'starttls' => 'tls',
+                default => env('MAIL_ENCRYPTION', 'tls'),
+            },
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],

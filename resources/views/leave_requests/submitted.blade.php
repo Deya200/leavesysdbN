@@ -4,6 +4,51 @@
 
 @section('styles')
 <style>
+    .steps {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        position: relative;
+        max-width: 430px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .step {
+        text-align: center;
+        position: relative;
+        flex: 1;
+    }
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #28a745;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    .step-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #333;
+    }
+    .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 60%;
+        width: 80%;
+        height: 2px;
+        background: #28a745;
+        z-index: 0;
+    }
+
     .confirmation-card {
         background: #f8f9fa;
         border-radius: 20px;
@@ -42,6 +87,23 @@
 @endsection
 
 @section('content')
+<div class="container">
+    <!-- Steps -->
+    <div class="steps">
+        <div class="step">
+            <div class="step-circle"><i class="fas fa-check"></i></div>
+            <div class="step-label">Details</div>
+        </div>
+        <div class="step">
+            <div class="step-circle"><i class="fas fa-check"></i></div>
+            <div class="step-label">Review</div>
+        </div>
+        <div class="step">
+            <div class="step-circle"><i class="fas fa-check"></i></div>
+            <div class="step-label">Submit</div>
+        </div>
+    </div>
+
 <div class="confirmation-card">
     <div class="confirmation-icon">
         <i class="fas fa-check-circle"></i>
@@ -61,6 +123,7 @@
         Back to Dashboard
     </a>
     <a href="{{ route('leave_requests.create') }}">Submit another request</a>
+</div>
 </div>
 
 <!-- Optional: Auto-redirect to dashboard after 7 seconds -->

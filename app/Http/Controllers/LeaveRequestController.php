@@ -10,9 +10,17 @@ use App\Models\Employee;
 use App\Models\LeaveAppeal;
 use App\Models\LeaveExtension;
 use App\Models\LeaveCancellation;
+use App\Models\AuditLog;
+use App\Mail\LeaveRequestSubmittedMail;
+use App\Mail\LeaveRequestApprovedMail;
+use App\Mail\LeaveRequestRejectedMail;
+use App\Mail\LeaveAppealSubmittedMail;
+use App\Mail\LeaveExtensionRequestedMail;
+use App\Mail\LeaveCancellationRequestedMail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class LeaveRequestController extends Controller
 {
@@ -199,6 +207,11 @@ class LeaveRequestController extends Controller
 
             Log::info("Leave request created: {$leaveRequest->id}");
 
+            // Send email to supervisor
+            if ($leaveRequest->supervisor && $leaveRequest->supervisor->email) {
+                Mail::to($leaveRequest->supervisor->email)->send(new LeaveRequestSubmittedMail($leaveRequest));
+            }
+
             return redirect()->route('leave_requests.create')->with('success', 'Your leave application was submitted successfully!');
         });
     }
@@ -353,6 +366,13 @@ class LeaveRequestController extends Controller
                 ]);
             }
 
+            AuditLog::record(
+                auth()->user()->EmployeeNumber,
+                'Supervisor approved leave request',
+                'leave_requests',
+                $leaveRequest->LeaveRequestID
+            );
+
             Log::info("Supervisor approved: {$leaveRequest->LeaveRequestID}");
             return redirect()->back()->with('success', 'Request approved successfully.');
         });
@@ -385,7 +405,21 @@ class LeaveRequestController extends Controller
                     'Message' => "Request rejected by supervisor: {$validated['SupervisorRejectionReason']}",
                     'Status' => 'Unread',
                 ]);
+
+                // Send rejection email to employee
+                if ($leaveRequest->employee && $leaveRequest->employee->email) {
+                    Mail::to($leaveRequest->employee->email)->send(
+                        new LeaveRequestRejectedMail($leaveRequest, $validated['SupervisorRejectionReason'], 'Supervisor')
+                    );
+                }
             }
+
+            AuditLog::record(
+                auth()->user()->EmployeeNumber,
+                'Supervisor rejected leave request',
+                'leave_requests',
+                $leaveRequest->LeaveRequestID
+            );
 
             Log::info("Supervisor rejected: {$leaveRequest->LeaveRequestID}");
             return redirect()->back()->with('success', 'Request rejected successfully.');
@@ -398,9 +432,12 @@ class LeaveRequestController extends Controller
 
         $validated = $request->validate([
             'AdminApprovalNote' => 'nullable|string|max:500',
+            'ApprovalNote' => 'nullable|string|max:500',
         ]);
 
-        return DB::transaction(function () use ($validated, $leaveRequest) {
+        $approvalNote = $validated['AdminApprovalNote'] ?? $validated['ApprovalNote'] ?? null;
+
+        return DB::transaction(function () use ($approvalNote, $leaveRequest) {
             if (strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') !== 0) {
                 $status = $leaveRequest->RequestStatus;
                 return redirect()->back()->with('error', "Cannot approve at this stage. Current status: {$status}. Please wait for supervisor approval if applicable.");
@@ -421,17 +458,31 @@ class LeaveRequestController extends Controller
             $leaveRequest->update([
                 'RequestStatus' => 'Approved',
                 'AdminApproval' => true,
-                'AdminApprovalNote' => $validated['AdminApprovalNote'] ?? null,
+                'AdminApprovalNote' => $approvalNote,
                 'is_active' => true,
             ]);
 
             if ($leaveRequest->wasChanged()) {
                 Notification::create([
                     'EmployeeNumber' => $leaveRequest->EmployeeNumber,
-                    'Message' => 'Request approved by admin. Admin Note: ' . ($validated['AdminApprovalNote'] ?? 'N/A'),
+                    'Message' => 'Request approved by admin. Admin Note: ' . ($approvalNote ?? 'N/A'),
                     'Status' => 'Unread',
                 ]);
+
+                // Send approval email to employee
+                if ($leaveRequest->employee && $leaveRequest->employee->email) {
+                    Mail::to($leaveRequest->employee->email)->send(
+                        new LeaveRequestApprovedMail($leaveRequest, $approvalNote)
+                    );
+                }
             }
+
+            AuditLog::record(
+                auth()->user()->EmployeeNumber,
+                'Admin approved leave request',
+                'leave_requests',
+                $leaveRequest->LeaveRequestID
+            );
 
             Log::info("Admin approved: {$leaveRequest->LeaveRequestID}");
             return redirect()->back()->with('success', 'Request approved successfully.');
@@ -441,17 +492,23 @@ class LeaveRequestController extends Controller
     public function adminReject(Request $request, LeaveRequest $leaveRequest)
     {
         $validated = $request->validate([
-            'AdminRejectionReason' => 'required|string|max:500',
+            'AdminRejectionReason' => 'nullable|string|max:500',
+            'RejectionReason' => 'nullable|string|max:500',
         ]);
 
-        return DB::transaction(function () use ($validated, $leaveRequest) {
+        $rejectionReason = $validated['AdminRejectionReason'] ?? $validated['RejectionReason'] ?? null;
+        if (!$rejectionReason) {
+            return redirect()->back()->with('error', 'Rejection reason is required');
+        }
+
+        return DB::transaction(function () use ($rejectionReason, $leaveRequest) {
             if (strcasecmp($leaveRequest->RequestStatus, 'Pending Admin Verification') !== 0 && strcasecmp($leaveRequest->RequestStatus, 'Pending Supervisor Approval') !== 0) {
                 return redirect()->back()->with('error', 'Invalid rejection stage. Request must be pending review.');
             }
 
             $leaveRequest->update([
                 'RequestStatus' => 'Rejected by Admin',
-                'AdminRejectionReason' => $validated['AdminRejectionReason'],
+                'AdminRejectionReason' => $rejectionReason,
                 'AdminVerified' => false,
                 'can_be_appealed' => true,
                 'appeal_deadline' => now()->addDays(7),
@@ -460,10 +517,24 @@ class LeaveRequestController extends Controller
             if ($leaveRequest->wasChanged()) {
                 Notification::create([
                     'EmployeeNumber' => $leaveRequest->EmployeeNumber,
-                    'Message' => "Request rejected by Admin: {$validated['AdminRejectionReason']}",
+                    'Message' => "Request rejected by Admin: {$rejectionReason}",
                     'Status' => 'Unread',
                 ]);
+
+                // Send rejection email to employee
+                if ($leaveRequest->employee && $leaveRequest->employee->email) {
+                    Mail::to($leaveRequest->employee->email)->send(
+                        new LeaveRequestRejectedMail($leaveRequest, $rejectionReason, 'Admin')
+                    );
+                }
             }
+
+            AuditLog::record(
+                auth()->user()->EmployeeNumber,
+                'Admin rejected leave request',
+                'leave_requests',
+                $leaveRequest->LeaveRequestID
+            );
 
             Log::info("Admin rejected: {$leaveRequest->LeaveRequestID}");
             return redirect()->back()->with('success', 'Leave request rejected successfully.');
@@ -473,6 +544,11 @@ class LeaveRequestController extends Controller
     public function showAdminRejectForm(LeaveRequest $leaveRequest)
     {
         return view('leave_requests.admin_reject_form', compact('leaveRequest'));
+    }
+
+    public function showAdminApproveForm(LeaveRequest $leaveRequest)
+    {
+        return view('leave_requests.admin_approve_form', compact('leaveRequest'));
     }
 
     public function employeeDashboard()
@@ -522,7 +598,10 @@ class LeaveRequestController extends Controller
 
         // Fetch recent tasks and notifications
         $activeTasks = $employee->tasks()->where('status', '!=', 'Completed')->orderBy('due_date')->take(5)->get();
-        $recentNotifications = $employee->notifications()->orderByDesc('created_at')->take(5)->get();
+        $recentNotifications = $employee->notifications()->orderByDesc('created_at')->take(10)->get();
+        $locumInvitations = $recentNotifications->filter(function ($notification) {
+            return str_contains(strtolower($notification->Message), 'locum');
+        });
 
         return view('dashboards.employee', [
             'dashboardData' => $dashboardData,
@@ -530,7 +609,8 @@ class LeaveRequestController extends Controller
             'leaveRequests' => $leaveRequests->take(10),
             'employee' => $employee,
             'activeTasks' => $activeTasks,
-            'recentNotifications' => $recentNotifications
+            'recentNotifications' => $recentNotifications,
+            'locumInvitations' => $locumInvitations,
         ]);
     }
 
@@ -546,7 +626,7 @@ class LeaveRequestController extends Controller
         }
 
         DB::transaction(function () use ($validated, $leaveRequest) {
-            LeaveAppeal::create([
+            $leaveAppeal = LeaveAppeal::create([
                 'leave_request_id' => $leaveRequest->LeaveRequestID,
                 'employee_number' => auth()->user()->EmployeeNumber,
                 'appeal_reason' => $validated['Reason'],
@@ -560,6 +640,11 @@ class LeaveRequestController extends Controller
                 'Message' => "Appeal submitted for leave request #{$leaveRequest->LeaveRequestID}",
                 'Status' => 'Unread',
             ]);
+
+            // Send appeal email to supervisor
+            if ($leaveRequest->supervisor && $leaveRequest->supervisor->email) {
+                Mail::to($leaveRequest->supervisor->email)->send(new LeaveAppealSubmittedMail($leaveAppeal));
+            }
 
             Log::info("Leave appeal submitted: {$leaveRequest->LeaveRequestID}");
         });
@@ -589,7 +674,7 @@ class LeaveRequestController extends Controller
         DB::transaction(function () use ($validated, $leaveRequest) {
             $extensionDays = (int) $validated['ExtensionDays'];
 
-            LeaveExtension::create([
+            $leaveExtension = LeaveExtension::create([
                 'leave_request_id' => $leaveRequest->LeaveRequestID,
                 'employee_number' => auth()->user()->EmployeeNumber,
                 'original_end_date' => $leaveRequest->EndDate,
@@ -605,6 +690,11 @@ class LeaveRequestController extends Controller
                 'Message' => "Extension requested for leave #{$leaveRequest->LeaveRequestID}",
                 'Status' => 'Unread',
             ]);
+
+            // Send extension email to supervisor
+            if ($leaveRequest->supervisor && $leaveRequest->supervisor->email) {
+                Mail::to($leaveRequest->supervisor->email)->send(new LeaveExtensionRequestedMail($leaveExtension));
+            }
 
             Log::info("Leave extension requested: {$leaveRequest->LeaveRequestID}");
         });
@@ -639,7 +729,7 @@ class LeaveRequestController extends Controller
                 }
             }
 
-            LeaveCancellation::create([
+            $leaveCancellation = LeaveCancellation::create([
                 'leave_request_id' => $leaveRequest->LeaveRequestID,
                 'employee_number' => auth()->user()->EmployeeNumber,
                 'cancellation_reason' => $validated['Reason'],
@@ -652,6 +742,11 @@ class LeaveRequestController extends Controller
                 'Message' => "Cancellation requested for leave #{$leaveRequest->LeaveRequestID}",
                 'Status' => 'Unread',
             ]);
+
+            // Send cancellation email to supervisor
+            if ($leaveRequest->supervisor && $leaveRequest->supervisor->email) {
+                Mail::to($leaveRequest->supervisor->email)->send(new LeaveCancellationRequestedMail($leaveCancellation));
+            }
 
             Log::info("Leave cancellation requested: {$leaveRequest->LeaveRequestID}");
         });
@@ -684,6 +779,13 @@ class LeaveRequestController extends Controller
             'archived_at' => now(),
         ]);
 
+        AuditLog::record(
+            auth()->user()->EmployeeNumber,
+            'Archived leave request',
+            'leave_requests',
+            $leaveRequest->LeaveRequestID
+        );
+
         Log::info("Leave request archived: {$leaveRequest->LeaveRequestID} by " . auth()->user()->EmployeeNumber);
 
         return redirect()->back()->with('success', 'Leave request archived successfully. Days returned to employee if applicable.');
@@ -713,6 +815,13 @@ class LeaveRequestController extends Controller
             'is_archived' => false,
             'archived_at' => null,
         ]);
+
+        AuditLog::record(
+            auth()->user()->EmployeeNumber,
+            'Restored leave request',
+            'leave_requests',
+            $leaveRequest->LeaveRequestID
+        );
 
         Log::info("Leave request restored: {$leaveRequest->LeaveRequestID} by " . auth()->user()->EmployeeNumber);
 
@@ -795,6 +904,13 @@ class LeaveRequestController extends Controller
                 $archivedCount++;
             }
         }
+
+        AuditLog::record(
+            auth()->user()->EmployeeNumber,
+            "Bulk archived {$archivedCount} leave requests",
+            'leave_requests',
+            0
+        );
 
         Log::info("Bulk archived {$archivedCount} leave requests, returned {$daysReturned} days by " . auth()->user()->EmployeeNumber);
 

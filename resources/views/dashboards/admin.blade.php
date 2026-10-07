@@ -149,7 +149,7 @@
                     style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white;">
                     <div class="d-flex align-items-center">
                         <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
-                            <i class="fas fa-users fs-5"></i>
+                            <i class="fas fa-users fs-4"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Total
@@ -164,7 +164,7 @@
                     style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
                     <div class="d-flex align-items-center">
                         <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
-                            <i class="fas fa-calendar-check fs-5"></i>
+                            <i class="fas fa-calendar-check fs-4"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Active
@@ -181,7 +181,7 @@
                     style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
                     <div class="d-flex align-items-center">
                         <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
-                            <i class="fas fa-clock fs-5"></i>
+                            <i class="fas fa-clock fs-4"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending Approvals</small>
@@ -197,13 +197,42 @@
                     style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white;">
                     <div class="d-flex align-items-center">
                         <div class="me-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:10px;">
-                            <i class="fas fa-building fs-5"></i>
+                            <i class="fas fa-building fs-4"></i>
                         </div>
                         <div>
                             <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Departments</small>
                             <h3 class="fw-bold mb-0">{{ \App\Models\Department::count() }}</h3>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 1rem;">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark"><i class="fas fa-money-bill-wave text-success me-2"></i>Institution Locum Spend</h5>
+                            <p class="mb-0 text-muted">Current month total for all departments.</p>
+                        </div>
+                        <span class="badge bg-success align-self-start">This month</span>
+                    </div>
+                    <h2 class="fw-bold mb-3">{{ $formattedLocumSpendThisMonth }}</h2>
+                    <p class="mb-0 text-muted">{{ $totalLocumSessionsThisMonth }} locum session{{ $totalLocumSessionsThisMonth === 1 ? '' : 's' }} recorded.</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 1rem;">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>Locum Reporting</h5>
+                            <p class="mb-0 text-muted">Review every locum session across the institution.</p>
+                        </div>
+                        <span class="badge bg-primary align-self-start">All departments</span>
+                    </div>
+                    <p class="mb-4 text-dark">Navigate to the full locum monthly report to see all sessions, earnings, and department-level details.</p>
+                    <a href="{{ route('locum.report') }}" class="btn btn-primary px-4 py-2">View Locum Report</a>
                 </div>
             </div>
         </div>
@@ -316,19 +345,29 @@
                                                         <i class="fas fa-eye text-info me-2"></i> View Details
                                                     </button>
                                                 </li>
-                                                <li>
-                                                    <button class="dropdown-item text-success" type="button" 
-                                                        onclick="openConfirmModal('approve', '{{ route('leave_requests.admin.approve', $request->LeaveRequestID) }}', 'Admin Approval', 'AdminApprovalNote')"
-                                                        @if(!$canAdminAction) disabled title="Only available after supervisor approval" @endif>
-                                                        <i class="fas fa-check-circle me-2"></i> Approve
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item text-danger" type="button" 
-                                                        onclick="openConfirmModal('reject', '{{ route('leave_requests.admin.reject', $request->LeaveRequestID) }}', 'Admin Rejection', 'AdminRejectionReason')">
-                                                        <i class="fas fa-times-circle me-2"></i> Reject
-                                                    </button>
-                                                </li>
+                                                @if ($canAdminAction)
+                                                    <li>
+                                                        <a href="{{ route('leave_requests.admin.approve.form', $request->LeaveRequestID) }}" class="dropdown-item text-success">
+                                                            <i class="fas fa-check-circle me-2"></i> Approve
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="{{ route('leave_requests.admin.reject.form', $request->LeaveRequestID) }}" class="dropdown-item text-danger">
+                                                            <i class="fas fa-times-circle me-2"></i> Reject
+                                                        </a>
+                                                    </li>
+                                                @elseif ($canSupAction)
+                                                    <li>
+                                                        <button class="dropdown-item text-success" type="button" onclick="openConfirmModal('approve', '{{ route('leave_requests.supervisor.approve', $request->LeaveRequestID) }}', 'Supervisor Approval', 'SupervisorApprovalNote')">
+                                                            <i class="fas fa-check-circle me-2"></i> Sup. Approve
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button class="dropdown-item text-danger" type="button" onclick="openConfirmModal('reject', '{{ route('leave_requests.supervisor.reject', $request->LeaveRequestID) }}', 'Supervisor Rejection', 'SupervisorRejectionReason')">
+                                                            <i class="fas fa-times-circle me-2"></i> Sup. Reject
+                                                        </button>
+                                                    </li>
+                                                @endif
                                             </ul>
                                         </div>
                                     </td>
@@ -360,7 +399,7 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/chart.min.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ── Monthly Verification Trend ──

@@ -1,0 +1,10 @@
+Date,EmployeeNumber,FirstName,LastName,WardName,Code,Notes
+2026-04-01,SUP-001,Supervisor,User,Private OPD,ST,
+2026-04-02,SUP-001,Supervisor,User,Private OPD,ST,
+2026-04-03,SUP-001,Supervisor,User,Private OPD,PH,Public holiday
+2026-04-01,EMP-001,Employee,User,Community OPD,ST,
+2026-04-02,EMP-001,Employee,User,Community OPD,DO,
+2026-04-03,EMP-001,Employee,User,Community OPD,ST,
+2026-04-01,ADM-001,Admin,User,Orthopaedics,ST,
+2026-04-02,ADM-001,Admin,User,Orthopaedics,ST,
+2026-04-03,ADM-001,Admin,User,Orthopaedics,SD,Short day

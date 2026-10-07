@@ -3,8 +3,7 @@
 @section('title', 'Supervisor Dashboard')
 
 @section('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ asset('css/animate.min.css') }}">
 
 <style>
     :root {
@@ -708,22 +707,22 @@
                                         No actions available
                                     </div>
                                 @endif
-
-                                @endif
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+        </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($leaveRequests->hasPages())
-        <div class="d-flex justify-content-center mt-4 mb-2">
-            {{ $leaveRequests->links() }}
+    <!-- Pagination -->
+    @if(method_exists($leaveRequests, 'links'))
+        <div class="mt-4">
+            {{ $leaveRequests->appends(request()->query())->links() }}
         </div>
     @endif
 
+    <!-- Modals -->
     <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form id="actionForm" method="POST">
@@ -752,6 +751,7 @@
     <!-- Include View Leave Modal -->
     @include('leave_requests._view_modal')
 </div>
+@endsection
 
 @section('scripts')
 <script>

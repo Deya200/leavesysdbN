@@ -10,10 +10,14 @@ class GradeController extends Controller
     /**
      * Display a listing of grades.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $grades = Grade::all(); // Fetch all grades
-        return view('grades.index', compact('grades')); // Pass grades to the view
+        $search = $request->input('search');
+        $grades = Grade::when($search, fn($q) => $q->where('GradeName', 'like', "%{$search}%"))
+            ->orderBy('GradeName')
+            ->paginate(15)
+            ->withQueryString();
+        return view('grades.index', compact('grades', 'search'));
     }
 
     /**

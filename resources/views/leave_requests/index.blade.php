@@ -618,7 +618,7 @@
         </div>
     </form>
 
-    <div class="lr-table-shell animate-fade-in" style="animation-delay: 0.6s;">
+    <div id="requests-table" class="lr-table-shell animate-fade-in" style="animation-delay: 0.6s;">
         <div class="lr-table-scroll">
             <table class="table lr-table">
                 <thead>
@@ -809,5 +809,22 @@
             });
         });
     });
+    // Auto-scroll to table when navigating pagination pages
+    (function () {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('page')) {
+            const section = document.getElementById('requests-table');
+            if (section) {
+                setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+            }
+        }
+        // Prepend anchor to all pagination links
+        document.querySelectorAll('.pagination a').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && !href.includes('#')) {
+                link.setAttribute('href', href + '#requests-table');
+            }
+        });
+    })();
 </script>
 @endsection

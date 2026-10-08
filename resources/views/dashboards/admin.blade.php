@@ -20,8 +20,23 @@
         .table {
             background-color: #ffffff;
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .requests-table-card,
+        .requests-table-responsive,
+        .requests-table-card .table {
+            overflow: visible !important;
+        }
+
+        .requests-actions-dropdown .dropdown-menu {
+            z-index: 1080;
+        }
+
+        @media (max-width: 991.98px) {
+            .requests-table-responsive {
+                overflow-x: auto !important;
+            }
         }
 
         .table thead {
@@ -169,9 +184,10 @@
                             <i class="fas fa-clock fs-4"></i>
                         </div>
                         <div>
-                            <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending
-                                Approvals</small>
-                            <h3 class="fw-bold mb-0">{{ $leaveRequests->where('RequestStatus', 'Pending Admin Verification')->count() }}</h3>
+                            <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Pending Approvals</small>
+                            <h3 class="fw-bold mb-0">
+                                {{ \App\Models\LeaveRequest::whereIn('RequestStatus', ['Pending Admin Verification', 'Pending Supervisor Approval'])->where('is_archived', false)->count() }}
+                            </h3>
                         </div>
                     </div>
                 </div>
@@ -268,13 +284,13 @@
         </div>
 
         <!-- Pending Requests Section -->
-        <div class="card p-0 border-0 shadow-sm mb-4" style="border-radius: 1rem; overflow: hidden;">
+        <div id="requests-section" class="card requests-table-card p-0 border-0 shadow-sm mb-4" style="border-radius: 1rem;">
             <div class="card-header bg-white border-bottom py-3">
                 <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-list-alt text-primary me-2"></i> Processing Queue</h5>
             </div>
             <div class="card-body p-0">
             @if ($leaveRequests->isNotEmpty())
-                <div class="table-responsive">
+                <div class="table-responsive requests-table-responsive">
                     <table class="table table-bordered align-middle">
                         <thead>
                             <tr>
@@ -304,25 +320,26 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge
-                                                                            @if($request->RequestStatus === 'Approved') bg-success
-                                                                            @elseif($request->RequestStatus === 'Rejected by Admin' || $request->RequestStatus === 'Rejected') bg-danger
-                                                                            @elseif(in_array(strtolower((string) $request->RequestStatus), ['pending admin verification', 'pending admin approval'], true)) bg-primary
-                                                                            @else bg-warning text-dark @endif">
-                                            {{ ucfirst($request->RequestStatus) }}
+                                        <span class="badge rounded-pill
+                                            @if($request->RequestStatus === 'Approved') bg-success
+                                            @elseif($request->RequestStatus === 'Rejected by Admin' || $request->RequestStatus === 'Rejected') bg-danger
+                                            @elseif($request->RequestStatus === 'Pending Admin Verification') bg-primary
+                                            @elseif($request->RequestStatus === 'Pending Supervisor Approval') bg-warning text-dark
+                                            @else bg-secondary @endif">
+                                            {{ $request->RequestStatus }}
                                         </span>
                                     </td>
                                     <td>
                                         @php
-                                            $canAdminAction = $request->isAwaitingAdminAction();
+                                            $canAdminAction = strcasecmp($request->RequestStatus, 'Pending Admin Verification') === 0;
                                             $canSupAction = strcasecmp($request->RequestStatus, 'Pending Supervisor Approval') === 0 && auth()->id() === $request->employee->SupervisorID;
                                         @endphp
 
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-secondary dropdown-toggle py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <div class="dropdown requests-actions-dropdown">
+                                            <button class="btn btn-sm btn-secondary dropdown-toggle py-1 px-2" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">
                                                 <i class="fas fa-ellipsis-v me-1"></i> Actions
                                             </button>
-                                            <ul class="dropdown-menu shadow-sm">
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                 <li>
                                                     <button class="dropdown-item" type="button" onclick="fetchAndShowLeaveModal('{{ route('leave_requests.show', $request->LeaveRequestID) }}')">
                                                         <i class="fas fa-eye text-info me-2"></i> View Details
@@ -359,7 +376,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="text-center mt-3 pb-3">
+                <div class="text-center mt-3 pb-3 d-flex justify-content-center align-items-center gap-3">
+                    {{ $leaveRequests->links() }}
                     <a href="{{ route('leave.report.pdf') }}" class="btn btn-outline-secondary shadow-sm btn-sm">
                         📄 Download Leave Report (PDF)
                     </a>
@@ -379,33 +397,6 @@
     @include('leave_requests._view_modal')
 
 @endsection
-
-<!-- Action Modals -->
-<div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="actionForm" method="POST">
-            @csrf
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Confirm Action</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="modalMessage">Are you sure you want to perform this action?</p>
-                    <div id="noteContainer">
-                        <label for="actionNote" class="form-label">Note/Reason:</label>
-                        <textarea name="note" id="actionNote" class="form-control" rows="3"
-                            placeholder="Enter details here..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" id="submitBtn" class="btn btn-primary">Confirm</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
 @section('scripts')
     <script src="{{ asset('js/chart.min.js') }}"></script>
@@ -513,6 +504,25 @@
             const modal = new bootstrap.Modal(document.getElementById('actionModal'));
             modal.show();
         }
+
+        // Auto-scroll to table section when pagination is used
+        (function () {
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('page')) {
+                const section = document.getElementById('requests-section');
+                if (section) {
+                    setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                }
+            }
+
+            // Append #requests-section to all pagination links so the browser also anchors
+            document.querySelectorAll('.pagination a').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && !href.includes('#')) {
+                    link.setAttribute('href', href + '#requests-section');
+                }
+            });
+        })();
 
         // Prevent double form submissions
         document.addEventListener('DOMContentLoaded', function () {

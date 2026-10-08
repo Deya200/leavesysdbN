@@ -27,7 +27,7 @@
 
                 <!-- Notifications Dropdown with Modern Design -->
                 <div class="dropdown">
-                    <button class="notification-btn" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; color: white; transition: all 0.3s ease; position: relative;">
+                    <button class="notification-btn" type="button" id="notificationDropdown" data-bs-toggle="dropdown" data-bs-boundary="viewport" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; color: white; transition: all 0.3s ease; position: relative;">
                         <i class="fas fa-bell fs-5"></i>
                         @if(isset($unreadCount) && $unreadCount > 0)
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background: #FF6B6B; font-size: 0.65rem; padding: 0.25rem 0.4rem; margin-left: -8px; margin-top: -4px; border: 2px solid #4C63B6;">
@@ -97,7 +97,7 @@
 
                 <!-- Profile dropdown with Modern Design -->
                 <div class="dropdown">
-                    <button class="profile-btn d-flex align-items-center dropdown-toggle p-0 border-0 bg-transparent" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="outline: none; box-shadow: none;">
+                    <button class="profile-btn d-flex align-items-center dropdown-toggle p-0 border-0 bg-transparent" type="button" id="profileDropdown" data-bs-toggle="dropdown" data-bs-boundary="viewport" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" style="outline: none; box-shadow: none;">
                         <div class="profile-wrapper" style="position: relative;">
                             @if(Auth::check() && !empty(Auth::user()->profile_photo) && file_exists(public_path(Auth::user()->profile_photo)))
                                 <img src="{{ asset(Auth::user()->profile_photo) }}" class="profile-photo-navbar rounded-circle" alt="Profile Picture" style="height: 44px; width: 44px; object-fit: cover; border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.3s ease;">
@@ -346,6 +346,7 @@ function confirmLogout() {
         background-color: white !important;
         border: 1px solid rgba(0,0,0,0.08) !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.12) !important;
+        z-index: 1080;
     }
 
     .dropdown-link-custom {

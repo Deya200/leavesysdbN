@@ -59,17 +59,9 @@
                     @endif
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a href="{{ url()->previous() == url()->current() ? (auth()->user()->role_id == 1 ? route('admin.verification') : route('leave_requests.index')) : url()->previous() }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>Back
+                        <a href="{{ route('leave_requests.admin_all') }}" class="btn btn-secondary shadow-sm px-4">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
                         </a>
-
-                        @if(in_array($leaveRequest->RequestStatus, ['Pending Supervisor Approval', 'Pending Admin Verification']))
-                            <a href="{{ route('leave_requests.edit', $leaveRequest) }}"
-                               class="btn btn-primary ms-2">
-                                <i class="fas fa-edit me-2"></i>Edit
-                            </a>
-                        @endif
                     </div>
                 </div>
             </div>

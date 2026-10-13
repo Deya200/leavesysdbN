@@ -844,7 +844,7 @@
                             <small class="text-muted">
                                 <i class="fas fa-shield-alt me-1"></i> Secure login • SSL encrypted
                                 <span class="mx-2">|</span>
-                                <i class="fas fa-clock me-1"></i> Session timeout: 30 min
+                                <i class="fas fa-clock me-1"></i> Session timeout: {{ config('session.lifetime') }} min
                             </small>
                         </div>
                     </form>

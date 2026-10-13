@@ -44,8 +44,8 @@ cd leavesysdbN
 
 ### **3. Install Dependencies**
 ```bash
-composer install
 npm install
+composer install
 ```
 
 ### **4. Environment Configuration**
@@ -55,7 +55,7 @@ cp .env.example .env
 ```
 Edit `.env` and set your database credentials:
 ```ini
-DB_CONNECTION=mysql
+DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_DATABASE=leavesysdb

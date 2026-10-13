@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'supervisor' => \App\Http\Middleware\SupervisorMiddleware::class,
             'clinical' => \App\Http\Middleware\ClinicalDepartmentMiddleware::class,
         ]);
+        $middleware->append([
+            \App\Http\Middleware\SecurityHeadersMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

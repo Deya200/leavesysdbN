@@ -14,7 +14,7 @@
                 <small class="text-nowrap mt-n1 sidebar-subtitle-text" style="font-size: 0.7rem; font-weight: 500;">Management System</small>
             </div>
         </div>
-        <button type="button" class="btn-close position-absolute top-0 end-0 m-3 d-md-none shadow-none"
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-3 d-lg-none shadow-none"
             data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
 

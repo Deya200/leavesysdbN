@@ -264,6 +264,8 @@ Route::post('/staff-voice', [StaffVoiceController::class, 'store'])->name('staff
 Route::post('/staff-voice/ideas/{entry}/vote', [StaffVoiceController::class, 'voteIdea'])->name('staff_voice.ideas.vote');
 Route::post('/staff-voice/polls/{option}/vote', [StaffVoiceController::class, 'votePoll'])->name('staff_voice.polls.vote');
 Route::put('/staff-voice/{entry}/respond', [StaffVoiceController::class, 'respond'])->name('staff_voice.respond');
+Route::post('/staff-voice/{entry}/comments', [StaffVoiceController::class, 'comment'])->name('staff_voice.comments.store');
+Route::post('/staff-voice/{entry}/comments', [StaffVoiceController::class, 'comment'])->name('staff_voice.comments.store');
 
 });
 

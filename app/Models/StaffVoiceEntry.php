@@ -51,6 +51,11 @@ class StaffVoiceEntry extends Model
         return $this->hasMany(StaffVoicePollOption::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(StaffVoiceComment::class, 'staff_voice_entry_id');
+    }
+
     public function getDisplayAuthorAttribute(): string
     {
         if ($this->is_anonymous) {

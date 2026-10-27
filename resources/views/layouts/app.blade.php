@@ -117,6 +117,37 @@
       }
     }
 
+    /* Keep the shared application shell usable on narrow screens. */
+    main { min-width: 0; }
+    .wrapper, .wrapper > *, main > * { min-width: 0; }
+    .table-responsive { max-width: 100%; -webkit-overflow-scrolling: touch; }
+    main .table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    main img, main video, main canvas { max-width: 100%; }
+    main pre, main code { overflow-wrap: anywhere; }
+    main .form-control, main .form-select { min-width: 0; }
+
+    @media (max-width: 575.98px) {
+      main { padding: .875rem !important; }
+      .card { margin-bottom: 1rem; }
+      .card-header { padding: .875rem 1rem; }
+      .card-body { padding: 1rem; }
+      .dashboard-container { padding-left: 0; }
+      .profile-header, .filter-bar { align-items: stretch; flex-direction: column; gap: .75rem; }
+      .profile-info { align-items: flex-start; gap: .75rem; }
+      .profile-meta { flex-wrap: wrap; gap: .75rem 1rem; }
+      .dashboard-tabs { gap: 1rem; overflow-x: auto; white-space: nowrap; margin-bottom: 1.25rem; }
+      .metric-grid { grid-template-columns: minmax(0, 1fr); gap: .75rem; margin-bottom: 1.25rem; }
+      .metric-card { padding: 1rem; }
+      .search-input-wrapper { max-width: none; width: 100%; }
+      .filter-chips { flex-wrap: wrap; }
+      .dropdown-menu[aria-labelledby="notificationDropdown"] { width: min(300px, calc(100vw - 1rem)) !important; right: -.5rem !important; }
+      header .container-fluid { padding-left: .75rem !important; padding-right: .75rem !important; }
+      header h5 { max-width: 34vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; }
+      header .dropdown-menu { max-width: calc(100vw - 1rem); }
+      .modal-dialog { margin: .5rem; }
+      .btn { min-height: 40px; }
+    }
+
     /* Modern Card Styles */
     .card {
       background: var(--color-surface);
@@ -572,31 +603,7 @@
           const isDarkNow = document.body.classList.contains(DARK_CLASS);
           applyTheme(!isDarkNow);
         });
-        if (window.innerWidth >= 768) {
-          mainEl.style.transition = 'margin-left 200ms ease, width 200ms ease';
-          mainEl.style.marginLeft = sidebarWidth;
-          mainEl.style.width = 'calc(100% - ' + sidebarWidth + ')';
-        }
       }
-
-      function removeSidebarPush() {
-        mainEl.style.marginLeft = '';
-        mainEl.style.width = '';
-      }
-
-      sidebarEl.addEventListener('show.bs.offcanvas', function () {
-        applySidebarPush();
-      });
-      sidebarEl.addEventListener('hidden.bs.offcanvas', function () {
-        removeSidebarPush();
-      });
-
-      // If user resizes while open/closed, reset
-      window.addEventListener('resize', function () {
-        if (window.innerWidth < 768) {
-          removeSidebarPush();
-        }
-      });
     });
   </script>
 

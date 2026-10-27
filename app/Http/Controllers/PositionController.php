@@ -23,7 +23,8 @@ class PositionController extends Controller
             ->orderBy('PositionName')
             ->paginate(15)
             ->withQueryString();
-        return view('positions.index', compact('positions', 'search'));
+        $grades = Grade::orderBy('GradeName')->get();
+        return view('positions.index', compact('positions', 'search', 'grades'));
     }
 
     /**

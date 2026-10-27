@@ -284,7 +284,7 @@
                                             placeholder="Search activity..."
                                             onkeyup="searchTable('recentActivitySearch', 'recentLeaveTable')">
                                     </div>
-                                    <a href="{{ route('leave_requests.index') }}"
+                                    <a href="{{ auth()->user()->role_id === 1 ? route('leave_requests.admin_all') : route('leave_requests.index') }}"
                                         class="btn btn-sm btn-link text-decoration-none">View Full History</a>
                                 </div>
                             </div>

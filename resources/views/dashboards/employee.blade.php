@@ -452,6 +452,8 @@
                                 <th class="py-3 text-uppercase small fw-bold text-slate-500 letter-spacing-1">Attachments</th>
                                 <th class="text-end pe-4 py-3 text-uppercase small fw-bold text-slate-500 letter-spacing-1">
                                     Status</th>
+                                <th class="text-end pe-4 py-3 text-uppercase small fw-bold text-slate-500 letter-spacing-1">
+                                    Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -501,10 +503,25 @@
                                             {{ strtoupper($displayStatus) }}
                                         </span>
                                     </td>
+                                    <td class="text-end pe-4 py-4">
+                                        @if ($request->canBeAppealed())
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                                onclick="openEmployeeActionModal('appeal', '{{ route('leave_requests.appeal', $request) }}')">
+                                                Appeal
+                                            </button>
+                                        @elseif ($request->canBeExtended())
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                                onclick="openEmployeeActionModal('extend', '{{ route('leave_requests.extend', $request) }}')">
+                                                Extend
+                                            </button>
+                                        @else
+                                            <span class="text-slate-300 small">-</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr id="emptyRow">
-                                    <td colspan="5" class="text-center py-5 text-slate-400">
+                                    <td colspan="6" class="text-center py-5 text-slate-400">
                                         <div class="py-4">
                                             <i class="fas fa-inbox fa-3x mb-3 text-slate-200"></i>
                                             <p class="mb-0 fw-medium">No leave requests found.</p>
@@ -517,11 +534,60 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="employeeActionModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <form id="employeeActionForm" method="POST">
+                        @csrf
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="employeeActionTitle">Leave Request Action</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="employeeExtensionDaysContainer" class="mb-3 d-none">
+                                    <label for="ExtensionDays" class="form-label">Extension days</label>
+                                    <input type="number" id="ExtensionDays" name="ExtensionDays" class="form-control" min="1" value="1">
+                                </div>
+                                <label for="EmployeeActionReason" class="form-label">Reason</label>
+                                <textarea id="EmployeeActionReason" name="Reason" class="form-control" rows="4" required maxlength="1000"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" id="employeeActionSubmit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div>
 @endsection
 
 @section('scripts')
     <script>
+        function openEmployeeActionModal(action, url) {
+            const form = document.getElementById('employeeActionForm');
+            const title = document.getElementById('employeeActionTitle');
+            const reason = document.getElementById('EmployeeActionReason');
+            const extensionDaysContainer = document.getElementById('employeeExtensionDaysContainer');
+            const extensionDays = document.getElementById('ExtensionDays');
+            const submit = document.getElementById('employeeActionSubmit');
+
+            form.action = url;
+            reason.value = '';
+            extensionDays.value = 1;
+
+            const isExtension = action === 'extend';
+            extensionDaysContainer.classList.toggle('d-none', !isExtension);
+            extensionDays.required = isExtension;
+            title.textContent = isExtension ? 'Request Leave Extension' : 'Appeal Leave Request';
+            reason.placeholder = isExtension ? 'Explain why you need the extension...' : 'Explain why you are appealing...';
+            submit.textContent = isExtension ? 'Submit Extension' : 'Submit Appeal';
+            submit.className = isExtension ? 'btn btn-primary' : 'btn btn-danger';
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('employeeActionModal')).show();
+        }
+
         function filterTable(status) {
             const rows = document.querySelectorAll('.leave-row');
             let visibleCount = 0;

@@ -10,9 +10,9 @@
                 <div class="card-header">
                     <h3 class="card-title">Locum Rates Management</h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.locum_rates.create') }}" class="btn btn-primary btn-sm">
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#locumRateModal" onclick="openLocumRateModal(this)">
                             <i class="fas fa-plus"></i> Add New Rate
-                        </a>
+                        </button>
                     </div>
                 </div>
                 <div class="card-body">
@@ -105,9 +105,18 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('admin.locum_rates.edit', $rate) }}" class="btn btn-sm btn-warning">
+                                            <button type="button" class="btn btn-sm btn-warning"
+                                                data-update-url="{{ route('admin.locum_rates.update', $rate) }}"
+                                                data-department-id="{{ $rate->DepartmentID }}"
+                                                data-position-type="{{ $rate->position_type }}"
+                                                data-shift="{{ $rate->shift }}"
+                                                data-daily-rate="{{ $rate->daily_rate }}"
+                                                data-hourly-rate="{{ $rate->hourly_rate }}"
+                                                data-currency="{{ $rate->currency }}"
+                                                data-active="{{ $rate->is_active ? '1' : '0' }}"
+                                                onclick="openLocumRateModal(this)">
                                                 <i class="fas fa-edit"></i> Edit
-                                            </a>
+                                            </button>
                                             <form action="{{ route('admin.locum_rates.destroy', $rate) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -130,5 +139,48 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="locumRateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <form id="locumRateForm" method="POST" action="{{ route('admin.locum_rates.store') }}" class="modal-content">
+                @csrf
+                <input type="hidden" id="locumRateMethod" name="_method" value="POST">
+                <div class="modal-header">
+                    <h5 id="locumRateModalTitle" class="modal-title">Add Locum Rate</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label for="locumDepartment" class="form-label">Department</label><select id="locumDepartment" name="DepartmentID" class="form-select" required><option value="">Select Department</option>@foreach($departments as $department)<option value="{{ $department->DepartmentID }}">{{ $department->DepartmentName }}</option>@endforeach</select></div>
+                        <div class="col-md-6"><label for="locumPositionType" class="form-label">Position Type</label><input id="locumPositionType" name="position_type" class="form-control" required maxlength="255"></div>
+                        <div class="col-md-6"><label for="locumShift" class="form-label">Shift</label><select id="locumShift" name="shift" class="form-select" required><option value="day">Day Shift</option><option value="night">Night Shift</option></select></div>
+                        <div class="col-md-6"><label for="locumCurrency" class="form-label">Currency</label><select id="locumCurrency" name="currency" class="form-select" required><option value="MWK">MWK</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="KES">KES</option></select></div>
+                        <div class="col-md-6"><label for="locumDailyRate" class="form-label">Daily Rate</label><input id="locumDailyRate" name="daily_rate" type="number" step="0.01" min="0" class="form-control" required></div>
+                        <div class="col-md-6"><label for="locumHourlyRate" class="form-label">Hourly Rate (Optional)</label><input id="locumHourlyRate" name="hourly_rate" type="number" step="0.01" min="0" class="form-control"></div>
+                        <div class="col-12"><div class="form-check"><input id="locumActive" name="is_active" type="checkbox" value="1" class="form-check-input" checked><label for="locumActive" class="form-check-label">Active</label></div></div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Rate</button></div>
+            </form>
+        </div>
+    </div>
 </div>
+@endsection
+@section('scripts')
+<script>
+function openLocumRateModal(button) {
+    const form = document.getElementById('locumRateForm');
+    const isEdit = Boolean(button.dataset.updateUrl);
+    form.action = isEdit ? button.dataset.updateUrl : '{{ route('admin.locum_rates.store') }}';
+    document.getElementById('locumRateMethod').value = isEdit ? 'PUT' : 'POST';
+    document.getElementById('locumRateModalTitle').textContent = isEdit ? 'Edit Locum Rate' : 'Add Locum Rate';
+    document.getElementById('locumDepartment').value = isEdit ? button.dataset.departmentId : '';
+    document.getElementById('locumPositionType').value = isEdit ? button.dataset.positionType : '';
+    document.getElementById('locumShift').value = isEdit ? button.dataset.shift : 'day';
+    document.getElementById('locumDailyRate').value = isEdit ? button.dataset.dailyRate : '';
+    document.getElementById('locumHourlyRate').value = isEdit ? button.dataset.hourlyRate : '';
+    document.getElementById('locumCurrency').value = isEdit ? button.dataset.currency : 'MWK';
+    document.getElementById('locumActive').checked = isEdit ? button.dataset.active === '1' : true;
+}
+</script>
 @endsection

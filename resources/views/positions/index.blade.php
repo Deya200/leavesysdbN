@@ -83,7 +83,7 @@
 
 
     <div class="text-end mb-4">
-        <a href="{{ route('positions.create') }}" class="btn btn-success">Add New Position</a>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#positionModal" onclick="openPositionModal()">Add New Position</button>
     </div>
 
     <div id="positions-table" class="card-custom">
@@ -106,7 +106,8 @@
                                 <td>{{ $position->grade->GradeName ?? 'N/A' }}</td>
                                 <td>
                                     <div class="d-flex gap-2 justify-content-center">
-                                        <a href="{{ route('positions.edit', $position->PositionID) }}" class="btn btn-sm btn-edit">Edit</a>
+                                        <button type="button" class="btn btn-sm btn-edit" data-bs-toggle="modal" data-bs-target="#positionModal"
+                                            onclick="openPositionModal('{{ route('positions.update', $position->PositionID) }}', '{{ addslashes($position->PositionName) }}', '{{ $position->GradeID }}')">Edit</button>
                                         <form action="{{ route('positions.destroy', $position->PositionID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this position?');">
                                             @csrf
                                             @method('DELETE')
@@ -133,11 +134,28 @@
             </div>
         @endif
     </div>
+
+    <div class="modal fade" id="positionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"><form id="positionForm" method="POST" action="{{ route('positions.store') }}" class="modal-content">
+            @csrf <input type="hidden" id="positionMethod" name="_method" value="POST">
+            <div class="modal-header"><h5 id="positionModalTitle" class="modal-title">Add Position</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body"><div class="mb-3"><label for="positionName" class="form-label">Position Name</label><input id="positionName" name="PositionName" class="form-control" required maxlength="150"></div><div><label for="positionGrade" class="form-label">Grade</label><select id="positionGrade" name="GradeID" class="form-select" required><option value="">Select a grade</option>@foreach($grades as $grade)<option value="{{ $grade->GradeID }}">{{ $grade->GradeName }}</option>@endforeach</select></div></div>
+            <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-success">Save Position</button></div>
+        </form></div>
+    </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
+function openPositionModal(updateUrl = '', positionName = '', gradeId = '') {
+    const form = document.getElementById('positionForm');
+    form.action = updateUrl || '{{ route('positions.store') }}';
+    document.getElementById('positionMethod').value = updateUrl ? 'PUT' : 'POST';
+    document.getElementById('positionModalTitle').textContent = updateUrl ? 'Edit Position' : 'Add Position';
+    document.getElementById('positionName').value = positionName;
+    document.getElementById('positionGrade').value = gradeId;
+}
     (function () {
         const url = new URL(window.location.href);
         if (url.searchParams.has('page')) {

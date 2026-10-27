@@ -92,7 +92,7 @@
 
     <!-- Add Grade Button -->
     <div class="mb-4 text-end">
-        <a href="{{ route('grades.create') }}" class="btn btn-success">Add New Grade</a>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#gradeModal" onclick="openGradeModal()">Add New Grade</button>
     </div>
 
     <!-- Grades Table -->
@@ -115,7 +115,8 @@
                             <td>{{ $grade->AnnualLeaveDays }}</td>
                             <td>
                                 <div class="d-flex gap-2 justify-content-center">
-                                    <a href="{{ route('grades.edit', $grade->GradeID) }}" class="btn btn-edit">Edit</a>
+                                    <button type="button" class="btn btn-edit" data-bs-toggle="modal" data-bs-target="#gradeModal"
+                                        onclick="openGradeModal('{{ route('grades.update', $grade->GradeID) }}', '{{ addslashes($grade->GradeName) }}', {{ $grade->AnnualLeaveDays }})">Edit</button>
                                     <form action="{{ route('grades.destroy', $grade->GradeID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this grade?');">
                                         @csrf
                                         @method('DELETE')
@@ -140,11 +141,28 @@
             </div>
         @endif
     </div>
+
+    <div class="modal fade" id="gradeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"><form id="gradeForm" method="POST" action="{{ route('grades.store') }}" class="modal-content">
+            @csrf <input type="hidden" id="gradeMethod" name="_method" value="POST">
+            <div class="modal-header"><h5 id="gradeModalTitle" class="modal-title">Add Grade</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body"><div class="mb-3"><label for="gradeName" class="form-label">Grade Name</label><input id="gradeName" name="GradeName" class="form-control" required maxlength="100"></div><div><label for="gradeAnnualLeaveDays" class="form-label">Annual Leave Days</label><input id="gradeAnnualLeaveDays" name="AnnualLeaveDays" type="number" min="0" class="form-control" required></div></div>
+            <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-success">Save Grade</button></div>
+        </form></div>
+    </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
+function openGradeModal(updateUrl = '', gradeName = '', annualLeaveDays = '') {
+    const form = document.getElementById('gradeForm');
+    form.action = updateUrl || '{{ route('grades.store') }}';
+    document.getElementById('gradeMethod').value = updateUrl ? 'PUT' : 'POST';
+    document.getElementById('gradeModalTitle').textContent = updateUrl ? 'Edit Grade' : 'Add Grade';
+    document.getElementById('gradeName').value = gradeName;
+    document.getElementById('gradeAnnualLeaveDays').value = annualLeaveDays;
+}
     (function () {
         const url = new URL(window.location.href);
         if (url.searchParams.has('page')) {

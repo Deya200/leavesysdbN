@@ -1,10 +1,13 @@
 <!-- Header -->
 <header class="py-3 border-0" style="position: sticky; top: 0; z-index: 1050; background: linear-gradient(135deg, #3D519F 0%, #4C63B6 50%, #5A75CD 100%); color: #fff; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(61, 81, 159, 0.3);">
     <div class="container-fluid px-3">
-        <div class="d-flex align-items-center justify-content-between gap-4">
+        <div class="d-flex align-items-center justify-content-between gap-2 gap-md-4">
             <!-- Left: Title Group -->
-            <div class="d-flex align-items-center gap-3 flex-shrink-0 ms-2">
-                <div class="d-flex flex-column d-none d-sm-flex">
+            <div class="d-flex align-items-center gap-2 gap-sm-3 flex-shrink-0 ms-0 ms-sm-2">
+                <button class="hamburger-btn d-inline-flex d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar" aria-label="Open navigation menu">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+                <div class="d-flex flex-column">
                     <h5 class="mb-0 fw-bold text-white lh-1">@yield('title', 'Dashboard')</h5>
                 </div>
             </div>
@@ -196,6 +199,18 @@ function confirmLogout() {
     header {
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+    }
+
+    .hamburger-btn {
+        width: 42px;
+        height: 42px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,.3);
+        border-radius: 12px;
+        background: rgba(255,255,255,.15);
+        color: inherit;
+        flex: 0 0 auto;
     }
 
     /* Hover Effects */

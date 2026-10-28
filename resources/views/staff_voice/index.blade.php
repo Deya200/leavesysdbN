@@ -3,7 +3,7 @@
 @section('title', 'Staff Voice')
 
 @php
-    $statusOptions = ['Submitted', 'Under Review', 'In Progress', 'Contact Arranged', 'Ongoing Support', 'In Mediation', 'Resolved', 'Implemented', 'Closed'];
+    $statusOptions = ['Submitted', 'Under Review', 'In Progress', 'Contact Arranged', 'Ongoing Support', 'In Mediation', 'Resolved', 'Implemented', 'Closed', 'Approved', 'Declined'];
     $sections = [
         'idea' => ['label' => 'Ideas', 'icon' => 'fa-lightbulb'],
         'recognition' => ['label' => 'Recognition', 'icon' => 'fa-heart'],
@@ -17,8 +17,9 @@
 
     function staff_voice_status_class($status) {
         return match ($status) {
-            'Resolved', 'Implemented', 'Closed' => 'success',
+            'Resolved', 'Implemented', 'Closed', 'Approved' => 'success',
             'Under Review', 'In Progress', 'Contact Arranged', 'Ongoing Support', 'In Mediation' => 'warning',
+            'Declined' => 'danger',
             default => 'secondary',
         };
     }
@@ -117,7 +118,7 @@
             <div class="sv-card-header">
                 <div>
                     <h2>Submit {{ $sections[$activeSection]['label'] ?? 'Item' }}</h2>
-                    <p class="sv-help">Only confidential channels receive reference codes.</p>
+                    <p class="sv-help">Suggestions are sent to HR for review before they appear to everyone.</p>
                 </div>
             </div>
             <div class="sv-card-body">
@@ -299,7 +300,37 @@
                                     <div class="sv-response"><strong>Response:</strong> {{ $item->response }}</div>
                                 @endif
 
+                                @if($item->type === 'idea' && $item->status === 'Approved')
+                                    <div class="mt-3">
+                                        <strong>Comments</strong>
+                                        @forelse($item->comments as $comment)
+                                            <div class="sv-response"><strong>{{ $comment->author_name }}</strong>: {{ $comment->body }}</div>
+                                        @empty
+                                            <p class="sv-help">No comments yet.</p>
+                                        @endforelse
+                                        <form method="POST" action="{{ route('staff_voice.comments.store', $item) }}" class="mt-2">
+                                            @csrf
+                                            <div class="input-group">
+                                                <input class="form-control" name="body" maxlength="2000" placeholder="Add a comment" required>
+                                                <button class="btn btn-outline-primary" type="submit">Comment</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                @endif
+
                                 @if($isAdmin)
+                                    @if($item->type === 'idea')
+                                        <form method="POST" action="{{ route('staff_voice.respond', $item) }}" class="sv-admin">
+                                            @csrf
+                                            @method('PUT')
+                                            <label class="form-label small">HR decision and note</label>
+                                            <textarea class="form-control form-control-sm mb-2" name="response" rows="2" placeholder="Approval note or reason for declining" required>{{ $item->response }}</textarea>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-success" name="status" value="Approved" type="submit">Approve and publish</button>
+                                                <button class="btn btn-sm btn-outline-danger" name="status" value="Declined" type="submit">Decline and notify originator</button>
+                                            </div>
+                                        </form>
+                                    @else
                                     <form method="POST" action="{{ route('staff_voice.respond', $item) }}" class="sv-admin">
                                         @csrf
                                         @method('PUT')
@@ -319,6 +350,7 @@
                                             </div>
                                         </div>
                                     </form>
+                                    @endif
                                 @endif
                             </article>
                         @endforeach

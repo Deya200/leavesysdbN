@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StaffVoiceEntry;
 use App\Models\StaffVoicePollOption;
+use App\Models\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,14 +21,23 @@ class StaffVoiceController extends Controller
         $user = $request->user();
         $isAdmin = (int) $user->role_id === 1;
 
-        $entries = StaffVoiceEntry::with('pollOptions')
+        $entries = StaffVoiceEntry::with(['pollOptions', 'comments'])
             ->where(function ($query) use ($user, $isAdmin) {
-                $query->where('is_public', true);
+                $query->where(function ($visible) use ($isAdmin) {
+                    $visible->where('is_public', true);
+                    if (!$isAdmin) {
+                        $visible->where(function ($approved) {
+                            $approved->where('type', '!=', 'idea')->orWhere('status', 'Approved');
+                        });
+                    }
+                });
 
                 if ($isAdmin) {
-                    $query->orWhereIn('type', self::CONFIDENTIAL_TYPES);
+                    $query->orWhereIn('type', self::CONFIDENTIAL_TYPES)
+                        ->orWhere(fn ($pending) => $pending->where('type', 'idea')->where('is_public', false));
                 } else {
-                    $query->orWhere('submitted_by', $user->EmployeeNumber);
+                    $query->orWhere(fn ($own) => $own->where('submitted_by', $user->EmployeeNumber)
+                        ->where(fn ($types) => $types->where('type', 'idea')->orWhereIn('type', self::CONFIDENTIAL_TYPES)));
                 }
             })
             ->latest()
@@ -87,7 +97,7 @@ class StaffVoiceController extends Controller
                 'meta' => $this->metaFor($validated, $type),
                 'submitted_by' => $isAnonymous ? null : $user->EmployeeNumber,
                 'is_anonymous' => $isAnonymous,
-                'is_public' => !$isConfidential,
+                'is_public' => !$isConfidential && $type !== 'idea',
             ]);
 
             if ($type === 'poll') {
@@ -101,7 +111,7 @@ class StaffVoiceController extends Controller
 
         $message = in_array($type, self::CONFIDENTIAL_TYPES, true)
             ? 'Submitted safely. Your reference number is ' . $entry->reference_code . '.'
-            : 'Thank you. Your contribution has been posted.';
+            : ($type === 'idea' ? 'Your suggestion has been sent to HR for review.' : 'Thank you. Your contribution has been posted.');
 
         return redirect()
             ->route('staff_voice.index', ['section' => $type])
@@ -146,14 +156,41 @@ class StaffVoiceController extends Controller
             'response' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        if ($entry->type === 'idea') {
+            abort_unless(in_array($validated['status'], ['Approved', 'Declined'], true), 422);
+            $validated['response'] = $request->validate(['response' => ['required', 'string', 'max:2000']])['response'];
+        }
+
         $entry->update([
             'status' => $validated['status'],
+            'is_public' => $entry->type === 'idea' ? $validated['status'] === 'Approved' : $entry->is_public,
             'response' => $validated['response'] ?? null,
             'responded_by' => $this->currentUserName($request->user()),
             'responded_at' => now(),
         ]);
 
+        if ($entry->type === 'idea' && $entry->submitted_by) {
+            Notification::create([
+                'EmployeeNumber' => $entry->submitted_by,
+                'Message' => "Your staff suggestion #{$entry->id} was {$validated['status']}. HR note: {$validated['response']}",
+                'Status' => 'Unread',
+            ]);
+        }
+
         return back()->with('success', 'Staff voice item updated.');
+    }
+
+    public function comment(Request $request, StaffVoiceEntry $entry): RedirectResponse
+    {
+        abort_unless($entry->type === 'idea' && $entry->status === 'Approved' && $entry->is_public, 404);
+        $validated = $request->validate(['body' => ['required', 'string', 'max:2000']]);
+        $user = $request->user();
+        $entry->comments()->create([
+            'employee_number' => $user->EmployeeNumber,
+            'author_name' => $this->currentUserName($user),
+            'body' => $validated['body'],
+        ]);
+        return back()->with('success', 'Comment posted.');
     }
 
     private function validateByType(Request $request, string $type): array
